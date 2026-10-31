@@ -6,7 +6,7 @@ Plusthree is a job board and career blog connecting African talent with global w
 
 **Current state: a local, interactive design preview with a working Laravel/MySQL foundation. It is not a finished job board or CMS and has not been deployed.**
 
-Read [AGENTS.md](AGENTS.md) for contributor/agent instructions and [ROADMAP.md](ROADMAP.md) for the short milestone checklist. This README is the detailed handoff. All commands below state their working directory; application commands run inside `app/`, not at the repository root.
+Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROADMAP.md) for the short milestone checklist and [TODO.md](TODO.md) for the running backlog. This README is the detailed handoff. All commands below state their working directory; application commands run inside `app/`, not at the repository root.
 
 ## 1. What is implemented
 
@@ -291,7 +291,7 @@ Acceptance: migrations work on dedicated MySQL; relationships and publication/ex
 
 Implemented: Filament 5.11 at `/mdosi`, brand-neutral admin theme, login, an explicit `canAccessPanel()` check requiring `users.is_admin`, and resources for companies, job listings, articles, categories and tags — including enum selects with brand labels, a date-only closing date stored as 23:59:59 Africa/Nairobi converted to UTC, publish-on-status (no manual publication picker; the timestamp is stamped on save), slug generation/validation, automatic `created_by`/`updated_by`/author defaults, status badges and filters. Non-admins receive 403; guests are redirected to `/mdosi/login`; `/admin` and the resource paths outside the panel prefix return 404.
 
-Not implemented yet: image uploads (imagery is deferred), a rich-text editor (article bodies are plain textareas), a record preview page, mail-dependent password reset, two-factor authentication, and a user-management screen — grant further admins deliberately via `php artisan tinker` until that exists.
+Not implemented yet: image uploads (imagery is deferred), a rich-text editor (article bodies are plain textareas), a record preview page, mail-dependent password reset, Google sign-in, two-factor authentication, and a user-management screen — grant further admins deliberately via `php artisan tinker` until that exists. Deferred auth work is listed in [TODO.md](TODO.md).
 
 - Install a compatible Filament version and its required Livewire dependencies. Check actual package requirements first; do not guess compatibility or blindly upgrade Laravel/PHP.
 - Configure a private panel at `/mdosi` (owner's chosen path, set through the Filament panel provider, not the default `/admin`). The path is cosmetic: it must not be treated as a security control, and explicit admin authorisation is still required in every environment.
