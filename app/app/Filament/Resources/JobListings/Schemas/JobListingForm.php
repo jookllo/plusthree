@@ -5,12 +5,14 @@ namespace App\Filament\Resources\JobListings\Schemas;
 use App\Enums\EmploymentType;
 use App\Enums\PublicationStatus;
 use App\Enums\WorkMode;
+use App\Models\Category;
 use App\Models\JobListing;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class JobListingForm
 {
@@ -56,6 +58,23 @@ class JobListingForm
                     ->helperText('http or https only. Other schemes are rejected when the listing is displayed.'),
                 TextInput::make('application_email')
                     ->email(),
+                Select::make('categories')
+                    ->label('Sectors')
+                    ->relationship(
+                        'categories',
+                        'name',
+                        modifyQueryUsing: fn (Builder $query) => $query->where('kind', Category::KIND_JOB),
+                    )
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->helperText('How the role is filed on the job board. Keep to one sector where possible.'),
+                Select::make('tags')
+                    ->relationship('tags', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->helperText('Optional cross-cutting labels such as Senior or Visa sponsorship.'),
                 Select::make('status')
                     ->options(PublicationStatus::options())
                     ->default(PublicationStatus::Draft)
