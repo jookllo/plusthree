@@ -42,7 +42,10 @@ RUN apt-get update \
 WORKDIR /var/www/html
 
 COPY docker/apache-vhost.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/apache-global.conf /etc/apache2/conf-available/plusthree-hardening.conf
 COPY docker/php.ini /usr/local/etc/php/conf.d/99-plusthree.ini
+
+RUN a2enconf plusthree-hardening
 
 COPY --from=vendor /build /var/www/html
 COPY --from=assets /build/public/build /var/www/html/public/build

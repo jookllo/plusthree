@@ -70,15 +70,23 @@ jobs:
       - name: Prepare environment
         run: |
           cp .env.example .env
-          # Another MySQL runs on 3307 locally; the service container is on 3306.
+          # The local example points at port 3307 and the development database.
+          # Write every value into .env rather than relying on the runner
+          # exporting them: Laravel's env repository reads $_ENV/$_SERVER, and
+          # those are not always populated by the runner.
           sed -i "s|^DB_HOST=.*|DB_HOST=${DB_HOST}|" .env
           sed -i "s|^DB_PORT=.*|DB_PORT=${DB_PORT}|" .env
+          sed -i "s|^DB_DATABASE=.*|DB_DATABASE=${DB_DATABASE}|" .env
           sed -i "s|^DB_USERNAME=.*|DB_USERNAME=${DB_USERNAME}|" .env
           sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${DB_PASSWORD}|" .env
           php artisan key:generate --force
 
       - name: Show connection target
-        run: php artisan tinker --execute="echo config('database.connections.mysql.host').':'.config('database.connections.mysql.port');"
+        run: |
+          php artisan tinker --execute="
+            \$c = config('database.connections.mysql');
+            echo \$c['driver'].' '.\$c['host'].':'.\$c['port'].' '.\$c['database'], PHP_EOL;
+          "
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
