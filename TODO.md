@@ -5,8 +5,8 @@ Last updated: 31 October 2026. Scope detail and acceptance criteria live in [REA
 ## Next up
 
 - [ ] **Deploy the current preview to Dokploy** — containerise the app, connect the repository, provision production MySQL, set environment variables, attach a domain with HTTPS, confirm the `noindex` preview loads.
-- [ ] **Public job pages** — `/jobs` with keyword/type filters and pagination, `/jobs/{slug}` detail pages, application links, closed-job state. Replace `config/preview.php` on the homepage.
-- [ ] **Public blog** — `/blog`, `/blog/{slug}`, category pages, article teasers on the homepage.
+- [x] **Public job pages** — `/jobs` with keyword/type filters and pagination, `/jobs/{slug}` detail pages, application links, closed-job state. Homepage reads the database; `config/preview.php` removed.
+- [x] **Public blog** — `/blog`, `/blog/{slug}`, category pages, article teasers on the homepage.
 
 ## Authentication and access (deferred by owner on 31 October 2026)
 
@@ -23,20 +23,24 @@ Last updated: 31 October 2026. Scope detail and acceptance criteria live in [REA
 - [ ] Visible dark-mode toggle in the top bar (Filament's light/dark/system switcher already exists in the avatar menu).
 - [ ] Rich-text article editor with HTML sanitisation.
 - [ ] "Preview as visitor" for drafts.
-- [ ] Image uploads and storage (blocked on the imagery decision).
+- [x] Article featured images (16:9, resized, alt text required) — mounted volume still required in Dokploy.
+- [ ] In-body images, once the rich-text editor exists.
+- [ ] Responsive `srcset` sizes and stored licence/provenance for photography.
 - [ ] Per-role permissions if a second editor joins.
 
 ## Public site and content
 
-- [ ] Imagery for the about band and article headers (owner chose to ship without images for now).
+- [ ] Imagery for the about band and job listings (article images are implemented; lists show a photo when one exists).
 - [ ] SEO: per-page metadata, canonical URLs, sitemap, `JobPosting`/`Article` structured data, noindex policy.
 - [ ] Typography decision for blog body text (system fonts today).
 - [ ] Replace sample listings with real content once publishing is trusted.
 
 ## Deployment and operations
 
-- [ ] `Dockerfile` and `.dockerignore` (Node asset build, production Composer install, PHP runtime).
+- [x] `Dockerfile` and `.dockerignore` (Node asset build, production Composer install, PHP runtime).
 - [ ] Dokploy application, MySQL service, environment variables, domain and HTTPS.
+- [ ] Mount `/var/www/html/storage/app/public` for uploaded images; include it in backups.
+- [ ] GitHub Actions CI: tests, `composer audit`, `pnpm audit`, image build (Dependabot is configured).
 - [ ] Persistent storage for uploads plus database backup and a restore test.
 - [ ] Scheduler and queue workers when background jobs are introduced.
 - [ ] Error monitoring and uptime checks.

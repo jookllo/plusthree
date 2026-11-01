@@ -6,7 +6,7 @@ Plusthree is a job board and career blog connecting African talent with global w
 
 **Current state: a local, interactive design preview with a working Laravel/MySQL foundation. It is not a finished job board or CMS and has not been deployed.**
 
-Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROADMAP.md) for the short milestone checklist and [TODO.md](TODO.md) for the running backlog. This README is the detailed handoff. All commands below state their working directory; application commands run inside `app/`, not at the repository root.
+Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROADMAP.md) for the short milestone checklist, [TODO.md](TODO.md) for the running backlog and [DEPLOY.md](DEPLOY.md) for Dokploy deployment. This README is the detailed handoff. All commands below state their working directory; application commands run inside `app/`, not at the repository root.
 
 ## 1. What is implemented
 
@@ -73,9 +73,12 @@ Deferred: CV collection, applicant tracking, candidate accounts, employer self-s
 | Path from project root | Role |
 | --- | --- |
 | `app/` | Laravel application root; contains artisan and dependency manifests |
-| `app/routes/web.php` | Homepage route, validation and sample filtering |
-| `app/config/preview.php` | Four fictional job examples; temporary data source |
-| `app/resources/views/home.blade.php` | Entire current public page and hardcoded career guides |
+| `app/routes/web.php` | Public routes: home, `/jobs`, `/jobs/{slug}`, `/blog`, `/blog/{slug}`, `/blog/category/{slug}` |
+| `app/app/Http/Controllers/` | `HomeController`, `JobListingController`, `ArticleController`, `CategoryController` |
+| `app/resources/views/layouts/site.blade.php` | Shared public layout: masthead, navigation, footer |
+| `app/resources/views/home.blade.php` | Homepage: search desk, latest open jobs and article teasers from the database |
+| `app/resources/views/jobs/`, `app/resources/views/blog/` | Job board, job detail, article index, article detail and category pages |
+| `app/resources/views/partials/` | Job row, article card and pagination components |
 | `app/resources/css/app.css` | Tailwind entry, source discovery and original colour/font tokens; imports site.css |
 | `app/resources/css/site.css` | Custom responsive design, focus styles and local design tokens |
 | `app/resources/js/app.js` | Laravel starter JavaScript entry |
@@ -85,7 +88,7 @@ Deferred: CV collection, applicant tracking, candidate accounts, employer self-s
 | `app/app/Providers/Filament/AdminPanelProvider.php` | Panel configuration: `/mdosi` path, brand name, colour palette, login |
 | `app/public/css/filament/`, `app/public/js/filament/`, `app/public/fonts/filament/` | Filament assets published locally by `filament:install` |
 | `app/app/Models/User.php` | Starter User model now carrying `is_admin` and author/listing relations |
-| `app/app/Models/` | `Company`, `JobListing`, `Article`, `Category`, `Tag` — content models (not yet rendered publicly) |
+| `app/app/Models/` | `Company`, `JobListing`, `Article`, `Category`, `Tag` — content models now read by the public pages |
 | `app/app/Enums/` | `EmploymentType`, `WorkMode`, `PublicationStatus` backed enums |
 | `app/app/Support/` | `HasUniqueSlug`, `Publishable` (visibility scopes), `NairobiTime` (UTC boundary conversion) |
 | `app/database/migrations/` | Starter users/cache/queue tables plus the `2026_10_31_*` content-schema migrations |
@@ -94,8 +97,8 @@ Deferred: CV collection, applicant tracking, candidate accounts, employer self-s
 | `SCHEMA.md` | Content schema design, decisions, and implementation record |
 | `app/database/seeders/DatabaseSeeder.php` | Starter Test User seeder; not a secure admin provisioning workflow |
 | `app/bootstrap/app.php` | Laravel bootstrap/routing and `/up` configuration |
-| `app/tests/Feature/FoundationTest.php` | Homepage/preview expectations and isolated MySQL checks |
-| `app/tests/Feature/DiscoveryPreviewTest.php` | Sample keyword/type filtering, empty state and escaping |
+| `app/tests/Feature/FoundationTest.php` | Homepage reachability and isolated MySQL checks |
+| `app/tests/Feature/PublicPagesTest.php` | Public job board, detail, blog, category, visibility and escaping behaviour |
 | `app/tests/Feature/ExampleTest.php`, `app/tests/Unit/ExampleTest.php` | Starter smoke/trivial tests, not evidence of business functionality |
 | `app/phpunit.xml` | Test overrides including MySQL and `plusthree_testing` |
 | `app/.env.example` | Safe configuration template, no working password |
@@ -306,7 +309,11 @@ Not implemented yet: image uploads (imagery is deferred), a rich-text editor (ar
 
 Acceptance: a non-admin cannot publish or access drafts; the owner can create, preview, edit, publish/unpublish and archive content; future publication and job deadlines behave consistently.
 
-### Milestone 3 — Real job discovery and detail pages
+### Milestone 3 — Real job discovery and detail pages (implemented 31 October 2026)
+
+Implemented: `/jobs` lists published, open listings from `job_listings` with keyword search (title, description, company name) and contract-type filtering in shareable GET URLs, 10 per page with preserved query strings. `/jobs/{slug}` shows a published job with employer, description, requirements, location, work mode and closing date. Open jobs expose an http/https application link or an email link; closed jobs remain readable with applications disabled; draft, future-dated, archived and expired roles never appear in lists. `config/preview.php` and the fictional roles were removed. Article and job detail routes are read-only and need no login.
+
+Remaining below is the original reference; search is still substring matching (no full-text), and there is no salary display or `JobPosting` structured data yet.
 
 - Replace `config('preview.jobs')` with published Eloquent queries; move growing route logic into controllers/query services.
 - Add `/jobs` and `/jobs/{slug}` (proposed routes; not present today).
@@ -321,7 +328,11 @@ Acceptance: a non-admin cannot publish or access drafts; the owner can create, p
 
 Acceptance: an admin-published job appears publicly; drafts/future/expired jobs do not appear in active results; keyword/type combinations paginate correctly; detail pages and application links work without login.
 
-### Milestone 4 — Real blog
+### Milestone 4 — Real blog (implemented 31 October 2026)
+
+Implemented: `/blog` lists published articles newest-first with the newest as the lead story, article category counts and pagination; `/blog/{slug}` renders the article, its category, author, date, reading time and related articles; `/blog/category/{slug}` lists a single article category. Article bodies are still plain-text textareas rendered with escaped newlines, so there is no rich HTML to sanitise yet. Tags display on articles but have no index page, and there is no article search.
+
+Remaining below is the original reference.
 
 - Add `/blog`, `/blog/{slug}` and category/tag views as appropriate.
 - Connect homepage article teasers to published articles instead of hardcoded details.
@@ -332,7 +343,11 @@ Acceptance: an admin-published job appears publicly; drafts/future/expired jobs 
 
 Acceptance: the owner can publish an article entirely through the panel; it has a stable public URL, appears in appropriate lists/search and is safely rendered.
 
-### Milestone 5 — Imagery and visual finish
+### Milestone 5 — Imagery and visual finish (article images implemented 1 November 2026)
+
+Implemented: articles accept an optional featured image through `/mdosi` (JPEG/PNG/WebP, cropped 16:9, resized to 1600×900, alt text required). Uploads go to the `public` disk; `DEPLOY.md` specifies the persistent volume. Articles without a photo fall back to one of 20 deterministic generated panels, used only as the article-page hero — lists show a photograph or nothing. The homepage column keeps the original typographic panel when there is no image.
+
+Still outstanding: any real photography (the owner has not supplied assets), in-body images (needs the rich-text editor), responsive `srcset` variants, a licence/provenance record, and the final logo.
 
 - Add relevant editorial imagery to selected article/brand areas; the owner has asked for this.
 - Confirm image rights/provenance; store project assets locally or in the configured asset storage.
@@ -388,14 +403,14 @@ Use `php artisan view:clear` when troubleshooting stale compiled views. Do not u
 
 Historical verification during implementation:
 
-- **31 October 2026 (current):** full suite **30 tests, 80 assertions passed** against `plusthree_testing`; panel access tests prove guests redirect, non-admins receive 403, admins load the dashboard, and `/admin` 404s. Earlier the same day: 24 tests, 69 assertions after the content schema; 7 tests, 21 assertions after the redesign.
+- **1 November 2026 (current):** full suite **43 tests, 125 assertions passed** against `plusthree_testing`, including public job/blog pages, visibility leaks, closed-job application rules, unsafe URL schemes, generated article art and featured-image rendering. Earlier: 40 tests, 114 assertions after the public pages; 30 tests, 80 assertions after the admin panel; 24 tests, 69 assertions after the content schema.
 - 8 content-schema migrations applied to the development database; the test-database guard was positively verified to abort before touching a non-test database.
 - After removing the location control: focused discovery suite **3 tests, 12 assertions passed** and assets built successfully.
 - Homepage previously returned HTTP 200 and desktop/mobile screenshots were inspected.
 
 `FoundationTest` uses `RefreshDatabase`: it rebuilds test tables. A fail-fast guard now lives in `app/tests/TestCase.php` and runs inside `setUpTraits()`, before any database trait can touch a schema, refusing any connection that is not MySQL `plusthree_testing`. It was positively verified by running a non-database test with `DB_DATABASE=plusthree`, which aborted with a `RuntimeException` instead of migrating. The guard is a safety net, not a substitute for reviewing which connection is resolved; separate development and testing database users remain a sensible extra layer.
 
-Missing test coverage includes admin permissions, all real content CRUD/publication, uploads, expiry, scheduling, blog search, SEO and deployment. The two starter tests are weak smoke checks. Do not interpret their passing as completion of the product.
+Missing test coverage includes Filament CRUD interactions, the upload widget itself (file storage is exercised through factory-set paths, not through a real upload), blog search, SEO output and deployment. The two starter tests remain weak smoke checks. Do not interpret their passing as completion of the product.
 
 ## 9. Troubleshooting and known technical debt
 
@@ -412,12 +427,14 @@ Missing test coverage includes admin permissions, all real content CRUD/publicat
 | Vite manifest missing | Build assets or start Vite; check `app/public/build/manifest.json` |
 | CSS changes do not appear | Rebuild, inspect stale `public/hot` from a stopped Vite process, refresh browser |
 | Old `location=` query visible | Obsolete URL state; current route ignores it; use the base URL |
-| Blog/job public URL returns 404 | Those public routes are not implemented yet |
+| Published item returns 404 | Check `status`, `published_at` (future dates are hidden), the slug, and for jobs whether the closing date has passed |
+| Article images 404 after deploy | Confirm the `/var/www/html/storage/app/public` volume is mounted and `public/storage` exists; files are lost without the volume |
+| Article/listing shows the wrong image or none | Lists show only uploaded images; articles without one use a generated hero panel on the article page and nothing on cards |
 | `/admin` returns 404 | Expected — the panel lives at `/mdosi`; `/admin` is deliberately unused |
 | Cannot sign in to `/mdosi` | Confirm the user exists and `is_admin` is true (`php artisan tinker`), and that the password hash matches; panel access requires the explicit admin flag, not just an account |
 | Panel assets 404 or unstyled | Run `php artisan filament:assets`; assets are published to `public/css|js|fonts/filament` |
-| Search returns only four example roles | Expected current preview source; connect real content in milestone 3 |
-| `git status` fails | At this inspection, `.git` was an empty/read-only environment-managed directory, not a usable Git repo. Do not claim commits/backups exist; establish version control deliberately when permitted |
+| A published job is missing from search | Search matches title, description and company name only (`LIKE`, case-insensitive); expired or unpublished roles are excluded by design |
+| Push rejected with `GH007` | The commit email is private; set `user.email` to the GitHub noreply address before committing |
 
 Other cleanup: split the monolithic homepage into Blade layouts/components as real pages arrive; remove unused CSS left from the typographic-art iteration; consolidate colour tokens; align Composer convenience scripts with pnpm; consider making the local DB helper less destructive to test environment customisation. `app/README.md` was Laravel's stock README before this handoff; use the root documentation.
 

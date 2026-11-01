@@ -77,11 +77,25 @@ class Article extends Model
     }
 
     /**
+     * Stable fallback art variant (1–20) for articles without a photograph.
+     *
+     * Derived from the slug so the same article always gets the same panel
+     * on the article page, independent of list position or request.
+     */
+    public function artVariant(): int
+    {
+        $seed = $this->slug ?: (string) $this->getKey();
+
+        return (int) (crc32($seed) % 20) + 1;
+    }
+
+    /**
      * Rough reading time for editorial display; derived, never stored.
      */
     public function readingTimeMinutes(): int
     {
-        $words = str_word_count(Str::of($this->body ?? '')->stripTags()->toString());
+        $text = trim(Str::of($this->body ?? '')->stripTags()->toString());
+        $words = $text === '' ? 0 : count(preg_split('/\s+/u', $text));
 
         return max(1, (int) ceil($words / 200));
     }

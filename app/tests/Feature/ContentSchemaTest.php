@@ -147,6 +147,13 @@ class ContentSchemaTest extends TestCase
         $this->assertSame(2, $article->readingTimeMinutes());
     }
 
+    public function test_reading_time_counts_non_latin_scripts(): void
+    {
+        $article = Article::factory()->create(['body' => str_repeat('ቃል ', 600)]);
+
+        $this->assertSame(3, $article->readingTimeMinutes());
+    }
+
     public function test_closing_date_is_stored_as_the_end_of_the_nairobi_day(): void
     {
         $closing = NairobiTime::endOfDayUtc('2026-11-15');

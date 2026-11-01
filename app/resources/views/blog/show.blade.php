@@ -1,0 +1,66 @@
+@extends('layouts.site')
+
+@section('title', $article->metaTitle().' — Plusthree')
+@section('meta-description', $article->metaDescription())
+
+@section('content')
+    <div class="wrap article-page">
+        <p class="breadcrumb">
+            <a href="{{ route('blog.index') }}">Career advice</a>
+            @if ($article->categories->isNotEmpty())
+                <span aria-hidden="true">/</span>
+                <a href="{{ route('blog.category', $article->categories->first()->slug) }}">
+                    {{ $article->categories->first()->name }}
+                </a>
+            @endif
+        </p>
+
+        <header class="article-hero">
+            <div class="article-hero-media">
+                @include('partials.article-art', ['article' => $article])
+            </div>
+            <div class="article-hero-body">
+                @if ($article->categories->isNotEmpty())
+                    <p class="story-category">{{ $article->categories->first()->name }}</p>
+                @endif
+                <h1>{{ $article->title }}</h1>
+                @if ($article->excerpt)
+                    <p class="article-standfirst">{{ $article->excerpt }}</p>
+                @endif
+                <p class="article-meta">
+                    <span>{{ $article->published_at?->timezone('Africa/Nairobi')->format('j F Y') }}</span>
+                    @if ($article->author)
+                        <span>{{ $article->author->name }}</span>
+                    @endif
+                    <span>{{ $article->readingTimeMinutes() }} min read</span>
+                </p>
+            </div>
+        </header>
+
+        <div class="article-body prose">
+            {!! nl2br(e($article->body)) !!}
+        </div>
+
+        @if ($article->tags->isNotEmpty())
+            <ul class="tag-list" aria-label="Tags">
+                @foreach ($article->tags as $tag)
+                    <li>{{ $tag->name }}</li>
+                @endforeach
+            </ul>
+        @endif
+
+        @if ($related->isNotEmpty())
+            <section class="related" aria-labelledby="related-heading">
+                <div class="section-heading">
+                    <h2 id="related-heading">Keep reading</h2>
+                    <a href="{{ route('blog.index') }}">All career advice</a>
+                </div>
+                <div class="article-grid">
+                    @foreach ($related as $item)
+                        @include('partials.article-card', ['article' => $item])
+                    @endforeach
+                </div>
+            </section>
+        @endif
+    </div>
+@endsection

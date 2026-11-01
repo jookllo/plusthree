@@ -1,19 +1,16 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\JobListingController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function (Request $request) {
-    $filters = $request->validate([
-        'q' => ['nullable', 'string', 'max:100'],
-        'type' => ['nullable', 'string', 'in:Full-time,Contract,Internship'],
-    ]);
-    $query = trim($filters['q'] ?? '');
-    $type = $filters['type'] ?? '';
-    $jobs = collect(config('preview.jobs'))->filter(fn (array $job) =>
-        ($query === '' || str_contains(mb_strtolower($job['title'].' '.$job['sector'].' '.$job['description'].' '.$job['mode']), mb_strtolower($query))) &&
-        ($type === '' || $job['type'] === $type)
-    )->values();
+Route::get('/', HomeController::class)->name('home');
 
-    return view('home', compact('jobs', 'query', 'type'));
-})->name('home');
+Route::get('/jobs', [JobListingController::class, 'index'])->name('jobs.index');
+Route::get('/jobs/{slug}', [JobListingController::class, 'show'])->name('jobs.show');
+
+Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');
+Route::get('/blog/category/{slug}', [CategoryController::class, 'show'])->name('blog.category');
+Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('blog.show');

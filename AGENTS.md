@@ -6,11 +6,11 @@ Applies to this project tree. Last reviewed 31 October 2026. Read the root READM
 
 Build a public African job board and career blog with owner-managed publishing. Browsing requires no login. The current application is a local design preview, not a CMS or production launch.
 
-Implemented: Laravel 12, MySQL connection and content-schema migrations, Blade/Tailwind/Vite, branded homepage, sample keyword/type filters, expandable fictional job previews, short hardcoded career guides, content models with publication/expiry scopes, factories and tests, and a Filament 5.11 publishing panel at `/mdosi` restricted to `users.is_admin` accounts.
+Implemented: Laravel 12, MySQL connection and content-schema migrations, Blade/Tailwind/Vite, database-backed homepage, `/jobs` search and detail pages, `/blog` index, article and category pages, content models with publication/expiry scopes, factories and tests, article featured-image uploads with generated fallback art, and a Filament 5.11 publishing panel at `/mdosi` restricted to `users.is_admin` accounts.
 
-Not implemented: public pages or search reading the content tables, real job details/application links, a blog index/article pages, database search, image uploads, a rich-text editor, record preview, password-reset mail, 2FA, user-management screens, SEO sitemap/schema/canonicals, photography, deployment.
+Not implemented: full-text search, a rich-text editor (article bodies are plain text), in-body images, a record preview, password-reset mail, 2FA, user-management screens, SEO sitemap/schema/canonicals, real photography, and the Dokploy deployment itself. Article featured images upload from `/mdosi`, but nothing is deployed and no volume exists yet.
 
-Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`) and are edited through the `/mdosi` panel, but no public page reads them yet. Only `User` exists as an account model; the panel requires `users.is_admin` (not mass assignable) and the starter Test User is not an admin. The four fictional roles still live in `app/config/preview.php`. The current public route is `GET /` named `home`; `/up` is the framework health route. Do not claim that a populated public database of jobs or articles exists — structurally the tables exist, and the panel can fill them, but the public site does not read them.
+Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), are edited through the `/mdosi` panel, and are read by the public pages: `GET /`, `/jobs`, `/jobs/{slug}`, `/blog`, `/blog/{slug}`, `/blog/category/{slug}`. Only `User` exists as an account model; the panel requires `users.is_admin` (not mass assignable) and the starter Test User is not an admin. `config/preview.php` and the four fictional roles were removed. `/up` is the framework health route. Do not claim the development database contains real vacancies or editorial — it holds a few explicitly labelled “Sample:” records used for layout checks.
 
 ## Owner decisions to preserve
 
@@ -45,8 +45,9 @@ Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`) and
 
 ## Source locations
 
-- `app/routes/web.php`: GET input validation and current sample filter.
-- `app/config/preview.php`: fictional sample job data.
+- `app/routes/web.php`: public routes for home, jobs, job detail, blog, article and category pages.
+- `app/app/Http/Controllers/`: `HomeController`, `JobListingController`, `ArticleController`, `CategoryController` for the public pages.
+- `app/resources/views/jobs/`, `app/resources/views/blog/`, `app/resources/views/partials/`: public listing, detail and card templates.
 - `app/resources/views/home.blade.php`: all homepage content and guides.
 - `app/resources/css/app.css`: Tailwind entry/imports; `site.css`: custom design.
 - `app/app/Models`, `app/app/Enums`, `app/app/Support`: content models, enums and slugs/visibility/timezone traits.
@@ -76,10 +77,10 @@ Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`) and
 ## Implementation sequence
 
 1. Content schema and publication rules — **implemented 31 October 2026** (models, migrations, factories, scopes and tests; see SCHEMA.md). Admin capability column exists but no panel uses it.
-2. Publishing admin — **core implemented 31 October 2026**: Filament 5.11 at `/mdosi`, admin-only access, CRUD resources. Remaining: uploads, rich-text editor, record preview, password reset, 2FA, user management.
-3. Database-backed public jobs/search/pagination/detail/application/expiry states.
-4. Blog index/article pages/categories/search and homepage integration.
-5. Imagery and responsive design finish.
+2. Publishing admin — **core implemented 31 October 2026**: Filament 5.11 at `/mdosi`, admin-only access, CRUD resources, article featured-image uploads. Remaining: rich-text editor, in-body images, record preview, password reset, 2FA, user management.
+3. Database-backed public jobs/search/pagination/detail/application/expiry states — **implemented 1 November 2026**.
+4. Blog index/article pages/categories and homepage integration — **implemented 1 November 2026**; article search, tag pages and rich-text bodies remain.
+5. Imagery and responsive design finish — **article featured images and 20 fallback art panels implemented**; real photography, in-body images and responsive `srcset` remain.
 6. SEO metadata, sitemap, canonical/noindex policy, structured data, slug redirects and expiration handling.
 7. End-to-end/accessibility/performance checks, then production deployment and operations.
 
@@ -92,7 +93,7 @@ See README milestone sections for detailed acceptance criteria. A different user
 - Use UTC persistence with explicit display/input timezone handling; owner context is Africa/Nairobi.
 - Choose stable unique slugs and an intentional redirect policy.
 - Validate and parameterise search; escape displayed input; use pagination and eager loading for real data. Full-text search is future work, not current functionality.
-- Current search is a case-insensitive substring of title/sector/description/work mode over four configuration records; no published records are searchable yet.
+- Public job search is a case-insensitive `LIKE` across title, description and company name, plus an exact contract-type filter; it is not full-text search. The homepage form submits to `/jobs`.
 - Keep filters in shareable GET URLs and preserve selected values. If introducing Livewire, retain crawlable server-rendered content and keyboard operation.
 - Escape plain text. Sanitize rich article/job HTML before trusted rendering. Do not assume Filament input alone makes arbitrary HTML safe.
 - Validate uploads, storage access and application URL schemes. Never allow executable uploaded content or unsafe external URL protocols.
@@ -118,7 +119,7 @@ pnpm install --frozen-lockfile
 pnpm build
 php artisan config:clear
 php artisan test
-php artisan test --filter=DiscoveryPreviewTest
+php artisan test --filter=PublicPagesTest
 php artisan route:list
 php artisan serve --host=127.0.0.1 --port=8000
 ```
