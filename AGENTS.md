@@ -10,6 +10,8 @@ Implemented: Laravel 12, MySQL connection and content-schema migrations, Blade/T
 
 Deployed 1 November 2026 at `https://plusthree.io` through Dokploy (`mtaa.chakulamoto.fit` panel): MySQL service, environment, Cloudflare domain with Let's Encrypt, and the `plusthree-uploads` volume at `/var/www/html/storage/app/public`. The production database is empty and indexing is off.
 
+Panel sign-in with Google is implemented via Socialite with an `ADMIN_EMAILS` allowlist (`App\Http\Controllers\Auth\GoogleController`); the password login remains as break-glass.
+
 Not implemented: full-text search, password-reset mail, 2FA, user-management screens, the scheduled image prune, backups, monitoring, real photography, and real content.
 
 Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), are edited through the `/mdosi` panel, and are read by the public pages: `GET /`, `/jobs`, `/jobs/{slug}`, `/blog`, `/blog/{slug}`, `/blog/category/{slug}`. Only `User` exists as an account model; the panel requires `users.is_admin` (not mass assignable) and the starter Test User is not an admin. `config/preview.php` and the four fictional roles were removed. `/up` is the framework health route. Do not claim the development database contains real vacancies or editorial — it holds a few explicitly labelled “Sample:” records used for layout checks.

@@ -299,7 +299,9 @@ Articles are written in Filament's rich-text editor: bold, italic, underline, he
 
 In-body uploads are downscaled to 1400px wide on arrival (`App\Support\InlineImage`), which required JPEG and WebP support in GD — the build previously had neither, so every photo silently skipped resizing. A **Describe images** action lists every in-body image without alt text and writes descriptions back into the body. `php artisan images:prune` reports files under `articles/inline` that no article references; `--force` deletes them, with a 24-hour grace period and a dry run by default.
 
-Not implemented yet: the describe-images check on the create screen, a scheduler for the prune command, mail-dependent password reset, Google sign-in, two-factor authentication, and a user-management screen — grant further admins deliberately via `php artisan tinker` until that exists. Deferred auth work is listed in [TODO.md](TODO.md).
+Sign-in with Google is available on the panel login (Socialite). Only addresses in `ADMIN_EMAILS` are accepted; a refused address creates no account and leaves no session, and the attempt is logged. New accounts are admins; existing accounts keep their current `is_admin`. The password login stays enabled as the break-glass route.
+
+Not implemented yet: the describe-images check on the create screen, a scheduler for the prune command, mail-dependent password reset, two-factor authentication, and a user-management screen — grant further admins deliberately via `php artisan tinker` until that exists. Deferred auth work is listed in [TODO.md](TODO.md).
 
 - Install a compatible Filament version and its required Livewire dependencies. Check actual package requirements first; do not guess compatibility or blindly upgrade Laravel/PHP.
 - Configure a private panel at `/mdosi` (owner's chosen path, set through the Filament panel provider, not the default `/admin`). The path is cosmetic: it must not be treated as a security control, and explicit admin authorisation is still required in every environment.

@@ -34,7 +34,7 @@ Last updated: 1 November 2026. Ordered by what to do next, not by topic. Scope d
 
 ## Deferred by the owner (31 October 2026)
 
-19. [ ] Google sign-in for `/mdosi` (Socialite + Google OAuth client, restricted to named admin accounts).
+19. [x] Google sign-in for `/mdosi` — Socialite, `ADMIN_EMAILS` allowlist enforced at the callback, Google-only accounts for new admins, password login kept as break-glass. Remaining: add the Google credentials in Dokploy.
 20. [ ] Optional two-factor authentication.
 21. [ ] User-management screen (admins are currently granted through `tinker`).
 22. [ ] Per-role permissions if a second editor joins.

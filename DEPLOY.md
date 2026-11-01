@@ -58,6 +58,12 @@ MAIL_FROM_ADDRESS=hello@your-domain.example
 MAIL_FROM_NAME="Plusthree"
 
 BCRYPT_ROUNDS=12
+
+# Panel sign-in with Google. Comma-separated allowlist; empty disables it.
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URL=https://your-domain.example/mdosi/auth/google/callback
+ADMIN_EMAILS=owner@your-domain.example
 ```
 
 Notes:
@@ -80,7 +86,19 @@ Notes:
    ```
 4. Sign in at `https://your-domain.example/mdosi`.
 
-## 5. Domain and DNS
+## 5. Google sign-in
+
+The panel accepts Google accounts only from the `ADMIN_EMAILS` allowlist. Everyone else is refused at the callback: no account is created, no session starts, and the attempt is logged. A newly created account is an admin; an existing account keeps whatever `is_admin` it already had.
+
+1. Google Cloud Console → create a project → **APIs & Services → OAuth consent screen** (External). Add your address as a test user while the app is unverified.
+2. **Credentials → Create credentials → OAuth client ID → Web application.**
+   - Authorised JavaScript origin: `https://your-domain.example`
+   - Authorised redirect URI: `https://your-domain.example/mdosi/auth/google/callback`
+3. Put the client ID and secret into Dokploy as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, set `ADMIN_EMAILS`, and redeploy.
+
+The password login stays enabled as the break-glass route, so a broken OAuth client cannot lock you out.
+
+## 6. Domain and DNS
 
 Dokploy terminates TLS with Traefik and requests the certificate itself.
 
@@ -108,14 +126,14 @@ Do not set `SESSION_SECURE_COOKIE=true` before HTTPS is actually serving, or the
 - **Uploads vanish after a redeploy.** The volume is missing or mounted at the wrong path; see §6.
 - **`Could not open input file: artisan`** in the terminal. The container shell starts in `/`; run `cd /var/www/html` first.
 
-## 6. Storage and operations
+## 7. Storage and operations
 
 - **Article images need a persistent volume.** In Dokploy, add a volume to the application mounted at `/var/www/html/storage/app/public`. Mount that directory, not all of `storage/app`: a broader mount hides the framework's cache/session directories from the image and causes permission surprises. The `public/storage` symlink is created during the image build; the volume only holds uploaded files.
 - Back up that volume as well as MySQL — a database restore without the matching images leaves articles with broken pictures. Test both restores before launch.
 - Logs go to `storage/logs` via the daily channel; add volume or log shipping if you need retention.
 - The public site is deliberately `noindex, nofollow` until launch; indexing is switched on deliberately later.
 
-## 7. Local image check
+## 8. Local image check
 
 ```sh
 docker build -t plusthree:local .
@@ -130,7 +148,7 @@ docker run --rm -p 8081:80 \
 
 Then open `http://127.0.0.1:8081/`. On Linux, `host.docker.internal` requires `--add-host=host.docker.internal:host-gateway`.
 
-## 8. Known limits of this deployment
+## 9. Known limits of this deployment
 
 - Single container, no queue worker, no scheduler — none are needed yet.
 - Sessions and cache use the MySQL database.
