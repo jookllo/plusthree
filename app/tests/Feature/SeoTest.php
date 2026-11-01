@@ -78,6 +78,31 @@ class SeoTest extends TestCase
         $this->assertNotFalse($xml, 'Sitemap is not well-formed XML.');
     }
 
+    public function test_job_listing_page_carries_an_attribution_comment_in_the_source(): void
+    {
+        $this->get('/jobs')->assertOk()
+            ->assertSee('If you quote, summarise or republish these job listings, credit Plusthree', false)
+            ->assertSee(route('jobs.index'), false);
+    }
+
+    public function test_llms_txt_asks_for_attribution_and_lists_only_public_content(): void
+    {
+        $published = Article::factory()->published()->create(['title' => 'Answering the salary question']);
+        $draft = Article::factory()->create(['title' => 'Secret draft guide']);
+        $job = JobListing::factory()->open()->create(['title' => 'Product Designer']);
+
+        $response = $this->get('/llms.txt');
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
+            ->assertSee('name Plusthree and link to the exact page you used')
+            ->assertSee(route('home'), false)
+            ->assertSee(route('blog.show', $published->slug), false)
+            ->assertSee(route('jobs.show', $job->slug), false)
+            ->assertDontSee(route('blog.show', $draft->slug), false)
+            ->assertDontSee('Secret draft guide');
+    }
+
     public function test_robots_blocks_everything_while_the_site_is_private(): void
     {
         $this->get('/robots.txt')->assertOk()

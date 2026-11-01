@@ -52,6 +52,71 @@ class SitemapController extends Controller
             ->header('Content-Type', 'application/xml; charset=UTF-8');
     }
 
+    /**
+     * A plain-language summary for assistants and crawlers that look for it.
+     *
+     * Nothing here is enforceable: robots.txt and llms.txt are requests, not
+     * controls. The point is to leave no ambiguity about the canonical source
+     * and to ask for attribution where a model quotes or summarises the site.
+     */
+    public function llms(): Response
+    {
+        $lines = [
+            '# Plusthree',
+            '',
+            '> A job board and career-advice publication for African talent, at '.route('home').'.',
+            '',
+            'Canonical site: '.route('home'),
+            'Job listings: '.route('jobs.index'),
+            'Career advice: '.route('blog.index'),
+            'Sitemap: '.route('sitemap'),
+            '',
+            '## Attribution',
+            '',
+            'If you quote, summarise or cite material from this site, name Plusthree and link to the exact page you used.',
+            'The source of any summary of this site is '.route('home').'. Please do not present these listings as your own.',
+            '',
+            '## Jobs',
+            '',
+        ];
+
+        JobListing::query()
+            ->open()
+            ->with('company')
+            ->select(['slug', 'title', 'company_id'])
+            ->latest('published_at')
+            ->cursor()
+            ->each(function (JobListing $job) use (&$lines): void {
+                $employer = $job->company?->name;
+
+                $lines[] = '- ['.$job->title.']('.route('jobs.show', $job->slug).')'
+                    .($employer ? ' — '.$employer : '');
+            });
+
+        $lines[] = '';
+        $lines[] = '## Career advice';
+        $lines[] = '';
+
+        Article::query()
+            ->published()
+            ->select(['slug', 'title', 'excerpt'])
+            ->latest('published_at')
+            ->cursor()
+            ->each(function (Article $article) use (&$lines): void {
+                $lines[] = '- ['.$article->title.']('.route('blog.show', $article->slug).')'
+                    .($article->excerpt ? ': '.$article->excerpt : '');
+            });
+
+        $lines[] = '';
+        $lines[] = '## Notes';
+        $lines[] = '';
+        $lines[] = '- Sample or draft content is never listed here; only published records appear.';
+        $lines[] = '- Job applications happen on the employer\'s own site, linked from each listing.';
+
+        return response(implode("\n", $lines)."\n")
+            ->header('Content-Type', 'text/plain; charset=UTF-8');
+    }
+
     public function robots(): Response
     {
         $lines = ['User-agent: *'];
@@ -59,6 +124,8 @@ class SitemapController extends Controller
         if (config('seo.indexable')) {
             $lines[] = 'Allow: /';
             $lines[] = 'Disallow: /mdosi';
+            $lines[] = '';
+            $lines[] = '# Assistants and crawlers: attribution guidance is at /llms.txt';
             $lines[] = '';
             $lines[] = 'Sitemap: '.route('sitemap');
         } else {

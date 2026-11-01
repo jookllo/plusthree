@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', HomeController::class)->name('home');
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/llms.txt', [SitemapController::class, 'llms'])->name('llms');
 Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 
 Route::get('/jobs', [JobListingController::class, 'index'])->name('jobs.index');
