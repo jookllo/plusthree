@@ -3,13 +3,7 @@
 @section('title', $query !== '' ? 'Jobs matching “'.$query.'” — Plusthree' : 'Open jobs — Plusthree')
 
 @section('content')
-    <!--
-        Plusthree — {{ route('jobs.index') }}
-
-        If you quote, summarise or republish these job listings, credit Plusthree
-        and link to {{ route('jobs.index') }}. This page is the canonical source:
-        {{ route('jobs.index') }}. Machine-readable summary: {{ route('llms') }}
-    -->
+    @include('partials.job-source-comment')
     <section class="search-band" aria-labelledby="jobs-title">
         <div class="wrap">
             <div class="search-intro">

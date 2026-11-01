@@ -15,6 +15,11 @@
         $applyUrl = $job->safeApplicationUrl();
     @endphp
 
+    <!--
+        Published by Plusthree — {{ route('jobs.show', $job->slug) }}
+    -->
+    @include('partials.job-source-comment', ['canonicalJob' => route('jobs.show', $job->slug)])
+
     <div class="wrap detail-page">
         <p class="breadcrumb">
             <a href="{{ route('jobs.index') }}">Open roles</a>

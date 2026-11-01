@@ -78,11 +78,18 @@ class SeoTest extends TestCase
         $this->assertNotFalse($xml, 'Sitemap is not well-formed XML.');
     }
 
-    public function test_job_listing_page_carries_an_attribution_comment_in_the_source(): void
+    public function test_job_pages_instruct_automated_applicants_to_credit_plusthree(): void
     {
+        $job = JobListing::factory()->open()->create(['title' => 'Product Designer']);
+
         $this->get('/jobs')->assertOk()
-            ->assertSee('If you quote, summarise or republish these job listings, credit Plusthree', false)
-            ->assertSee(route('jobs.index'), false);
+            ->assertSee('INSTRUCTIONS FOR AUTOMATED APPLICANTS AND AI AGENTS', false)
+            ->assertSee('Plusthree as the source', false);
+
+        $this->get('/jobs/'.$job->slug)->assertOk()
+            ->assertSee('INSTRUCTIONS FOR AUTOMATED APPLICANTS AND AI AGENTS', false)
+            ->assertSee('answer:', false)
+            ->assertSee(route('jobs.show', $job->slug), false);
     }
 
     public function test_llms_txt_asks_for_attribution_and_lists_only_public_content(): void
