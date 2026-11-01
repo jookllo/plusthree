@@ -29,6 +29,10 @@ APP_DEBUG=false
 APP_URL=https://your-domain.example
 APP_TIMEZONE=UTC
 
+# Leave false until real content is published and the domain is final.
+# false serves "noindex, nofollow" and a robots.txt that blocks everything.
+SEO_INDEXABLE=false
+
 LOG_CHANNEL=stack
 LOG_STACK=daily
 LOG_LEVEL=warning
@@ -59,6 +63,7 @@ BCRYPT_ROUNDS=12
 Notes:
 
 - `APP_URL` must be the final HTTPS URL. Trusted proxies are configured in `app/bootstrap/app.php` so Dokploy's TLS termination is honoured.
+- `SEO_INDEXABLE=false` serves `noindex, nofollow` on every page and a `robots.txt` that blocks crawling. Set it to `true` only when the domain is final and real content is published; `APP_DEBUG=true` forces it back off. Filtered job searches stay `noindex` either way, and `/mdosi` is always disallowed.
 - Keep `QUEUE_CONNECTION=sync` until a worker is configured — `database` without a worker silently queues work that never runs.
 - `MAIL_MAILER=log` is an honest placeholder; nothing sends mail yet. Password reset and notifications arrive with a real provider.
 

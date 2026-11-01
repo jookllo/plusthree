@@ -2,6 +2,15 @@
 
 @section('title', $article->metaTitle().' — Plusthree')
 @section('meta-description', $article->metaDescription())
+@section('og-type', 'article')
+@section('canonical', route('blog.show', $article->slug))
+@if ($article->featured_image_path)
+    @section('og-image', url(Storage::disk('public')->url($article->featured_image_path)))
+@endif
+
+@push('structured-data')
+    @include('partials.json-ld', ['data' => \App\Support\StructuredData::article($article)])
+@endpush
 
 @section('content')
     <div class="wrap article-page">

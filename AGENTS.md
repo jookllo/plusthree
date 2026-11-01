@@ -81,7 +81,7 @@ Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), ar
 3. Database-backed public jobs/search/pagination/detail/application/expiry states — **implemented 1 November 2026**.
 4. Blog index/article pages/categories and homepage integration — **implemented 1 November 2026**; article search and tag pages remain.
 5. Imagery and responsive design finish — **article featured images, in-body images and 20 fallback art panels implemented**; real photography and responsive `srcset` remain.
-6. SEO metadata, sitemap, canonical/noindex policy, structured data, slug redirects and expiration handling.
+6. SEO metadata, sitemap, canonical/noindex policy and structured data — **implemented 1 November 2026**; slug redirects, expired-job metadata and Search Console remain.
 7. End-to-end/accessibility/performance checks, then production deployment and operations.
 
 See README milestone sections for detailed acceptance criteria. A different user-prioritised task may change the order. Do not mark a milestone complete when only its visual mockup exists.
@@ -140,7 +140,7 @@ The pnpm wrapper is a shell script, not a JavaScript module. The existing Compos
 - SEO changes: inspect rendered HTML and public/private sitemap/schema outcomes.
 - Do not rewrite tests merely to hide a regression. Update intentional behaviour expectations with an explanation.
 - Historical results: full suite 30 tests/80 assertions on 31 October 2026 after the panel; 24 tests/69 assertions earlier the same day after the content schema; 7 tests/21 assertions after redesign; focused search suite 3 tests/12 assertions after location removal.
-- Current noindex expectation is deliberate. At launch, replace it with environment-aware indexing and revise tests for local/staging versus production.
+- Indexing is opt-in through `SEO_INDEXABLE` (see `config/seo.php`); `APP_DEBUG=true` overrides it off, and filtered job searches stay `noindex`. `/sitemap.xml` and `/robots.txt` are routes — `public/robots.txt` was removed. Do not restore a static robots file, and do not switch indexing on before the domain and real content exist.
 
 ## Documentation and completion
 

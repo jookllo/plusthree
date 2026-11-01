@@ -23,7 +23,7 @@ Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROA
 | Career advice | Three short readable guides inside expandable homepage sections | Hardcoded Blade content; no blog database, article URLs or editor |
 | Branding | Supplied colours, Africa logo with red uppercase tagline, saved logo concepts | Logo remains provisional; raster PNG, not a finished vector identity |
 | Accessibility basics | Labels, semantic headings, skip link, visible keyboard focus, native details controls | Not a complete accessibility audit |
-| SEO foundation | Server-rendered HTML, page title and description | Intentionally `noindex, nofollow`; sitemap/canonical/schema work remains |
+| SEO | Title, description, canonical, Open Graph, JSON-LD, `sitemap.xml`, `robots.txt` | `noindex` until `SEO_INDEXABLE=true`; Search Console and slug redirects remain |
 | Verification | PHP feature tests including schema visibility, expiry boundary, delete rules and database isolation | Does not verify features that do not exist |
 
 ### Current public behaviour
@@ -360,7 +360,11 @@ Still outstanding: any real photography (the owner has not supplied assets), res
 
 Acceptance: images are real assets with documented origin, layout does not jump on load, text remains readable and mobile views have no horizontal overflow.
 
-### Milestone 6 — SEO and indexing
+### Milestone 6 — SEO and indexing (metadata, sitemap and schema implemented 1 November 2026)
+
+Implemented: every public page renders a title, description, canonical URL, Open Graph and Twitter metadata through `partials/seo-meta`; articles and job listings override the defaults. `/sitemap.xml` lists the home, job and blog indexes plus every open job, published article and non-empty article category with modification times. `/robots.txt` is generated (the static file was removed) and blocks everything until indexing is enabled. `App\Support\StructuredData` emits `WebSite` on the home page, `Article` on articles and `JobPosting` on open jobs. Indexing is opt-in through `SEO_INDEXABLE`, refused while `APP_DEBUG` is on, and filtered job searches stay `noindex` with a canonical pointing at `/jobs`.
+
+Still outstanding: Search Console verification and sitemap submission after the domain exists, slug redirect policy, expired-job metadata handling beyond removal from the sitemap, and admin overrides for non-article pages.
 
 - Add reusable per-page title, description, canonical and social-sharing metadata with useful defaults and admin overrides.
 - Generate XML sitemaps from eligible published records; include accurate modification times.
@@ -369,7 +373,7 @@ Acceptance: images are real assets with documented origin, layout does not jump 
 - Define canonical/noindex behaviour for internal searches and filter combinations; avoid indexing unlimited near-duplicate pages.
 - Exclude admin, drafts and private previews through access controls and appropriate indexing directives. robots.txt is not access control.
 - Implement slug redirects and expired-job metadata removal/updates.
-- Keep local/staging noindex. Replace the current hardcoded directive with environment/publication-aware handling before launch and deliberately enable production indexing when ready.
+- Keep local/staging noindex. The directive is now configuration-driven (`SEO_INDEXABLE`); set it deliberately once the domain and real content exist.
 - Connect Search Console and submit the sitemap after the real domain is live. Validate structured data against current official documentation.
 
 Acceptance: HTML contains the actual content without JavaScript, published URLs have correct metadata, private/expired states are handled correctly, sitemap/schema validators pass. SEO eligibility does not guarantee rankings or rich results.
@@ -405,14 +409,14 @@ Use `php artisan view:clear` when troubleshooting stale compiled views. Do not u
 
 Historical verification during implementation:
 
-- **1 November 2026 (current):** full suite **52 tests, 158 assertions passed** against `plusthree_testing`, including public job/blog pages, visibility leaks, closed-job application rules, unsafe URL schemes, generated article art, featured-image rendering, rich-text sanitisation (scripts, event handlers and `javascript:` URLs), plain-text body compatibility and signed draft previews. Earlier the same day: 43 tests/125 assertions after the public pages; 30 tests/80 assertions after the admin panel; 24 tests/69 assertions after the content schema.
+- **1 November 2026 (current):** full suite **63 tests, 207 assertions passed** against `plusthree_testing`, including public job/blog pages, visibility leaks, closed-job application rules, unsafe URL schemes, generated article art, featured-image rendering, rich-text sanitisation (scripts, event handlers and `javascript:` URLs), plain-text body compatibility, signed draft previews, canonical URLs, sitemap eligibility, robots policy and schema.org JSON-LD. Earlier the same day: 43 tests/125 assertions after the public pages; 30 tests/80 assertions after the admin panel; 24 tests/69 assertions after the content schema.
 - 8 content-schema migrations applied to the development database; the test-database guard was positively verified to abort before touching a non-test database.
 - After removing the location control: focused discovery suite **3 tests, 12 assertions passed** and assets built successfully.
 - Homepage previously returned HTTP 200 and desktop/mobile screenshots were inspected.
 
 `FoundationTest` uses `RefreshDatabase`: it rebuilds test tables. A fail-fast guard now lives in `app/tests/TestCase.php` and runs inside `setUpTraits()`, before any database trait can touch a schema, refusing any connection that is not MySQL `plusthree_testing`. It was positively verified by running a non-database test with `DB_DATABASE=plusthree`, which aborted with a `RuntimeException` instead of migrating. The guard is a safety net, not a substitute for reviewing which connection is resolved; separate development and testing database users remain a sensible extra layer.
 
-Missing test coverage includes Filament CRUD interactions, the upload widget itself (file storage is exercised through factory-set paths, not through a real upload), blog search, SEO output and deployment. The two starter tests remain weak smoke checks. Do not interpret their passing as completion of the product.
+Missing test coverage includes Filament CRUD interactions, the upload widget itself (file storage is exercised through factory-set paths, not through a real upload), blog search and deployment. The two starter tests remain weak smoke checks. Do not interpret their passing as completion of the product.
 
 ## 9. Troubleshooting and known technical debt
 

@@ -1,5 +1,9 @@
 @extends('layouts.site')
 
+@push('structured-data')
+    @include('partials.json-ld', ['data' => \App\Support\StructuredData::website()])
+@endpush
+
 @section('content')
     <section class="search-band" aria-labelledby="page-title">
         <div class="wrap">

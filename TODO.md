@@ -10,7 +10,7 @@ Last updated: 1 November 2026. Ordered by what to do next, not by topic. Scope d
 
 ## Launch blockers
 
-4. [ ] **SEO minimum.** Per-page metadata (titles and descriptions already exist on articles), canonical URLs, `sitemap.xml`, `JobPosting` and `Article` structured data, and an environment-aware noindex policy so production stops serving `noindex, nofollow`. Depends on: 1, 3.
+4. [x] **SEO minimum.** Metadata, canonicals, Open Graph, `sitemap.xml`, `robots.txt`, `JobPosting`/`Article`/`WebSite` JSON-LD and an opt-in `SEO_INDEXABLE` policy. Remaining: set `SEO_INDEXABLE=true` and submit the sitemap to Search Console after the domain is live, plus a slug redirect policy.
 5. [ ] **Alt text for in-body images.** The editor's image button does not ask for a description, so every inline image is invisible to screen readers. Needs a custom image dialog that captures alt text. Depends on: nothing.
 6. [ ] **Downscale in-body uploads.** Only featured images are resized to 1600×900; an inline photo from a phone is served at full weight. Depends on: nothing.
 7. [ ] **Database backup and a restore drill.** A nightly dump plus one real restore into a scratch database, timed and documented. A backup nobody has restored is not a backup. Depends on: 1.

@@ -3,9 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Plusthree — Jobs & career advice for African talent')</title>
-    <meta name="description" content="@yield('meta-description', 'Explore opportunities across Africa and beyond, with practical advice for your next career move.')">
-    <meta name="robots" content="noindex, nofollow">
+    @include('partials.seo-meta')
+    @stack('structured-data')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>

@@ -2,6 +2,12 @@
 
 @section('title', $job->title.' — Plusthree')
 @section('meta-description', Str::limit(strip_tags($job->description ?? ''), 155))
+@section('og-type', 'article')
+@section('canonical', route('jobs.show', $job->slug))
+
+@push('structured-data')
+    @include('partials.json-ld', ['data' => \App\Support\StructuredData::jobPosting($job)])
+@endpush
 
 @section('content')
     @php
