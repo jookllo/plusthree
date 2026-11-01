@@ -49,4 +49,22 @@ class ArticleController extends Controller
             'related' => $related,
         ]);
     }
+
+    /**
+     * Drafts, future-dated and archived articles, reachable only through a
+     * short-lived signed URL generated in the admin panel.
+     */
+    public function preview(string $slug)
+    {
+        $article = Article::query()
+            ->with(['author', 'categories', 'tags'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        return view('blog.show', [
+            'article' => $article,
+            'related' => collect(),
+            'preview' => true,
+        ]);
+    }
 }

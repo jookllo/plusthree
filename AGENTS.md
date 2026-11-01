@@ -8,7 +8,7 @@ Build a public African job board and career blog with owner-managed publishing. 
 
 Implemented: Laravel 12, MySQL connection and content-schema migrations, Blade/Tailwind/Vite, database-backed homepage, `/jobs` search and detail pages, `/blog` index, article and category pages, content models with publication/expiry scopes, factories and tests, article featured-image uploads with generated fallback art, and a Filament 5.11 publishing panel at `/mdosi` restricted to `users.is_admin` accounts.
 
-Not implemented: full-text search, a rich-text editor (article bodies are plain text), in-body images, a record preview, password-reset mail, 2FA, user-management screens, SEO sitemap/schema/canonicals, real photography, and the Dokploy deployment itself. Article featured images upload from `/mdosi`, but nothing is deployed and no volume exists yet.
+Not implemented: full-text search, alt text for in-body images, password-reset mail, 2FA, user-management screens, SEO sitemap/schema/canonicals, real photography, and the Dokploy deployment itself. Article images upload from `/mdosi`, but nothing is deployed and no volume exists yet.
 
 Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), are edited through the `/mdosi` panel, and are read by the public pages: `GET /`, `/jobs`, `/jobs/{slug}`, `/blog`, `/blog/{slug}`, `/blog/category/{slug}`. Only `User` exists as an account model; the panel requires `users.is_admin` (not mass assignable) and the starter Test User is not an admin. `config/preview.php` and the four fictional roles were removed. `/up` is the framework health route. Do not claim the development database contains real vacancies or editorial — it holds a few explicitly labelled “Sample:” records used for layout checks.
 
@@ -77,10 +77,10 @@ Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), ar
 ## Implementation sequence
 
 1. Content schema and publication rules — **implemented 31 October 2026** (models, migrations, factories, scopes and tests; see SCHEMA.md). Admin capability column exists but no panel uses it.
-2. Publishing admin — **core implemented 31 October 2026**: Filament 5.11 at `/mdosi`, admin-only access, CRUD resources, article featured-image uploads. Remaining: rich-text editor, in-body images, record preview, password reset, 2FA, user management.
+2. Publishing admin — **core implemented 31 October 2026; rich text and preview 1 November 2026**: Filament 5.11 at `/mdosi`, admin-only access, CRUD resources, article featured and in-body images, a rich-text editor and a signed draft preview. Remaining: alt text for in-body images, image cleanup, password reset, 2FA, user management.
 3. Database-backed public jobs/search/pagination/detail/application/expiry states — **implemented 1 November 2026**.
-4. Blog index/article pages/categories and homepage integration — **implemented 1 November 2026**; article search, tag pages and rich-text bodies remain.
-5. Imagery and responsive design finish — **article featured images and 20 fallback art panels implemented**; real photography, in-body images and responsive `srcset` remain.
+4. Blog index/article pages/categories and homepage integration — **implemented 1 November 2026**; article search and tag pages remain.
+5. Imagery and responsive design finish — **article featured images, in-body images and 20 fallback art panels implemented**; real photography and responsive `srcset` remain.
 6. SEO metadata, sitemap, canonical/noindex policy, structured data, slug redirects and expiration handling.
 7. End-to-end/accessibility/performance checks, then production deployment and operations.
 
@@ -95,7 +95,7 @@ See README milestone sections for detailed acceptance criteria. A different user
 - Validate and parameterise search; escape displayed input; use pagination and eager loading for real data. Full-text search is future work, not current functionality.
 - Public job search is a case-insensitive `LIKE` across title, description and company name, plus an exact contract-type filter; it is not full-text search. The homepage form submits to `/jobs`.
 - Keep filters in shareable GET URLs and preserve selected values. If introducing Livewire, retain crawlable server-rendered content and keyboard operation.
-- Escape plain text. Sanitize rich article/job HTML before trusted rendering. Do not assume Filament input alone makes arbitrary HTML safe.
+- Escape plain text. Rich article HTML is rendered only through `App\Support\ArticleBody`; that sanitiser is the trust boundary, so do not echo `$article->body` directly. Do not assume Filament input alone makes arbitrary HTML safe.
 - Validate uploads, storage access and application URL schemes. Never allow executable uploaded content or unsafe external URL protocols.
 - Restrict the panel by explicit admin permission, not simply “any logged-in user.” The starter Test User is not a production admin.
 - Keep schema changes non-destructive and review foreign-key deletion behaviour. No fabricated production seed data.

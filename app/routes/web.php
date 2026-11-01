@@ -13,4 +13,7 @@ Route::get('/jobs/{slug}', [JobListingController::class, 'show'])->name('jobs.sh
 
 Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');
 Route::get('/blog/category/{slug}', [CategoryController::class, 'show'])->name('blog.category');
+Route::get('/blog/{slug}/preview', [ArticleController::class, 'preview'])
+    ->middleware('signed')
+    ->name('blog.preview');
 Route::get('/blog/{slug}', [ArticleController::class, 'show'])->name('blog.show');

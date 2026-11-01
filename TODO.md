@@ -21,10 +21,13 @@ Last updated: 1 November 2026. Scope detail and acceptance criteria live in [REA
 ## Admin panel polish
 
 - [ ] Visible dark-mode toggle in the top bar (Filament's light/dark/system switcher already exists in the avatar menu).
-- [ ] **Rich-text article editor** — swap the plain `Textarea` for Filament's `RichEditor` so editors get bold, italic, underline, headings, lists, quotes and links. Requires server-side sanitisation before the body is rendered (allowlist of tags/attributes) and prose styling for the new elements; bodies are currently escaped plain text.
-- [ ] "Preview as visitor" for drafts.
+- [x] **Rich-text article editor** — Filament `RichEditor` with bold, italic, underline, headings, lists, quotes and links, plus a floating toolbar on text selection. Output is sanitised through `App\Support\ArticleBody` (Symfony HtmlSanitizer allowlist) before rendering.
+- [x] "Preview as visitor" for drafts — a signed URL valid for 30 minutes, generated from the article's edit screen.
 - [x] Article featured images (16:9, resized, alt text required) — mounted volume still required in Dokploy.
-- [ ] **In-body images** — the same editor supports file attachments (`fileAttachmentsDisk('public')`), so images can be uploaded mid-article into the same volume. Blocked on the rich-text editor, and needs a way to supply alt text: the editor's image button does not prompt for it.
+- [x] **In-body images** — uploaded mid-article to `articles/inline` on the same public volume.
+- [ ] Alt text for in-body images: the editor's image button does not prompt for it, and Filament strips the `data-id` we would need to look it up. Add a custom image dialog.
+- [ ] Delete orphaned in-body images when they are removed from an article (Filament only cleans up when a file-attachment provider is registered).
+- [ ] Downscale in-body uploads; only the featured image is resized today.
 - [ ] Optional quieter fallback art — halve the stripe weight and pull the motif colour closer to the base if the current article-hero backdrop reads too strongly behind the headline.
 - [ ] Responsive `srcset` sizes and stored licence/provenance for photography.
 - [ ] Per-role permissions if a second editor joins.

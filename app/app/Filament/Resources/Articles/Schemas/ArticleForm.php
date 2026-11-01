@@ -6,6 +6,7 @@ use App\Enums\PublicationStatus;
 use App\Models\Article;
 use App\Models\Category;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -36,11 +37,25 @@ class ArticleForm
                     ->rows(2)
                     ->maxLength(320)
                     ->helperText('Used on cards and as the meta description fallback.'),
-                Textarea::make('body')
+                RichEditor::make('body')
                     ->required()
-                    ->rows(12)
                     ->columnSpanFull()
-                    ->helperText('Plain text for now. Rich-text sanitisation arrives with the editor upgrade.'),
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('articles/inline')
+                    ->fileAttachmentsVisibility('public')
+                    ->fileAttachmentsAcceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->fileAttachmentsMaxSize(4096)
+                    ->toolbarButtons([
+                        ['bold', 'italic', 'underline', 'link'],
+                        ['h2', 'h3'],
+                        ['bulletList', 'orderedList', 'blockquote'],
+                        ['attachFiles'],
+                        ['undo', 'redo'],
+                    ])
+                    ->floatingToolbars([
+                        'paragraph' => ['bold', 'italic', 'underline', 'link'],
+                    ])
+                    ->helperText('Select text to format it in place, or use the toolbar for headings and lists. Images are inserted where the cursor is.'),
                 FileUpload::make('featured_image_path')
                     ->label('Featured image')
                     ->image()

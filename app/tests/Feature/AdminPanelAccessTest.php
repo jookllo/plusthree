@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Article;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -44,5 +45,19 @@ class AdminPanelAccessTest extends TestCase
     {
         $this->get('/job-listings')->assertNotFound();
         $this->get('/articles')->assertNotFound();
+    }
+
+    public function test_the_article_editor_offers_formatting_and_a_draft_preview(): void
+    {
+        $admin = User::factory()->create();
+        $admin->forceFill(['is_admin' => true])->save();
+
+        $article = Article::factory()->create(['title' => 'Plain draft']);
+
+        $this->actingAs($admin)
+            ->get('/mdosi/articles/'.$article->slug.'/edit')
+            ->assertOk()
+            ->assertSee('rich-editor', false)
+            ->assertSee('Preview');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PublicationStatus;
+use App\Support\ArticleBody;
 use App\Support\HasUniqueSlug;
 use App\Support\Publishable;
 use Database\Factories\ArticleFactory;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Support\Str;
+use Illuminate\Support\HtmlString;
 
 class Article extends Model
 {
@@ -94,10 +95,18 @@ class Article extends Model
      */
     public function readingTimeMinutes(): int
     {
-        $text = trim(Str::of($this->body ?? '')->stripTags()->toString());
+        $text = ArticleBody::plainText($this->body);
         $words = $text === '' ? 0 : count(preg_split('/\s+/u', $text));
 
         return max(1, (int) ceil($words / 200));
+    }
+
+    /**
+     * The body as sanitised, display-ready HTML.
+     */
+    public function renderedBody(): HtmlString
+    {
+        return ArticleBody::render($this->body);
     }
 
     public function getRouteKeyName(): string

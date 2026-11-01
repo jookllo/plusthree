@@ -294,7 +294,9 @@ Acceptance: migrations work on dedicated MySQL; relationships and publication/ex
 
 Implemented: Filament 5.11 at `/mdosi`, brand-neutral admin theme, login, an explicit `canAccessPanel()` check requiring `users.is_admin`, and resources for companies, job listings, articles, categories and tags — including enum selects with brand labels, a date-only closing date stored as 23:59:59 Africa/Nairobi converted to UTC, publish-on-status (no manual publication picker; the timestamp is stamped on save), slug generation/validation, automatic `created_by`/`updated_by`/author defaults, status badges and filters. Non-admins receive 403; guests are redirected to `/mdosi/login`; `/admin` and the resource paths outside the panel prefix return 404.
 
-Not implemented yet: image uploads (imagery is deferred), a rich-text editor (article bodies are plain textareas), a record preview page, mail-dependent password reset, Google sign-in, two-factor authentication, and a user-management screen — grant further admins deliberately via `php artisan tinker` until that exists. Deferred auth work is listed in [TODO.md](TODO.md).
+Articles are written in Filament's rich-text editor: bold, italic, underline, headings, lists, quotes and links, with a floating toolbar over a text selection and in-body image uploads to `articles/inline` on the public disk. The body is stored as HTML and rendered through `App\Support\ArticleBody`, which allowlists elements and attributes with Symfony HtmlSanitizer (already a Filament dependency) and strips scripts, event handlers and `javascript:` URLs. Plain-text bodies written before the editor are still escaped and keep their line breaks. A **Preview** action opens the public page for published articles and a 30-minute signed URL for drafts; the signed route is registered with the `signed` middleware and drafts stay 404 on the public route.
+
+Not implemented yet: alt text for in-body images (the editor's image button does not prompt for it), cleanup of images removed from an article, mail-dependent password reset, Google sign-in, two-factor authentication, and a user-management screen — grant further admins deliberately via `php artisan tinker` until that exists. Deferred auth work is listed in [TODO.md](TODO.md).
 
 - Install a compatible Filament version and its required Livewire dependencies. Check actual package requirements first; do not guess compatibility or blindly upgrade Laravel/PHP.
 - Configure a private panel at `/mdosi` (owner's chosen path, set through the Filament panel provider, not the default `/admin`). The path is cosmetic: it must not be treated as a security control, and explicit admin authorisation is still required in every environment.
@@ -302,7 +304,7 @@ Not implemented yet: image uploads (imagery is deferred), a rich-text editor (ar
 - Build company, job, article and taxonomy resources with required-field validation.
 - Job editor: employer, content, work type/location, application method, publication time, deadline, preview and status controls.
 - Article editor: rich body, image/alt text, excerpt, author, category/tags, slug, SEO fields, draft/preview/publish controls.
-- Sanitize rich HTML at the appropriate boundary. Escaped plain-text Blade output today does not make future rich-text rendering safe automatically.
+- Sanitize rich HTML at the appropriate boundary. `App\Support\ArticleBody` is the only trusted path from stored markup to rendered output; anything echoed directly still has to be escaped.
 - Validate uploads by type/size, use safe storage paths and reject executable content.
 - Restrict drafts and previews to authorised users or scoped signed preview links.
 - Add login throttling and test authorisation on the panel and individual actions.
@@ -347,7 +349,7 @@ Acceptance: the owner can publish an article entirely through the panel; it has 
 
 Implemented: articles accept an optional featured image through `/mdosi` (JPEG/PNG/WebP, cropped 16:9, resized to 1600×900, alt text required). Uploads go to the `public` disk; `DEPLOY.md` specifies the persistent volume. Articles without a photo fall back to one of 20 deterministic generated panels, used only as the article-page hero — lists show a photograph or nothing. The homepage column keeps the original typographic panel when there is no image.
 
-Still outstanding: any real photography (the owner has not supplied assets), in-body images (needs the rich-text editor), responsive `srcset` variants, a licence/provenance record, and the final logo.
+Still outstanding: any real photography (the owner has not supplied assets), responsive `srcset` variants, a licence/provenance record, alt text for in-body images, and the final logo.
 
 - Add relevant editorial imagery to selected article/brand areas; the owner has asked for this.
 - Confirm image rights/provenance; store project assets locally or in the configured asset storage.
@@ -403,7 +405,7 @@ Use `php artisan view:clear` when troubleshooting stale compiled views. Do not u
 
 Historical verification during implementation:
 
-- **1 November 2026 (current):** full suite **43 tests, 125 assertions passed** against `plusthree_testing`, including public job/blog pages, visibility leaks, closed-job application rules, unsafe URL schemes, generated article art and featured-image rendering. Earlier: 40 tests, 114 assertions after the public pages; 30 tests, 80 assertions after the admin panel; 24 tests, 69 assertions after the content schema.
+- **1 November 2026 (current):** full suite **52 tests, 158 assertions passed** against `plusthree_testing`, including public job/blog pages, visibility leaks, closed-job application rules, unsafe URL schemes, generated article art, featured-image rendering, rich-text sanitisation (scripts, event handlers and `javascript:` URLs), plain-text body compatibility and signed draft previews. Earlier the same day: 43 tests/125 assertions after the public pages; 30 tests/80 assertions after the admin panel; 24 tests/69 assertions after the content schema.
 - 8 content-schema migrations applied to the development database; the test-database guard was positively verified to abort before touching a non-test database.
 - After removing the location control: focused discovery suite **3 tests, 12 assertions passed** and assets built successfully.
 - Homepage previously returned HTTP 200 and desktop/mobile screenshots were inspected.

@@ -37,8 +37,14 @@
             </div>
         </header>
 
+        @if ($preview ?? false)
+            <p class="preview-banner" role="status">
+                Preview — this article is not published. Only people with this link can see it.
+            </p>
+        @endif
+
         <div class="article-body prose">
-            {!! nl2br(e($article->body)) !!}
+            {!! $article->renderedBody() !!}
         </div>
 
         @if ($article->tags->isNotEmpty())
