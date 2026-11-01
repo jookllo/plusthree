@@ -70,7 +70,15 @@ jobs:
       - name: Prepare environment
         run: |
           cp .env.example .env
+          # Another MySQL runs on 3307 locally; the service container is on 3306.
+          sed -i "s|^DB_HOST=.*|DB_HOST=${DB_HOST}|" .env
+          sed -i "s|^DB_PORT=.*|DB_PORT=${DB_PORT}|" .env
+          sed -i "s|^DB_USERNAME=.*|DB_USERNAME=${DB_USERNAME}|" .env
+          sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${DB_PASSWORD}|" .env
           php artisan key:generate --force
+
+      - name: Show connection target
+        run: php artisan tinker --execute="echo config('database.connections.mysql.host').':'.config('database.connections.mysql.port');"
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
@@ -94,9 +102,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: docker build --progress=plain -t plusthree:ci .
+
+      - name: Confirm GD can read JPEG and WebP
+        run: |
+          docker run --rm plusthree:ci php -r '
+            $info = gd_info();
+            printf("JPEG=%s WebP=%s\n", $info["JPEG Support"] ? "yes" : "no", $info["WebP Support"] ? "yes" : "no");
+            exit($info["JPEG Support"] && $info["WebP Support"] ? 0 : 1);
+          '
