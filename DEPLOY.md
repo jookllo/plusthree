@@ -80,14 +80,34 @@ Notes:
    ```
 4. Sign in at `https://your-domain.example/mdosi`.
 
-## 5. Storage and operations
+## 5. Domain and DNS
+
+Dokploy terminates TLS with Traefik and requests the certificate itself.
+
+1. **Cloudflare DNS.** Add an `A` record for the apex (`@`) pointing at the server's public IPv4, and another for `www` if it should resolve. Leave the record **DNS only** (grey cloud) for the first attempt: a proxied record can mask a failing certificate challenge.
+2. **Dokploy domain.** Application → Domains → Add Domain: host `your-domain.example`, path `/`, **internal port `80`** (the container's Apache port), HTTPS on, certificate provider Let's Encrypt. Add `www` as a second entry if needed — each hostname gets its own certificate.
+3. **Firewall.** Inbound `80` and `443` must reach the server. Traefik answers the ACME challenge on 80 and serves the site on 443.
+4. **Verify before reproxying.**
+   ```sh
+   dig +short your-domain.example
+   curl -I http://your-domain.example    # redirect to https
+   curl -I https://your-domain.example   # 200 with a valid certificate
+   ```
+5. **Then proxy it.** Switch the record to Proxied (orange cloud) and set SSL/TLS → Overview → **Full (strict)**. *Flexible* causes redirect loops and leaves the origin connection unencrypted. Keep Always Use HTTPS on.
+6. **Update the app.** `APP_URL=https://your-domain.example` and `SESSION_SECURE_COOKIE=true`, then redeploy. `APP_URL` feeds canonical URLs, the sitemap and signed preview links.
+
+Common failures: a certificate stuck pending usually means a proxied record or a blocked port 80; "too many redirects" means Cloudflare is set to Flexible; one hostname working and the other failing means the missing DNS record or the missing Dokploy domain entry.
+
+Do not set `SESSION_SECURE_COOKIE=true` before HTTPS is actually serving, or the panel login will silently fail.
+
+## 6. Storage and operations
 
 - **Article images need a persistent volume.** In Dokploy, add a volume to the application mounted at `/var/www/html/storage/app/public`. Mount that directory, not all of `storage/app`: a broader mount hides the framework's cache/session directories from the image and causes permission surprises. The `public/storage` symlink is created during the image build; the volume only holds uploaded files.
 - Back up that volume as well as MySQL — a database restore without the matching images leaves articles with broken pictures. Test both restores before launch.
 - Logs go to `storage/logs` via the daily channel; add volume or log shipping if you need retention.
 - The public site is deliberately `noindex, nofollow` until launch; indexing is switched on deliberately later.
 
-## 6. Local image check
+## 7. Local image check
 
 ```sh
 docker build -t plusthree:local .
@@ -102,7 +122,7 @@ docker run --rm -p 8081:80 \
 
 Then open `http://127.0.0.1:8081/`. On Linux, `host.docker.internal` requires `--add-host=host.docker.internal:host-gateway`.
 
-## 7. Known limits of this deployment
+## 8. Known limits of this deployment
 
 - Single container, no queue worker, no scheduler — none are needed yet.
 - Sessions and cache use the MySQL database.
