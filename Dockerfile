@@ -59,8 +59,10 @@ RUN rm -f bootstrap/cache/*.php \
         storage/app/public/articles \
         bootstrap/cache \
     && php artisan package:discover --ansi \
+    && php artisan filament:assets \
     && php artisan storage:link \
-    && chown -R www-data:www-data storage bootstrap/cache
+    && mkdir -p public/css/filament public/js/filament public/fonts/filament \
+    && chown -R www-data:www-data storage bootstrap/cache public/css/filament public/js/filament public/fonts/filament
 
 EXPOSE 80
 

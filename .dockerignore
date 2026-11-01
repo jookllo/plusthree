@@ -22,5 +22,8 @@ app/storage/framework/cache/data/*
 app/storage/framework/sessions/*
 app/storage/framework/views/*
 app/public/build
+app/public/css/filament
+app/public/js/filament
+app/public/fonts/filament
 app/public/hot
 app/public/storage
