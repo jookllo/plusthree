@@ -1,50 +1,52 @@
 # TODO / backlog
 
-Last updated: 1 November 2026. Scope detail and acceptance criteria live in [README.md](README.md) and [ROADMAP.md](ROADMAP.md); this file is the running list.
+Last updated: 1 November 2026. Ordered by what to do next, not by topic. Scope detail and acceptance criteria live in [README.md](README.md) and [ROADMAP.md](ROADMAP.md).
 
-## Next up
+## Before anything else
 
-- [ ] **Deploy the current preview to Dokploy** — containerise the app, connect the repository, provision production MySQL, set environment variables, attach a domain with HTTPS, confirm the `noindex` preview loads.
-- [x] **Public job pages** — `/jobs` with keyword/type filters and pagination, `/jobs/{slug}` detail pages, application links, closed-job state. Homepage reads the database; `config/preview.php` removed.
-- [x] **Public blog** — `/blog`, `/blog/{slug}`, category pages, article teasers on the homepage.
+1. [ ] **Deploy to Dokploy.** Create the project, add a MySQL service, paste the environment block from [DEPLOY.md](DEPLOY.md), attach the domain with HTTPS, mount `/var/www/html/storage/app/public`, then run `php artisan migrate --force` and create the owner account. Nothing else below matters until the site exists on a real URL. Depends on: none. Blocks: everything.
+2. [ ] **Confirm images survive a redeploy.** Upload a featured and an in-body image, redeploy, check both still render. The volume is the only thing standing between the owner and silently losing every image. Depends on: 1.
+3. [ ] **Replace the sample content.** Three jobs and three articles are labelled "Sample:" and must not be published as real. Write or import real listings, then delete the samples. Depends on: 1.
 
-## Authentication and access (deferred by owner on 31 October 2026)
+## Launch blockers
 
-- [ ] Google sign-in for `/mdosi` (Laravel Socialite + Google OAuth client; restrict entry to named admin accounts).
-- [ ] Email password reset (Filament reset flow + a real mail provider) so a forgotten password does not require server access.
-- [ ] Keep the CLI password reset documented as break-glass recovery.
-- [ ] Login throttling / rate limiting on failed attempts.
-- [ ] A second admin account so one lost mailbox cannot lock the site.
-- [ ] Optional two-factor authentication.
-- [ ] User-management screen (currently admins are granted through `tinker`).
+4. [ ] **SEO minimum.** Per-page metadata (titles and descriptions already exist on articles), canonical URLs, `sitemap.xml`, `JobPosting` and `Article` structured data, and an environment-aware noindex policy so production stops serving `noindex, nofollow`. Depends on: 1, 3.
+5. [ ] **Alt text for in-body images.** The editor's image button does not ask for a description, so every inline image is invisible to screen readers. Needs a custom image dialog that captures alt text. Depends on: nothing.
+6. [ ] **Downscale in-body uploads.** Only featured images are resized to 1600×900; an inline photo from a phone is served at full weight. Depends on: nothing.
+7. [ ] **Database backup and a restore drill.** A nightly dump plus one real restore into a scratch database, timed and documented. A backup nobody has restored is not a backup. Depends on: 1.
+8. [ ] **Account recovery.** Email password reset (Filament's flow plus a mail provider), a second admin account, and login throttling. Today a forgotten password means server access or `tinker`. Depends on: 1.
 
-## Admin panel polish
+## Soon after launch
 
-- [ ] Visible dark-mode toggle in the top bar (Filament's light/dark/system switcher already exists in the avatar menu).
-- [x] **Rich-text article editor** — Filament `RichEditor` with bold, italic, underline, headings, lists, quotes and links, plus a floating toolbar on text selection. Output is sanitised through `App\Support\ArticleBody` (Symfony HtmlSanitizer allowlist) before rendering.
-- [x] "Preview as visitor" for drafts — a signed URL valid for 30 minutes, generated from the article's edit screen.
-- [x] Article featured images (16:9, resized, alt text required) — mounted volume still required in Dokploy.
-- [x] **In-body images** — uploaded mid-article to `articles/inline` on the same public volume.
-- [ ] Alt text for in-body images: the editor's image button does not prompt for it, and Filament strips the `data-id` we would need to look it up. Add a custom image dialog.
-- [ ] Delete orphaned in-body images when they are removed from an article (Filament only cleans up when a file-attachment provider is registered).
-- [ ] Downscale in-body uploads; only the featured image is resized today.
-- [ ] Optional quieter fallback art — halve the stripe weight and pull the motif colour closer to the base if the current article-hero backdrop reads too strongly behind the headline.
-- [ ] Responsive `srcset` sizes and stored licence/provenance for photography.
-- [ ] Per-role permissions if a second editor joins.
+9. [ ] **GitHub Actions CI.** Tests, `composer audit`, `pnpm audit` and an image build on every push. Dependabot is already configured. Depends on: nothing.
+10. [ ] **Delete orphaned in-body images** when they are removed from an article. Filament only cleans up when a file-attachment provider is registered. Depends on: nothing.
+11. [ ] **Error monitoring and uptime checks.** Depends on: 1.
+12. [ ] **Scheduler and queue workers** once any background job exists. Depends on: nothing yet.
 
-## Public site and content
+## Design and content polish
 
-- [ ] Imagery for the about band and job listings (article images are implemented; lists show a photo when one exists).
-- [ ] SEO: per-page metadata, canonical URLs, sitemap, `JobPosting`/`Article` structured data, noindex policy.
-- [ ] Typography decision for blog body text (system fonts today).
-- [ ] Replace sample listings with real content once publishing is trusted.
+13. [ ] **Photography.** The owner has not supplied real assets; nothing on the site is a real photograph yet. Needed: licence/provenance recorded and saved in the workspace, not a temporary directory.
+14. [ ] **Responsive `srcset`** for article and in-body images.
+15. [ ] **Imagery for the about band and job listings** — lists show a photo only when one exists.
+16. [ ] **Typography decision for blog body text** (system fonts today).
+17. [ ] **Optional quieter fallback art** — halve the stripe weight and pull the motif colour closer to the base if the article-hero backdrop reads too strongly behind headlines.
+18. [ ] **Visible dark-mode toggle** in the panel top bar (Filament's switcher already sits in the avatar menu).
 
-## Deployment and operations
+## Deferred by the owner (31 October 2026)
 
-- [x] `Dockerfile` and `.dockerignore` (Node asset build, production Composer install, PHP runtime).
-- [ ] Dokploy application, MySQL service, environment variables, domain and HTTPS.
-- [ ] Mount `/var/www/html/storage/app/public` for uploaded images; include it in backups.
-- [ ] GitHub Actions CI: tests, `composer audit`, `pnpm audit`, image build (Dependabot is configured).
-- [ ] Persistent storage for uploads plus database backup and a restore test.
-- [ ] Scheduler and queue workers when background jobs are introduced.
-- [ ] Error monitoring and uptime checks.
+19. [ ] Google sign-in for `/mdosi` (Socialite + Google OAuth client, restricted to named admin accounts).
+20. [ ] Optional two-factor authentication.
+21. [ ] User-management screen (admins are currently granted through `tinker`).
+22. [ ] Per-role permissions if a second editor joins.
+23. [ ] Keep the CLI password reset documented as break-glass recovery.
+
+## Done
+
+- [x] Content schema, publication and expiry scopes, factories, tests.
+- [x] Filament 5.11 panel at `/mdosi`, admin-only.
+- [x] Public job pages: search, filters, pagination, detail, closed state.
+- [x] Public blog: index, article, category pages, homepage teasers.
+- [x] Article featured images with required alt text; generated art hero.
+- [x] Rich-text editor with floating toolbar, sanitised output, in-body images.
+- [x] Signed draft preview from the edit screen.
+- [x] `Dockerfile`, `.dockerignore`, `DEPLOY.md`, trusted proxies, Dependabot.
