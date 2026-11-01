@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Articles\Schemas;
 use App\Enums\PublicationStatus;
 use App\Models\Article;
 use App\Models\Category;
+use App\Support\InlineImage;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -45,6 +46,9 @@ class ArticleForm
                     ->fileAttachmentsVisibility('public')
                     ->fileAttachmentsAcceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                     ->fileAttachmentsMaxSize(4096)
+                    ->saveUploadedFileAttachmentUsing(
+                        fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => InlineImage::store($file)
+                    )
                     ->toolbarButtons([
                         ['bold', 'italic', 'underline', 'link'],
                         ['h2', 'h3'],

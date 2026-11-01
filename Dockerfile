@@ -33,7 +33,8 @@ FROM php:8.3-apache AS runtime
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        libicu-dev libzip-dev libonig-dev libpng-dev curl unzip \
+        libicu-dev libzip-dev libonig-dev libpng-dev libjpeg62-turbo-dev libwebp-dev libfreetype6-dev curl unzip \
+    && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype \
     && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring intl zip bcmath gd opcache \
     && a2enmod rewrite headers \
     && rm -rf /var/lib/apt/lists/*

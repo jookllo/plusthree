@@ -11,15 +11,15 @@ Last updated: 1 November 2026. Ordered by what to do next, not by topic. Scope d
 ## Launch blockers
 
 4. [x] **SEO minimum.** Metadata, canonicals, Open Graph, `sitemap.xml`, `robots.txt`, `JobPosting`/`Article`/`WebSite` JSON-LD and an opt-in `SEO_INDEXABLE` policy. Remaining: set `SEO_INDEXABLE=true` and submit the sitemap to Search Console after the domain is live, plus a slug redirect policy.
-5. [ ] **Alt text for in-body images.** The editor's image button does not ask for a description, so every inline image is invisible to screen readers. Needs a custom image dialog that captures alt text. Depends on: nothing.
-6. [ ] **Downscale in-body uploads.** Only featured images are resized to 1600×900; an inline photo from a phone is served at full weight. Depends on: nothing.
+5. [x] **Alt text for in-body images.** A "Describe images" action on the article editor lists every image without a description and writes them back into the body. Remaining: the same check on the create screen.
+6. [x] **Downscale in-body uploads.** Anything wider than 1400px is re-encoded to 1400px on upload; failures keep the original file. Required adding JPEG/WebP support to GD in the image.
 7. [ ] **Database backup and a restore drill.** A nightly dump plus one real restore into a scratch database, timed and documented. A backup nobody has restored is not a backup. Depends on: 1.
 8. [ ] **Account recovery.** Email password reset (Filament's flow plus a mail provider), a second admin account, and login throttling. Today a forgotten password means server access or `tinker`. Depends on: 1.
 
 ## Soon after launch
 
-9. [ ] **GitHub Actions CI.** Tests, `composer audit`, `pnpm audit` and an image build on every push. Dependabot is already configured. Depends on: nothing.
-10. [ ] **Delete orphaned in-body images** when they are removed from an article. Filament only cleans up when a file-attachment provider is registered. Depends on: nothing.
+9. [x] **GitHub Actions CI.** MySQL-backed test run, `composer audit`, `pnpm audit` and a Docker image build on every push and pull request.
+10. [x] **Delete orphaned in-body images.** `php artisan images:prune` reports files under `articles/inline` that no article references; `--force` deletes them. Dry run by default, 24-hour grace. Remaining: schedule it once a scheduler runs.
 11. [ ] **Error monitoring and uptime checks.** Depends on: 1.
 12. [ ] **Scheduler and queue workers** once any background job exists. Depends on: nothing yet.
 

@@ -296,7 +296,9 @@ Implemented: Filament 5.11 at `/mdosi`, brand-neutral admin theme, login, an exp
 
 Articles are written in Filament's rich-text editor: bold, italic, underline, headings, lists, quotes and links, with a floating toolbar over a text selection and in-body image uploads to `articles/inline` on the public disk. The body is stored as HTML and rendered through `App\Support\ArticleBody`, which allowlists elements and attributes with Symfony HtmlSanitizer (already a Filament dependency) and strips scripts, event handlers and `javascript:` URLs. Plain-text bodies written before the editor are still escaped and keep their line breaks. A **Preview** action opens the public page for published articles and a 30-minute signed URL for drafts; the signed route is registered with the `signed` middleware and drafts stay 404 on the public route.
 
-Not implemented yet: alt text for in-body images (the editor's image button does not prompt for it), cleanup of images removed from an article, mail-dependent password reset, Google sign-in, two-factor authentication, and a user-management screen — grant further admins deliberately via `php artisan tinker` until that exists. Deferred auth work is listed in [TODO.md](TODO.md).
+In-body uploads are downscaled to 1400px wide on arrival (`App\Support\InlineImage`), which required JPEG and WebP support in GD — the build previously had neither, so every photo silently skipped resizing. A **Describe images** action lists every in-body image without alt text and writes descriptions back into the body. `php artisan images:prune` reports files under `articles/inline` that no article references; `--force` deletes them, with a 24-hour grace period and a dry run by default.
+
+Not implemented yet: the describe-images check on the create screen, a scheduler for the prune command, mail-dependent password reset, Google sign-in, two-factor authentication, and a user-management screen — grant further admins deliberately via `php artisan tinker` until that exists. Deferred auth work is listed in [TODO.md](TODO.md).
 
 - Install a compatible Filament version and its required Livewire dependencies. Check actual package requirements first; do not guess compatibility or blindly upgrade Laravel/PHP.
 - Configure a private panel at `/mdosi` (owner's chosen path, set through the Filament panel provider, not the default `/admin`). The path is cosmetic: it must not be treated as a security control, and explicit admin authorisation is still required in every environment.
@@ -349,7 +351,7 @@ Acceptance: the owner can publish an article entirely through the panel; it has 
 
 Implemented: articles accept an optional featured image through `/mdosi` (JPEG/PNG/WebP, cropped 16:9, resized to 1600×900, alt text required). Uploads go to the `public` disk; `DEPLOY.md` specifies the persistent volume. Articles without a photo fall back to one of 20 deterministic generated panels, used only as the article-page hero — lists show a photograph or nothing. The homepage column keeps the original typographic panel when there is no image.
 
-Still outstanding: any real photography (the owner has not supplied assets), responsive `srcset` variants, a licence/provenance record, alt text for in-body images, and the final logo.
+Still outstanding: any real photography (the owner has not supplied assets), responsive `srcset` variants, a licence/provenance record, and the final logo.
 
 - Add relevant editorial imagery to selected article/brand areas; the owner has asked for this.
 - Confirm image rights/provenance; store project assets locally or in the configured asset storage.
@@ -409,7 +411,7 @@ Use `php artisan view:clear` when troubleshooting stale compiled views. Do not u
 
 Historical verification during implementation:
 
-- **1 November 2026 (current):** full suite **63 tests, 207 assertions passed** against `plusthree_testing`, including public job/blog pages, visibility leaks, closed-job application rules, unsafe URL schemes, generated article art, featured-image rendering, rich-text sanitisation (scripts, event handlers and `javascript:` URLs), plain-text body compatibility, signed draft previews, canonical URLs, sitemap eligibility, robots policy and schema.org JSON-LD. Earlier the same day: 43 tests/125 assertions after the public pages; 30 tests/80 assertions after the admin panel; 24 tests/69 assertions after the content schema.
+- **1 November 2026 (current):** full suite **74 tests, 239 assertions passed** (2 skipped: GD is not installed on this host) against `plusthree_testing`, including public job/blog pages, visibility leaks, closed-job application rules, unsafe URL schemes, generated article art, featured-image rendering, rich-text sanitisation (scripts, event handlers and `javascript:` URLs), plain-text body compatibility, signed draft previews, canonical URLs, sitemap eligibility, robots policy, schema.org JSON-LD, in-body image descriptions and orphaned-image pruning. Earlier the same day: 43 tests/125 assertions after the public pages; 30 tests/80 assertions after the admin panel; 24 tests/69 assertions after the content schema.
 - 8 content-schema migrations applied to the development database; the test-database guard was positively verified to abort before touching a non-test database.
 - After removing the location control: focused discovery suite **3 tests, 12 assertions passed** and assets built successfully.
 - Homepage previously returned HTTP 200 and desktop/mobile screenshots were inspected.

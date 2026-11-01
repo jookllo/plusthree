@@ -8,7 +8,7 @@ Build a public African job board and career blog with owner-managed publishing. 
 
 Implemented: Laravel 12, MySQL connection and content-schema migrations, Blade/Tailwind/Vite, database-backed homepage, `/jobs` search and detail pages, `/blog` index, article and category pages, content models with publication/expiry scopes, factories and tests, article featured-image uploads with generated fallback art, and a Filament 5.11 publishing panel at `/mdosi` restricted to `users.is_admin` accounts.
 
-Not implemented: full-text search, alt text for in-body images, password-reset mail, 2FA, user-management screens, SEO sitemap/schema/canonicals, real photography, and the Dokploy deployment itself. Article images upload from `/mdosi`, but nothing is deployed and no volume exists yet.
+Not implemented: full-text search, password-reset mail, 2FA, user-management screens, the scheduled image prune, real photography, and the Dokploy deployment itself. Article images upload from `/mdosi`, but nothing is deployed and no volume exists yet.
 
 Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), are edited through the `/mdosi` panel, and are read by the public pages: `GET /`, `/jobs`, `/jobs/{slug}`, `/blog`, `/blog/{slug}`, `/blog/category/{slug}`. Only `User` exists as an account model; the panel requires `users.is_admin` (not mass assignable) and the starter Test User is not an admin. `config/preview.php` and the four fictional roles were removed. `/up` is the framework health route. Do not claim the development database contains real vacancies or editorial — it holds a few explicitly labelled “Sample:” records used for layout checks.
 
@@ -77,12 +77,13 @@ Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), ar
 ## Implementation sequence
 
 1. Content schema and publication rules — **implemented 31 October 2026** (models, migrations, factories, scopes and tests; see SCHEMA.md). Admin capability column exists but no panel uses it.
-2. Publishing admin — **core implemented 31 October 2026; rich text and preview 1 November 2026**: Filament 5.11 at `/mdosi`, admin-only access, CRUD resources, article featured and in-body images, a rich-text editor and a signed draft preview. Remaining: alt text for in-body images, image cleanup, password reset, 2FA, user management.
+2. Publishing admin — **core implemented 31 October 2026; rich text and preview 1 November 2026**: Filament 5.11 at `/mdosi`, admin-only access, CRUD resources, article featured and in-body images, a rich-text editor and a signed draft preview. Remaining: the describe-images check on the create screen, a scheduler for `images:prune`, password reset, 2FA, user management.
 3. Database-backed public jobs/search/pagination/detail/application/expiry states — **implemented 1 November 2026**.
 4. Blog index/article pages/categories and homepage integration — **implemented 1 November 2026**; article search and tag pages remain.
 5. Imagery and responsive design finish — **article featured images, in-body images and 20 fallback art panels implemented**; real photography and responsive `srcset` remain.
 6. SEO metadata, sitemap, canonical/noindex policy and structured data — **implemented 1 November 2026**; slug redirects, expired-job metadata and Search Console remain.
-7. End-to-end/accessibility/performance checks, then production deployment and operations.
+7. Delivery plumbing — **CI and image pruning implemented 1 November 2026** (`.github/workflows/ci.yml`, `php artisan images:prune`); scheduling remains.
+8. Production deployment and operations, plus end-to-end/accessibility/performance checks.
 
 See README milestone sections for detailed acceptance criteria. A different user-prioritised task may change the order. Do not mark a milestone complete when only its visual mockup exists.
 
