@@ -8,7 +8,9 @@ Build a public African job board and career blog with owner-managed publishing. 
 
 Implemented: Laravel 12, MySQL connection and content-schema migrations, Blade/Tailwind/Vite, database-backed homepage, `/jobs` search and detail pages, `/blog` index, article and category pages, content models with publication/expiry scopes, factories and tests, article featured-image uploads with generated fallback art, and a Filament 5.11 publishing panel at `/mdosi` restricted to `users.is_admin` accounts.
 
-Not implemented: full-text search, password-reset mail, 2FA, user-management screens, the scheduled image prune, real photography, and the Dokploy deployment itself. Article images upload from `/mdosi`, but nothing is deployed and no volume exists yet.
+Deployed 1 November 2026 at `https://plusthree.io` through Dokploy (`mtaa.chakulamoto.fit` panel): MySQL service, environment, Cloudflare domain with Let's Encrypt, and the `plusthree-uploads` volume at `/var/www/html/storage/app/public`. The production database is empty and indexing is off.
+
+Not implemented: full-text search, password-reset mail, 2FA, user-management screens, the scheduled image prune, backups, monitoring, real photography, and real content.
 
 Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), are edited through the `/mdosi` panel, and are read by the public pages: `GET /`, `/jobs`, `/jobs/{slug}`, `/blog`, `/blog/{slug}`, `/blog/category/{slug}`. Only `User` exists as an account model; the panel requires `users.is_admin` (not mass assignable) and the starter Test User is not an admin. `config/preview.php` and the four fictional roles were removed. `/up` is the framework health route. Do not claim the development database contains real vacancies or editorial — it holds a few explicitly labelled “Sample:” records used for layout checks.
 

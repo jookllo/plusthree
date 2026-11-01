@@ -4,8 +4,8 @@ Last updated: 1 November 2026. Ordered by what to do next, not by topic. Scope d
 
 ## Before anything else
 
-1. [ ] **Deploy to Dokploy.** Create the project, add a MySQL service, paste the environment block from [DEPLOY.md](DEPLOY.md), attach the domain with HTTPS, mount `/var/www/html/storage/app/public`, then run `php artisan migrate --force` and create the owner account. Nothing else below matters until the site exists on a real URL. Depends on: none. Blocks: everything.
-2. [ ] **Confirm images survive a redeploy.** Upload a featured and an in-body image, redeploy, check both still render. The volume is the only thing standing between the owner and silently losing every image. Depends on: 1.
+1. [x] **Deploy to Dokploy.** Live at `https://plusthree.io`: MySQL service `plusthree-db`, environment configured, domain moved from port 3000 to 80, `plusthree-uploads` volume mounted at `/var/www/html/storage/app/public`, migrations run, owner account created.
+2. [ ] **Confirm images survive a redeploy.** The volume is attached, but nothing has been uploaded through it yet. Upload a featured and an in-body image, redeploy, check both still render. Depends on: 3.
 3. [ ] **Replace the sample content.** Three jobs and three articles are labelled "Sample:" and must not be published as real. Write or import real listings, then delete the samples. Depends on: 1.
 
 ## Launch blockers

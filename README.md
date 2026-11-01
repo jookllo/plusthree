@@ -24,6 +24,7 @@ Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROA
 | Branding | Supplied colours, Africa logo with red uppercase tagline, saved logo concepts | Logo remains provisional; raster PNG, not a finished vector identity |
 | Accessibility basics | Labels, semantic headings, skip link, visible keyboard focus, native details controls | Not a complete accessibility audit |
 | SEO | Title, description, canonical, Open Graph, JSON-LD, `sitemap.xml`, `robots.txt` | `noindex` until `SEO_INDEXABLE=true`; Search Console and slug redirects remain |
+| Deployment | Live at `https://plusthree.io` on Dokploy with MySQL and a named uploads volume | `noindex`, empty database, no backups or monitoring yet |
 | Verification | PHP feature tests including schema visibility, expiry boundary, delete rules and database isolation | Does not verify features that do not exist |
 
 ### Current public behaviour

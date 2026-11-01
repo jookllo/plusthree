@@ -12,7 +12,7 @@ Stack: Laravel 12, MySQL, Blade and Tailwind/Vite. Filament and Livewire are pla
 6. **Blog — implemented 1 November 2026.** `/blog` (newest article as lead), `/blog/{slug}` with related reading, `/blog/category/{slug}`, and homepage teasers all read published articles. Article featured images upload through `/mdosi` with required alt text; articles without one use a generated hero panel. Rich-text bodies, tag pages and article search remain.
 7. **SEO — metadata, sitemap and structured data implemented 1 November 2026.** Canonicals, Open Graph, `sitemap.xml`, generated `robots.txt`, `Article`/`JobPosting`/`WebSite` JSON-LD and an opt-in `SEO_INDEXABLE` policy. Outstanding: Search Console, slug redirects and expired-job metadata.
 8. **Verification — baseline only.** Existing homepage/search/database tests and prior responsive checks; future features require meaningful new coverage and production readiness checks.
-9. **Deployment — files ready, not deployed.** A production `Dockerfile`, trusted-proxy configuration and [DEPLOY.md](DEPLOY.md) exist and the image builds locally. Still required: Dokploy project and MySQL service, production secrets, domain/HTTPS, the image-uploads volume, backups, and Search Console.
+9. **Deployment — live 1 November 2026.** Dokploy application and MySQL service, production environment, Cloudflare domain with Let's Encrypt HTTPS, and a named `plusthree-uploads` volume at `/var/www/html/storage/app/public`. Still required: real content, backups with a restore drill, monitoring, and Search Console submission.
 
 Initial release: public browsing without accounts; admin-managed jobs/articles; applications through employer links/email. Applicant tracking, CV uploads, payments and employer self-service are deferred.
 

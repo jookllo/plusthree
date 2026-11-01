@@ -100,6 +100,14 @@ Common failures: a certificate stuck pending usually means a proxied record or a
 
 Do not set `SESSION_SECURE_COOKIE=true` before HTTPS is actually serving, or the panel login will silently fail.
 
+### Troubleshooting a fresh deployment
+
+- **502 from the domain.** The domain's **Container Port** is wrong. This image serves on **80**; Dokploy often defaults to `3000` for a new service. Edit the domain and set the port to 80.
+- **500 from every page.** The environment is missing or the database has no tables. Check `DB_HOST` matches the MySQL service's **internal host** (shown on its General tab, e.g. `plusthree-db-3k1d77` — not the display name), then run `php artisan migrate --force` in the container.
+- **`duplicate mount point` on deploy.** The same volume was added twice. Remove one entry under Advanced → Volumes and redeploy.
+- **Uploads vanish after a redeploy.** The volume is missing or mounted at the wrong path; see §6.
+- **`Could not open input file: artisan`** in the terminal. The container shell starts in `/`; run `cd /var/www/html` first.
+
 ## 6. Storage and operations
 
 - **Article images need a persistent volume.** In Dokploy, add a volume to the application mounted at `/var/www/html/storage/app/public`. Mount that directory, not all of `storage/app`: a broader mount hides the framework's cache/session directories from the image and causes permission surprises. The `public/storage` symlink is created during the image build; the volume only holds uploaded files.
