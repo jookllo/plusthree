@@ -45,7 +45,10 @@ class SitemapController extends Controller
             });
 
         return response()
-            ->view('sitemap', ['urls' => $urls])
+            ->view('sitemap', [
+                'declaration' => '<?xml version="1.0" encoding="UTF-8"?>',
+                'urls' => $urls,
+            ])
             ->header('Content-Type', 'application/xml; charset=UTF-8');
     }
 

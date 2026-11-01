@@ -65,6 +65,19 @@ class SeoTest extends TestCase
             ->assertSee(route('home'), false);
     }
 
+    public function test_sitemap_is_a_valid_xml_document(): void
+    {
+        $response = $this->get('/sitemap.xml');
+
+        $body = $response->getContent();
+
+        $this->assertStringStartsWith('<?xml version="1.0" encoding="UTF-8"?>', $body);
+        $this->assertStringEndsWith("</urlset>\n", $body);
+
+        $xml = simplexml_load_string($body);
+        $this->assertNotFalse($xml, 'Sitemap is not well-formed XML.');
+    }
+
     public function test_robots_blocks_everything_while_the_site_is_private(): void
     {
         $this->get('/robots.txt')->assertOk()
