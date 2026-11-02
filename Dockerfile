@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- Frontend assets -------------------------------------------------------
-FROM node:22-alpine AS assets
+FROM node:26-alpine AS assets
 WORKDIR /build
 RUN npm install --global pnpm@10
 COPY app/package.json app/pnpm-lock.yaml app/pnpm-workspace.yaml ./
