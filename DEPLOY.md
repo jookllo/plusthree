@@ -95,9 +95,10 @@ Employer enquiries submitted through `/for-employers` do not depend on this: the
    ```
 3. Create the owner account deliberately (never seed a default password):
    ```sh
-   php artisan tinker --execute="\App\Models\User::updateOrCreate(['email' => 'you@example.com'], ['name' => 'Owner', 'password' => Illuminate\Support\Facades\Hash::make('choose-a-strong-password'), 'is_admin' => true]);"
+   php artisan tinker --execute="\$u = App\Models\User::updateOrCreate(['email' => 'you@example.com'], ['name' => 'Owner']); \$u->forceFill(['password' => 'choose-a-strong-password', 'is_admin' => true, 'email_verified_at' => now()])->save(); echo \$u->email.' admin='.(\$u->is_admin ? 'yes' : 'no').PHP_EOL;"
    ```
-4. Sign in at `https://your-domain.example/mdosi`.
+   `password` is hashed automatically by the model cast, so pass the plain password. `is_admin` is deliberately not mass assignable, which is why this uses `forceFill` rather than putting it in `updateOrCreate`; adding it there would be silently ignored and the account would not open the panel.
+4. Sign in at `https://your-domain.example/mdosi`. To change the password later, use **Forgot password?** on the login page (needs the mail environment) or rerun the command in step 3 with a new value.
 
 ## 5. Google sign-in
 
