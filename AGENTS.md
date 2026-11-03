@@ -20,7 +20,7 @@ Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), ar
 
 - Brand: `plusthree`; tagline “WHERE AFRICA’S GEMS MEET GLOBAL WORK.”
 - Palette: navy #23305C, red #B3261E, gold #F2B632, green #1F8A70, ivory #FBF7F0. Use accessible darker variants when needed for readable text.
-- Provisional logo is `app/public/images/plusthree-logo.png`; source is `output/logos/plusthree-africa-red-tagline.png`. Final logo work was deferred. Preserve all concepts. The favicon set is derived from the +3 mark by `scripts/make-favicons.py`; regenerate it after any logo change rather than drawing a separate symbol.
+- Provisional logo is `app/public/images/plusthree-logo.png`; source is `output/logos/plusthree-africa-red-tagline.png`. Final logo work was deferred. Preserve all concepts. The favicon set is derived from the +3 mark by `scripts/make-favicons.py`; regenerate it after any logo change rather than drawing a separate symbol, then bump `?v=` in `layouts/site.blade.php` so the Cloudflare-cached copy is refetched.
 - Laravel + MySQL + Blade/Tailwind is the selected stack. Livewire/Filament are planned. No Vue/separate frontend is needed by default.
 - **Do not restore the “Where?” location field unless requested.** Location remains useful on jobs. Current `location` query parameters are ignored.
 - **Header structure is owner-specified:** “Find a job” is a menu containing Careers, Fellowships and Other opportunities, each a real page (`/jobs`, `/fellowships`, `/other-opportunities`), not a query string on `/jobs`; the separate “Explore” keyword shortcuts were removed and should not return without a request. “For employers” opens the employer form at `/for-employers`, not a homepage anchor.

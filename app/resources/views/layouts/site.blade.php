@@ -4,7 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @include('partials.seo-meta')
-    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+    {{-- The ?v= busts a Cloudflare-cached zero-byte /favicon.ico from before
+         the icon existed. Bump it if the icon is regenerated. --}}
+    <link rel="icon" href="{{ asset('favicon.ico') }}?v=2" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">

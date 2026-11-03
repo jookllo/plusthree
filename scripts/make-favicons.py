@@ -18,10 +18,16 @@ Outputs into app/public/:
 
 Requires Pillow and numpy. Regenerate after the logo changes rather than
 editing the PNGs by hand.
+
+The public layout links `/favicon.ico?v=N` so Cloudflare picks up the new
+bytes immediately instead of serving its cached copy until the TTL expires.
+After regenerating, bump N in app/resources/views/layouts/site.blade.php —
+the script prints the current value to make that easy to remember.
 """
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 import numpy as np
@@ -94,6 +100,18 @@ def main() -> None:
     master.resize((32, 32), Image.Resampling.LANCZOS).save(OUT / "favicon-32.png", optimize=True)
 
     print(f"mark {mark.width}x{mark.height} -> {OUT}")
+    print(f"Now bump the cache-busting version so browsers and Cloudflare refetch it: {version_hint()}")
+
+
+def version_hint() -> str:
+    """Point at the exact link to edit, with the next version number."""
+    layout = ROOT / "app" / "resources" / "views" / "layouts" / "site.blade.php"
+    match = re.search(r"favicon\.ico'\)\s*\}\}\?v=(\d+)", layout.read_text())
+
+    if not match:
+        return f"no ?v=N found in {layout} relative to {ROOT}"
+
+    return f"?v={int(match.group(1)) + 1} in {layout.relative_to(ROOT)}"
 
 
 if __name__ == "__main__":
