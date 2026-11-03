@@ -91,6 +91,7 @@ Deferred: CV collection, applicant tracking, candidate accounts, employer self-s
 | `app/resources/css/site.css` | Custom responsive design, focus styles and local design tokens |
 | `app/resources/js/app.js` | Laravel starter JavaScript entry |
 | `app/public/images/plusthree-logo.png` | Provisional Africa/red-tagline logo used by the page |
+| `scripts/make-favicons.py` | Rebuilds `favicon.ico`, `apple-touch-icon.png` and the 192/512 manifest icons from the logo's +3 mark |
 | `app/public/build/` | Generated, ignored production asset bundles and Vite manifest |
 | `app/app/Filament/Resources/` | Filament resources: companies, job listings, articles, categories, tags (forms, tables, pages) |
 | `app/app/Providers/Filament/AdminPanelProvider.php` | Panel configuration: `/mdosi` path, brand name, colour palette, login |
@@ -259,6 +260,8 @@ The current layout is a working design iteration, not a recorded final design ap
 Current provisional logo: `output/logos/plusthree-africa-red-tagline.png`, copied to `app/public/images/plusthree-logo.png`. It has the +3 emblem, Africa silhouette, plusthree wordmark and uppercase red tagline. Earlier concepts and prompts remain in `output/logos/`.
 
 The owner deferred final logo work. Do not treat the current raster as an approved final vector identity.
+
+The favicon set is derived from that same mark, not a separate symbol: `scripts/make-favicons.py` crops the +3 (dropping the wordmark and tagline, which are unreadable at tab size) and writes `favicon.ico` (16/32/48/64), `apple-touch-icon.png`, `icon-192.png`, `icon-512.png` and `favicon-32.png` for the panel. It is rebuilt by running `python3 scripts/make-favicons.py` after the logo changes. `site.webmanifest` supplies the name, colours and larger icons.
 
 **Photography/illustrations have not been added to the website.** The sidebar's “More than a job title. Your story.” panel is typography, not a photograph. The owner specifically asked about images; an explanation was given, but sourcing/integration remains outstanding. They do not need to download assets themselves. Source appropriately licensed imagery or generate assets when requested, record provenance/credits, optimise sizes and provide meaningful alt text. Do not represent stock/generated people as actual customers or team members.
 

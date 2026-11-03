@@ -36,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
                     : '',
             )
             ->brandName('plusthree')
+            ->favicon(asset('favicon-32.png'))
             ->colors([
                 'primary' => [
                     50 => '#f3f5fa',
