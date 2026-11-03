@@ -102,6 +102,6 @@
 
     <section class="wrap publishing" id="publishing">
         <h2>Have an opportunity to share?</h2>
-        <p>Publishing is managed by the plusthree team. Send the role details to <a href="mailto:info@plusthree.io">info@plusthree.io</a> and we will review it.</p>
+        <p>Publishing is managed by the plusthree team. <a href="{{ route('employers.show') }}">Send us an opportunity</a> or email <a href="mailto:info@plusthree.io">info@plusthree.io</a>.</p>
     </section>
 @endsection

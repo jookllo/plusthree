@@ -16,6 +16,7 @@ Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROA
 | Database | Dedicated MySQL development and testing databases configured; content-schema migrations applied | Development holds sample records only; production is empty |
 | Content schema | `companies`, `job_listings`, `articles`, `categories`, `tags`, pivot tables and `users.is_admin`; publication/expiry scopes, enums, factories | No full-text search or saved searches. See [SCHEMA.md](SCHEMA.md) |
 | Publishing admin | Filament 5 panel at `/mdosi`; admin-only access with Google sign-in and a password fallback; CRUD for companies, job listings, articles, categories and tags; rich text, images, draft preview | No user-management screen, 2FA or password-reset mail |
+| Inbox | Panel **Messages** (employer enquiries stored from `/for-employers`, unread badge, reply) and **Emails** (rich-text compose, drafts, preview, send through Resend with a stored result) | No inbound mailbox, templates, contact lists or attachments |
 | Frontend | Blade, Tailwind 4, Vite 7, pnpm lockfile | No Vue or separate frontend |
 | Header | “Find a job” menu (Careers, Fellowships, Other opportunities), Career advice, About plusthree, and “For employers” as an email link | Location is not a header option |
 | Homepage | Responsive masthead, provisional logo, gold search area, ruled job list, editorial sidebar, about/employer sections | Real content is still sample content |
@@ -40,7 +41,12 @@ Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROA
 - The thematic “Explore” shortcuts (remote work, internships, design & creative, social impact) were removed at the owner's request; the header menu replaces them.
 - The “Where?” location field was removed at the user's request. Location is still shown on listing rows, and `location=` URL parameters are ignored.
 - Filtered job searches stay `noindex` and canonicalise to `/jobs`.
-- “For employers” emails `info@plusthree.io`; there is no employer portal or self-service submission, and the homepage says publishing is managed by the plusthree team.
+- `GET /for-employers` is the employer form (name, email, organisation, role, opportunity type, link, details) and the header's “For employers” link points to it. `POST /for-employers` stores a row in `messages` and shows a confirmation; it sends no email, so a mail outage cannot lose an enquiry. A hidden honeypot field is accepted and discarded, and submissions are throttled to 6 per minute per IP. The page also offers `info@plusthree.io` as a fallback.
+- Panel **Inbox → Messages** lists enquiries with an unread badge, a New/Handled filter, mark handled/unread, delete, and a **Reply** action that opens a new email with the sender's address, a `Re:` subject and the original text quoted.
+- Panel **Inbox → Emails** is the composer and outbox: rich-text body, one or more recipients, preview, and **Send** through Resend. Each email is sent to recipients one at a time and the record keeps `draft`, `sent` (with a timestamp) or `failed` (with the provider's reason and how many were delivered). Drafts are reusable and can be sent later.
+- Email bodies pass through the same `App\Support\ArticleBody` allowlist as articles before they are rendered or mailed.
+- No queue worker is configured, so sending happens synchronously in the request. Do not switch these sends to `Mail::queue()` without adding a worker.
+- Replies to `info@plusthree.io` are not received by the application. Forward that address to a real inbox with Cloudflare Email Routing until an inbound provider is added.
 
 ## 2. Stack decisions and product boundaries
 

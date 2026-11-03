@@ -14,7 +14,7 @@ Last updated: 1 November 2026. Ordered by what to do next, not by topic. Scope d
 5. [x] **Alt text for in-body images.** A "Describe images" action on the article editor lists every image without a description and writes them back into the body. Remaining: the same check on the create screen.
 6. [x] **Downscale in-body uploads.** Anything wider than 1400px is re-encoded to 1400px on upload; failures keep the original file. Required adding JPEG/WebP support to GD in the image.
 7. [ ] **Database backup and a restore drill.** A nightly dump plus one real restore into a scratch database, timed and documented. A backup nobody has restored is not a backup. Depends on: 1.
-8. [ ] **Account recovery.** Email password reset (Filament's flow plus a mail provider), a second admin account, and login throttling. Today a forgotten password means server access or `tinker`. Depends on: 1.
+8. [ ] **Account recovery.** Email password reset (Filament's flow now that Resend is configured), a second admin account, and login throttling. Today a forgotten password means server access or `tinker`. Depends on: 1.
 
 ## Soon after launch
 
@@ -50,3 +50,11 @@ Last updated: 1 November 2026. Ordered by what to do next, not by topic. Scope d
 - [x] Rich-text editor with floating toolbar, sanitised output, in-body images.
 - [x] Signed draft preview from the edit screen.
 - [x] `Dockerfile`, `.dockerignore`, `DEPLOY.md`, trusted proxies, Dependabot.
+
+## Inbox
+
+- [x] Public employer form at `/for-employers`, stored in `messages` (name, email, organisation, role, type, link, details), honeypot and a 6/minute throttle. Nothing is emailed on submit, so a mail outage cannot lose an enquiry.
+- [x] Panel **Inbox → Messages**: unread badge, filters, mark handled/unread, delete, and a Reply action that pre-fills the composer with the original quoted.
+- [x] Panel **Inbox → Emails**: rich-text compose with drafts, preview, per-recipient send through Resend, and a stored `sent`/`failed` status with the provider's reason.
+- [ ] Receiving replies in the panel (Resend inbound + webhook). Until then, use Cloudflare Email Routing to forward `info@plusthree.io` to a real inbox.
+- [ ] Saved templates and contact lists, images in email bodies.

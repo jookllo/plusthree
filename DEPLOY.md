@@ -53,9 +53,10 @@ CACHE_STORE=database
 QUEUE_CONNECTION=sync
 FILESYSTEM_DISK=local
 
-MAIL_MAILER=log
-MAIL_FROM_ADDRESS=hello@your-domain.example
+MAIL_MAILER=resend
+MAIL_FROM_ADDRESS=info@plusthree.io
 MAIL_FROM_NAME="Plusthree"
+RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
 
 BCRYPT_ROUNDS=12
 
@@ -71,7 +72,15 @@ Notes:
 - `APP_URL` must be the final HTTPS URL. Trusted proxies are configured in `app/bootstrap/app.php` so Dokploy's TLS termination is honoured.
 - `SEO_INDEXABLE=false` serves `noindex, nofollow` on every page and a `robots.txt` that blocks crawling. Set it to `true` only when the domain is final and real content is published; `APP_DEBUG=true` forces it back off. Filtered job searches stay `noindex` either way, and `/mdosi` is always disallowed.
 - Keep `QUEUE_CONNECTION=sync` until a worker is configured — `database` without a worker silently queues work that never runs.
-- `MAIL_MAILER=log` is an honest placeholder; nothing sends mail yet. Password reset and notifications arrive with a real provider.
+- `MAIL_MAILER=resend` sends through Resend; `RESEND_API_KEY` is required and `MAIL_FROM_ADDRESS` must be on a domain verified in Resend (SPF/DKIM records added at Cloudflare). With `MAIL_MAILER=log` locally, panel emails are written to `storage/logs/laravel.log` instead of being delivered.
+- The panel sends synchronously, one recipient per provider call, and stores the result on the record. There is no queue worker, so do not switch these sends to `Mail::queue()` without adding one.
+
+## 4a. Receiving mail
+
+Resend sends; it does not receive. To read replies to `info@plusthree.io`, use Cloudflare Email Routing (free) on the same domain: **Email → Email Routing → Enable**, add the destination address you actually read, then create a route `info@plusthree.io → your inbox`. Cloudflare adds the MX record, which does not conflict with Resend because Resend verifies a sending domain with TXT/DKIM records.
+
+Employer enquiries submitted through `/for-employers` do not depend on this: they are stored in the database and appear in `/mdosi/messages`.
+
 
 ## 4. First deploy
 

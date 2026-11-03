@@ -57,7 +57,9 @@ Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), ar
 - `app/resources/css/app.css`: Tailwind entry/imports; `site.css`: custom design.
 - `app/app/Models`, `app/app/Enums`, `app/app/Support`: content models, enums and slugs/visibility/timezone traits.
 - `app/database/migrations`, `app/database/factories`: content-schema migrations and factories.
-- `app/app/Filament/Resources`, `app/app/Providers/Filament/AdminPanelProvider.php`: `/mdosi` panel and CRUD resources.
+- `app/app/Filament/Resources`, `app/app/Providers/Filament/AdminPanelProvider.php`: `/mdosi` panel and CRUD resources, including the Inbox (Messages, Emails).
+- `app/app/Http/Controllers/EmployerEnquiryController.php`, `app/resources/views/employers/show.blade.php`, `app/app/Http/Requests/StoreEmployerEnquiry.php`: the public employer form.
+- `app/app/Support/EmailDelivery.php`, `app/app/Mail/ComposedEmail.php`, `app/resources/views/emails/`: panel sending and templates.
 - `app/tests/Feature/AdminPanelAccessTest.php`: panel access rules.
 - `app/tests/Feature`: relevant behaviour tests.
 - `app/tests/TestCase.php`: fail-fast test-database guard.
@@ -104,6 +106,9 @@ See README milestone sections for detailed acceptance criteria. A different user
 - Escape plain text. Rich article HTML is rendered only through `App\Support\ArticleBody`; that sanitiser is the trust boundary, so do not echo `$article->body` directly. Do not assume Filament input alone makes arbitrary HTML safe.
 - Validate uploads, storage access and application URL schemes. Never allow executable uploaded content or unsafe external URL protocols.
 - Restrict the panel by explicit admin permission, not simply “any logged-in user.” The starter Test User is not a production admin.
+- **Employer enquiries are database-first.** `POST /for-employers` writes to `messages` and never depends on outbound mail; do not turn that form into a mail-only contact form.
+- **Panel email is synchronous.** `App\Support\EmailDelivery` sends one recipient per call through the configured mailer and records `draft`/`sent`/`failed` with the provider's reason. There is no queue worker on the deployment, so do not introduce `Mail::queue()` without adding one. Do not use the composer for bulk marketing without an explicit owner request.
+- Email bodies are editor markup and must render through `App\Support\ArticleBody`, never echoed directly.
 - Keep schema changes non-destructive and review foreign-key deletion behaviour. No fabricated production seed data.
 
 ## Design and reference use

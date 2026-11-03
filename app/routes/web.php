@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\EmployerEnquiryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JobListingController;
 use App\Http\Controllers\SitemapController;
@@ -21,6 +22,12 @@ Route::get('/mdosi/auth/google/callback', [GoogleController::class, 'callback'])
 
 Route::get('/jobs', [JobListingController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{slug}', [JobListingController::class, 'show'])->name('jobs.show');
+
+// Employer enquiries are stored for the panel inbox, never emailed on submit.
+Route::get('/for-employers', [EmployerEnquiryController::class, 'show'])->name('employers.show');
+Route::post('/for-employers', [EmployerEnquiryController::class, 'store'])
+    ->middleware('throttle:6,1')
+    ->name('employers.store');
 
 Route::get('/blog', [ArticleController::class, 'index'])->name('blog.index');
 Route::get('/blog/category/{slug}', [CategoryController::class, 'show'])->name('blog.category');

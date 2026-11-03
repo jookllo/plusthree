@@ -35,7 +35,7 @@
         <a href="{{ route('blog.index') }}" @class(['active' => request()->routeIs('blog.*')])>Career advice</a>
         <a href="{{ route('home') }}#about">About plusthree</a>
     </nav>
-    <a class="nav-note" href="mailto:info@plusthree.io">For employers</a>
+    <a class="nav-note" href="{{ route('employers.show') }}">For employers</a>
 </header>
 <main id="main">
     @yield('content')
