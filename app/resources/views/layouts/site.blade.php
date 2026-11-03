@@ -15,11 +15,27 @@
         <img src="{{ asset('images/plusthree-logo.png') }}" width="280" height="112" alt="Plusthree — WHERE AFRICA’S GEMS MEET GLOBAL WORK.">
     </a>
     <nav aria-label="Main navigation">
-        <a href="{{ route('jobs.index') }}" @class(['active' => request()->routeIs('jobs.*')])>Find a job</a>
+        <details class="nav-menu">
+            <summary @class(['active' => request()->routeIs('jobs.*')])>Find a job</summary>
+            <ul class="nav-menu-panel">
+                <li>
+                    <a href="{{ route('jobs.index') }}"
+                       @class(['active' => request()->routeIs('jobs.*') && ! request()->query('type')])>Careers</a>
+                </li>
+                <li>
+                    <a href="{{ route('jobs.index', ['type' => \App\Enums\EmploymentType::Fellowship->value]) }}"
+                       @class(['active' => request()->query('type') === \App\Enums\EmploymentType::Fellowship->value])>Fellowships</a>
+                </li>
+                <li>
+                    <a href="{{ route('jobs.index', ['type' => \App\Enums\EmploymentType::Other->value]) }}"
+                       @class(['active' => request()->query('type') === \App\Enums\EmploymentType::Other->value])>Other opportunities</a>
+                </li>
+            </ul>
+        </details>
         <a href="{{ route('blog.index') }}" @class(['active' => request()->routeIs('blog.*')])>Career advice</a>
         <a href="{{ route('home') }}#about">About plusthree</a>
     </nav>
-    <a class="nav-note" href="{{ route('home') }}#publishing">For employers</a>
+    <a class="nav-note" href="mailto:info@plusthree.io">For employers</a>
 </header>
 <main id="main">
     @yield('content')

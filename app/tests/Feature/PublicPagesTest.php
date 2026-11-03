@@ -58,6 +58,45 @@ class PublicPagesTest extends TestCase
             ->assertDontSee('Product Designer');
     }
 
+    public function test_job_board_filters_fellowships_and_other_opportunities(): void
+    {
+        JobListing::factory()->open()->create(['title' => 'Product Designer']);
+        JobListing::factory()->open()->create([
+            'title' => 'Climate Leadership Fellow',
+            'employment_type' => EmploymentType::Fellowship,
+        ]);
+        JobListing::factory()->open()->create([
+            'title' => 'Community Grant',
+            'employment_type' => EmploymentType::Other,
+        ]);
+
+        $this->get('/jobs?type=fellowship')->assertOk()
+            ->assertSee('Climate Leadership Fellow')
+            ->assertDontSee('Product Designer')
+            ->assertDontSee('Community Grant');
+
+        $this->get('/jobs?type=other')->assertOk()
+            ->assertSee('Community Grant')
+            ->assertDontSee('Climate Leadership Fellow')
+            ->assertDontSee('Product Designer');
+    }
+
+    public function test_header_offers_a_job_menu_and_an_employer_email(): void
+    {
+        $this->get('/')->assertOk()
+            ->assertSee('Find a job')
+            ->assertSee('Careers')
+            ->assertSee('Fellowships')
+            ->assertSee('Other opportunities')
+            ->assertSee(route('jobs.index', ['type' => 'fellowship']), false)
+            ->assertSee(route('jobs.index', ['type' => 'other']), false)
+            ->assertSee('href="mailto:info@plusthree.io"', false)
+            ->assertSee('info@plusthree.io')
+            // The old keyword shortcuts were removed at the owner's request.
+            ->assertDontSee('Design &amp; creative', false)
+            ->assertDontSee('Social impact');
+    }
+
     public function test_job_board_empty_state_and_escaped_input(): void
     {
         JobListing::factory()->open()->create(['title' => 'Product Designer']);

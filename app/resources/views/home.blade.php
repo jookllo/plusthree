@@ -21,13 +21,6 @@
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg>
                 </button>
             </form>
-            <div class="quick-links">
-                <span>Explore</span>
-                <a href="{{ route('jobs.index', ['q' => 'remote']) }}">Remote work</a>
-                <a href="{{ route('jobs.index', ['q' => 'intern']) }}">Internships</a>
-                <a href="{{ route('jobs.index', ['q' => 'design']) }}">Design &amp; creative</a>
-                <a href="{{ route('jobs.index', ['q' => 'programme']) }}">Social impact</a>
-            </div>
         </div>
     </section>
 
@@ -109,6 +102,6 @@
 
     <section class="wrap publishing" id="publishing">
         <h2>Have an opportunity to share?</h2>
-        <p>Job publishing will be managed by the plusthree team. Employer submissions are not open yet.</p>
+        <p>Publishing is managed by the plusthree team. Send the role details to <a href="mailto:info@plusthree.io">info@plusthree.io</a> and we will review it.</p>
     </section>
 @endsection

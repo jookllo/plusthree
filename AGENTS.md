@@ -22,7 +22,8 @@ Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), ar
 - Palette: navy #23305C, red #B3261E, gold #F2B632, green #1F8A70, ivory #FBF7F0. Use accessible darker variants when needed for readable text.
 - Provisional logo is `app/public/images/plusthree-logo.png`; source is `output/logos/plusthree-africa-red-tagline.png`. Final logo work was deferred. Preserve all concepts.
 - Laravel + MySQL + Blade/Tailwind is the selected stack. Livewire/Filament are planned. No Vue/separate frontend is needed by default.
-- **Do not restore the “Where?” location field unless requested.** Location remains useful on jobs. Current `location` query parameters are ignored; remote shortcut uses keyword search.
+- **Do not restore the “Where?” location field unless requested.** Location remains useful on jobs. Current `location` query parameters are ignored.
+- **Header structure is owner-specified:** “Find a job” is a menu containing Careers, Fellowships and Other opportunities; the separate “Explore” keyword shortcuts were removed and should not return without a request. “For employers” is a `mailto:info@plusthree.io` link, not a homepage anchor.
 - The owner rejected a generic marketing hero with oversized claims and rounded cards. Preserve job discovery, ruled/scannable listings, compact navigation and the editorial career column.
 - The owner asked about images. Photos/illustrations have not actually been integrated. Source suitable assets when working on that task; do not require the owner to download them first, or pretend the current text panel is a photograph.
 - Public users apply through external employer links/email initially. Do not add CV storage, applicant tracking, payments, accounts or employer self-service without a scope decision.

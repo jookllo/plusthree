@@ -26,6 +26,15 @@ button,summary{cursor:pointer}
 .masthead nav a{text-decoration:none;font-size:15px;padding:40px 0 32px;border-bottom:3px solid var(--transparent)}
 .masthead nav a:hover,.masthead nav .active{border-color:var(--red)}
 .nav-note{font-size:14px;text-decoration:underline}
+.nav-menu{position:relative;align-self:stretch;display:flex;align-items:center}
+.masthead nav summary{display:flex;align-items:center;gap:7px;list-style:none;font-size:15px;padding:40px 0 32px;border-bottom:3px solid var(--transparent)}
+.masthead nav summary::-webkit-details-marker{display:none}
+.masthead nav summary::after{content:"";width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translate(-1px,-3px)}
+.masthead nav summary:hover,.masthead nav summary.active,.masthead nav .nav-menu[open] summary{border-color:var(--red)}
+.masthead nav .nav-menu[open] summary::after{transform:rotate(-135deg) translate(-2px,1px)}
+.nav-menu-panel{position:absolute;top:100%;left:-18px;z-index:4;min-width:238px;margin:0;padding:6px 0;list-style:none;background:var(--white);border:1px solid var(--ink);box-shadow:0 14px 26px rgb(35 48 92 / 14%)}
+.masthead nav .nav-menu-panel a{display:block;padding:11px 18px;font-size:15px;border-bottom:0}
+.masthead nav .nav-menu-panel a:hover,.masthead nav .nav-menu-panel a.active{background:var(--pale-blue);text-decoration:none}
 .search-band{background:var(--gold);padding:32px 0 24px;border-bottom:1px solid var(--ink)}
 .search-intro{display:flex;justify-content:space-between;align-items:baseline;gap:24px;margin-bottom:24px}
 .search-intro h1{font-size:clamp(30px,3.3vw,43px);font-weight:750;letter-spacing:-1.5px}
@@ -190,6 +199,10 @@ details[open] summary{margin-bottom:12px}
 .brand{width:240px;margin-inline:auto}
 .masthead nav{justify-content:center;gap:28px}
 .masthead nav a{padding:8px 0 16px;font-size:13px}
+.masthead nav summary{padding:8px 0 16px;font-size:13px}
+.masthead nav{position:relative}
+.nav-menu{position:static}
+.nav-menu-panel{left:50%;transform:translateX(-50%);min-width:220px}
 .search-band{padding:24px 0 24px}
 .search-intro h1{font-size:34px;letter-spacing:-1px;max-width:320px}
 .search-intro p{font-size:15px}

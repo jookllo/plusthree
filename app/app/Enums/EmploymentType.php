@@ -7,6 +7,8 @@ enum EmploymentType: string
     case FullTime = 'full_time';
     case Contract = 'contract';
     case Internship = 'internship';
+    case Fellowship = 'fellowship';
+    case Other = 'other';
 
     public function label(): string
     {
@@ -14,11 +16,13 @@ enum EmploymentType: string
             self::FullTime => 'Full-time',
             self::Contract => 'Contract',
             self::Internship => 'Internship',
+            self::Fellowship => 'Fellowship',
+            self::Other => 'Other opportunity',
         };
     }
 
     /**
-     * Values that match the existing public filter links in home.blade.php.
+     * Values accepted by the public ?type= filter, linked from the header menu.
      *
      * @return list<string>
      */

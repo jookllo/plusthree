@@ -4,7 +4,7 @@ Last inspected: **31 October 2026** (Africa/Nairobi).
 
 Plusthree is a job board and career blog connecting African talent with global work. The tagline is **“WHERE AFRICA’S GEMS MEET GLOBAL WORK.”** Visitors should browse without an account. The owner should publish jobs and articles through a private admin panel.
 
-**Current state: a local, interactive design preview with a working Laravel/MySQL foundation. It is not a finished job board or CMS and has not been deployed.**
+**Current state: a working Laravel/MySQL job board and blog, deployed at `https://plusthree.io` on Dokploy. The database still holds sample content and indexing is off, so it is not yet a public launch.**
 
 Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROADMAP.md) for the short milestone checklist, [TODO.md](TODO.md) for the running backlog and [DEPLOY.md](DEPLOY.md) for Dokploy deployment. This README is the detailed handoff. All commands below state their working directory; application commands run inside `app/`, not at the repository root.
 
@@ -12,15 +12,16 @@ Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROA
 
 | Area | Implemented | Important limit |
 | --- | --- | --- |
-| Backend | Laravel 12 installed with Composer lockfile | Only the homepage has application-specific behaviour |
-| Database | Dedicated MySQL development and testing databases configured; content-schema migrations applied | No public page or admin screen reads the new tables yet |
-| Content schema | `companies`, `job_listings`, `articles`, `categories`, `tags`, pivot tables and `users.is_admin`; publication/expiry scopes, enums, factories | Only the admin panel reads these tables; no public page does yet. See [SCHEMA.md](SCHEMA.md) |
-| Publishing admin | Filament 5 panel at `/mdosi`; admin-only sign-in; create/edit/delete for companies, job listings, articles, categories and tags; publication state, dates and expiry | Plain-text article body; no image uploads, record preview, scheduling UI or user management |
-| Frontend | Blade, Tailwind 4, Vite 7, pnpm lockfile | No Vue, Livewire or Filament installed |
-| Homepage | Responsive masthead, provisional logo, gold search area, ruled job list, editorial sidebar, about/employer sections | Local preview with fictional listings |
-| Search | GET keyword search and employment-type filters | In-memory substring filtering, not database/full-text search |
-| Job previews | Four sample roles with expandable descriptions | No real employers, application workflow or standalone job pages |
-| Career advice | Three short readable guides inside expandable homepage sections | Hardcoded Blade content; no blog database, article URLs or editor |
+| Backend | Laravel 12 with Composer lockfile; public pages, panel and console commands | Email delivery and scheduling are not configured |
+| Database | Dedicated MySQL development and testing databases configured; content-schema migrations applied | Development holds sample records only; production is empty |
+| Content schema | `companies`, `job_listings`, `articles`, `categories`, `tags`, pivot tables and `users.is_admin`; publication/expiry scopes, enums, factories | No full-text search or saved searches. See [SCHEMA.md](SCHEMA.md) |
+| Publishing admin | Filament 5 panel at `/mdosi`; admin-only access with Google sign-in and a password fallback; CRUD for companies, job listings, articles, categories and tags; rich text, images, draft preview | No user-management screen, 2FA or password-reset mail |
+| Frontend | Blade, Tailwind 4, Vite 7, pnpm lockfile | No Vue or separate frontend |
+| Header | “Find a job” menu (Careers, Fellowships, Other opportunities), Career advice, About plusthree, and “For employers” as an email link | Location is not a header option |
+| Homepage | Responsive masthead, provisional logo, gold search area, ruled job list, editorial sidebar, about/employer sections | Real content is still sample content |
+| Search | Database keyword (`LIKE`) search plus an exact employment-type filter, paginated | Not full-text; no stemming, typo tolerance or relevance ranking |
+| Job pages | `/jobs`, `/jobs/{slug}` with application links, expiry states and structured data | Applications happen on the employer's site |
+| Career advice | Database-backed `/blog`, `/blog/{slug}` and `/blog/category/{slug}` | Article search and tag pages are not built |
 | Branding | Supplied colours, Africa logo with red uppercase tagline, saved logo concepts | Logo remains provisional; raster PNG, not a finished vector identity |
 | Accessibility basics | Labels, semantic headings, skip link, visible keyboard focus, native details controls | Not a complete accessibility audit |
 | SEO | Title, description, canonical, Open Graph, JSON-LD, `sitemap.xml`, `robots.txt` | `noindex` until `SEO_INDEXABLE=true`; Search Console and slug redirects remain |
@@ -32,15 +33,14 @@ Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROA
 - `GET /` is named `home`.
 - `GET /up` is Laravel's configured health route, not a full database/storage health check.
 - Homepage anchors: `#main`, `#jobs`, `#career`, `#about`, `#publishing`.
-- `q`: optional string, maximum 100 characters. Trimmed and matched case-insensitively against sample **title, sector, description and work mode**.
-- `type`: optional exact value: `Full-time`, `Contract`, or `Internship`.
-- Keyword and type conditions are combined. Type links preserve the current keyword.
-- Search returns all matching sample entries; there is no pagination, relevance ranking, stemming, typo tolerance or saved search.
-- The “Where?” location field was removed at the user's request. Location is still shown on listing rows. Old `location=` URL parameters are ignored by the current route.
-- The “Remote work” shortcut now uses `?q=remote#jobs`.
-- All examples are explicitly marked as sample roles. Applications are unavailable.
-- “Career advice” opens a section on the same page, not a separate blog index.
-- “For employers” points to a section explaining that submissions are not open. There is no employer portal.
+- Header: **Find a job** is a menu with *Careers* (`/jobs`), *Fellowships* (`/jobs?type=fellowship`) and *Other opportunities* (`/jobs?type=other`). It is a native `<details>` element, so it works by keyboard and without JavaScript. *Career advice* opens `/blog`, *About plusthree* opens `/#about`, and *For employers* is a `mailto:info@plusthree.io` link.
+- `q`: optional string, maximum 100 characters. Trimmed and matched case-insensitively with `LIKE` against job **title, description and company name**.
+- `type`: optional exact value: `full_time`, `contract`, `internship`, `fellowship` or `other`.
+- Keyword and type conditions are combined and preserved in the query string through pagination (10 per page).
+- The thematic “Explore” shortcuts (remote work, internships, design & creative, social impact) were removed at the owner's request; the header menu replaces them.
+- The “Where?” location field was removed at the user's request. Location is still shown on listing rows, and `location=` URL parameters are ignored.
+- Filtered job searches stay `noindex` and canonicalise to `/jobs`.
+- “For employers” emails `info@plusthree.io`; there is no employer portal or self-service submission, and the homepage says publishing is managed by the plusthree team.
 
 ## 2. Stack decisions and product boundaries
 
