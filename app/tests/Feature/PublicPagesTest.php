@@ -39,6 +39,20 @@ class PublicPagesTest extends TestCase
             ->assertSee('name="q"', false);
     }
 
+    public function test_every_page_links_the_site_icons_and_manifest(): void
+    {
+        // The icons are static files, so a broken reference is invisible to the
+        // rest of the tests. The ?v= keeps Cloudflare from serving an old copy.
+        $this->get('/')->assertOk()
+            ->assertSee('rel="icon"', false)
+            ->assertSee('favicon.ico?v=', false)
+            ->assertSee('favicon-32.png', false)
+            ->assertSee('apple-touch-icon.png', false)
+            ->assertSee('rel="manifest"', false)
+            ->assertSee('site.webmanifest', false)
+            ->assertSee('name="theme-color"', false);
+    }
+
     public function test_job_board_filters_by_keyword_and_contract_type(): void
     {
         JobListing::factory()->open()->create(['title' => 'Product Designer']);
