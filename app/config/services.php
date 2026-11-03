@@ -36,6 +36,9 @@ return [
     ],
 
     'google' => [
+        // Off by default: the panel shows the Google button only when this is
+        // true and both credentials exist.
+        'enabled' => env('GOOGLE_LOGIN_ENABLED', false),
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URL', '/mdosi/auth/google/callback'),

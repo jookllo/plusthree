@@ -20,15 +20,15 @@
             <ul class="nav-menu-panel">
                 <li>
                     <a href="{{ route('jobs.index') }}"
-                       @class(['active' => request()->routeIs('jobs.*') && ! request()->query('type')])>Careers</a>
+                       @class(['active' => request()->routeIs('jobs.index') && ! in_array(request()->query('type'), [\App\Enums\EmploymentType::Fellowship->value, \App\Enums\EmploymentType::Other->value], true)])>Careers</a>
                 </li>
                 <li>
-                    <a href="{{ route('jobs.index', ['type' => \App\Enums\EmploymentType::Fellowship->value]) }}"
-                       @class(['active' => request()->query('type') === \App\Enums\EmploymentType::Fellowship->value])>Fellowships</a>
+                    <a href="{{ route('jobs.fellowships') }}"
+                       @class(['active' => request()->routeIs('jobs.fellowships') || request()->query('type') === \App\Enums\EmploymentType::Fellowship->value])>Fellowships</a>
                 </li>
                 <li>
-                    <a href="{{ route('jobs.index', ['type' => \App\Enums\EmploymentType::Other->value]) }}"
-                       @class(['active' => request()->query('type') === \App\Enums\EmploymentType::Other->value])>Other opportunities</a>
+                    <a href="{{ route('jobs.other') }}"
+                       @class(['active' => request()->routeIs('jobs.other') || request()->query('type') === \App\Enums\EmploymentType::Other->value])>Other opportunities</a>
                 </li>
             </ul>
         </details>

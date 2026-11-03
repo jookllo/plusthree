@@ -60,4 +60,35 @@ class AdminPanelAccessTest extends TestCase
             ->assertSee('rich-editor', false)
             ->assertSee('Preview');
     }
+
+    public function test_the_google_button_is_hidden_until_it_is_configured(): void
+    {
+        config([
+            'services.google.enabled' => false,
+            'services.google.client_id' => 'test-client',
+            'services.google.client_secret' => 'test-secret',
+        ]);
+
+        $this->get('/mdosi/login')->assertOk()
+            ->assertDontSee('Sign in with Google')
+            ->assertSee('Sign in');
+    }
+
+    public function test_the_google_button_appears_once_it_is_enabled_and_configured(): void
+    {
+        config([
+            'services.google.enabled' => true,
+            'services.google.client_id' => 'test-client',
+            'services.google.client_secret' => 'test-secret',
+        ]);
+
+        $this->get('/mdosi/login')->assertOk()
+            ->assertSee('Sign in with Google');
+    }
+
+    public function test_the_panel_offers_a_password_reset_request_page(): void
+    {
+        $this->get('/mdosi/password-reset/request')->assertOk()
+            ->assertSee('Email');
+    }
 }

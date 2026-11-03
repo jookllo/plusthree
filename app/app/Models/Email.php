@@ -26,6 +26,7 @@ class Email extends Model
      */
     protected $fillable = [
         'subject',
+        'from_address',
         'body',
         'recipients',
         'status',
@@ -49,6 +50,44 @@ class Email extends Model
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * The address this email sends from.
+     *
+     * A stored address is only honoured while it is still configured, so a
+     * removed or mistyped sender falls back to the default rather than making
+     * the provider reject the message.
+     */
+    public function senderAddress(): string
+    {
+        $configured = self::configuredSenders();
+        $chosen = trim((string) $this->from_address);
+
+        if ($chosen !== '' && in_array($chosen, $configured, true)) {
+            return $chosen;
+        }
+
+        return $configured[0] ?? (string) config('mail.from.address');
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function configuredSenders(): array
+    {
+        $senders = config('mail.senders', []);
+
+        if (! is_array($senders) || $senders === []) {
+            $fallback = (string) config('mail.from.address');
+
+            return $fallback === '' ? [] : [$fallback];
+        }
+
+        return array_values(array_filter(array_map(
+            fn ($address): string => trim((string) $address),
+            $senders,
+        ), fn (string $address): bool => $address !== ''));
     }
 
     public function isDraft(): bool

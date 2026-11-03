@@ -62,7 +62,9 @@ class SeoTest extends TestCase
             ->assertSee(route('jobs.show', $job->slug), false)
             ->assertDontSee(route('blog.show', $draft->slug), false)
             ->assertDontSee(route('jobs.show', $closed->slug), false)
-            ->assertSee(route('home'), false);
+            ->assertSee(route('home'), false)
+            ->assertSee(route('jobs.fellowships'), false)
+            ->assertSee(route('jobs.other'), false);
     }
 
     public function test_sitemap_is_a_valid_xml_document(): void

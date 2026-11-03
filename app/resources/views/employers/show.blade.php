@@ -69,7 +69,7 @@
                         <label for="employment_type">Opportunity type</label>
                         <select id="employment_type" name="employment_type"
                                 @error('employment_type') aria-invalid="true" aria-describedby="employment_type-error" @enderror>
-                            <option value="">Not sure</option>
+                            <option value="">Select a type</option>
                             @foreach ($employmentTypes as $value => $label)
                                 <option value="{{ $value }}" @selected(old('employment_type') === $value)>{{ $label }}</option>
                             @endforeach

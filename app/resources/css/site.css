@@ -23,11 +23,11 @@ button,summary{cursor:pointer}
 .brand{display:block;width:260px;flex-shrink:0}
 .brand img{display:block;width:100%;height:auto}
 .masthead nav{display:flex;gap:32px;align-self:stretch;align-items:center}
-.masthead nav a{text-decoration:none;font-size:15px;padding:40px 0 32px;border-bottom:3px solid var(--transparent)}
+.masthead nav a{text-decoration:none;font-size:15px;padding:40px 0 32px;border-bottom:3px solid var(--transparent);white-space:nowrap}
 .masthead nav a:hover,.masthead nav .active{border-color:var(--red)}
 .nav-note{font-size:14px;text-decoration:underline}
 .nav-menu{position:relative;align-self:stretch;display:flex;align-items:center}
-.masthead nav summary{display:flex;align-items:center;gap:7px;list-style:none;font-size:15px;padding:40px 0 32px;border-bottom:3px solid var(--transparent)}
+.masthead nav summary{display:flex;align-items:center;gap:7px;list-style:none;font-size:15px;padding:40px 0 32px;border-bottom:3px solid var(--transparent);white-space:nowrap}
 .masthead nav summary::-webkit-details-marker{display:none}
 .masthead nav summary::after{content:"";width:6px;height:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translate(-1px,-3px)}
 .masthead nav summary:hover,.masthead nav summary.active,.masthead nav .nav-menu[open] summary{border-color:var(--red)}
@@ -135,6 +135,9 @@ details[open] summary{margin-bottom:12px}
 
 /* ---- Public listing, detail and editorial pages ------------------------- */
 .search-form-wide{grid-template-columns:minmax(0,1fr) 190px auto}
+.search-form-landing{grid-template-columns:minmax(0,1fr) auto}
+.landing-note{margin-top:16px;font-size:13px;color:var(--muted)}
+.landing-note a{color:var(--ink);font-weight:bold}
 .filter-field select{height:33px;border:0;background:var(--white);width:100%}
 .active-filter{border:1px solid var(--ink);padding:2px 8px;font-weight:bold}
 .listing-page{padding-block:8px 56px;min-height:40vh}
@@ -259,6 +262,11 @@ details[open] summary{margin-bottom:12px}
 .footer-brand{font-size:22px}
 }
 
+@media(max-width:390px){.masthead nav{gap:14px}
+.masthead nav a,.masthead nav summary{font-size:12px;padding:8px 0 14px}
+.nav-menu-panel{min-width:200px}
+}
+
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important}
 }
 
@@ -274,7 +282,7 @@ h1,h2{text-wrap:balance}
 .search-form-wide{grid-template-columns:minmax(0,1fr) 170px auto}
 }
 
-@media(max-width:700px){.search-form-wide{grid-template-columns:minmax(0,1fr)}
+@media(max-width:700px){.search-form-wide,.search-form-landing{grid-template-columns:minmax(0,1fr)}
 .filter-field{padding-top:0}
 .detail-page{padding-bottom:48px}
 .detail-header{padding-top:16px}

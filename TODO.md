@@ -1,6 +1,6 @@
 # TODO / backlog
 
-Last updated: 1 November 2026. Ordered by what to do next, not by topic. Scope detail and acceptance criteria live in [README.md](README.md) and [ROADMAP.md](ROADMAP.md).
+Last updated: 3 November 2026. Ordered by what to do next, not by topic. Scope detail and acceptance criteria live in [README.md](README.md) and [ROADMAP.md](ROADMAP.md).
 
 ## Before anything else
 
@@ -14,7 +14,7 @@ Last updated: 1 November 2026. Ordered by what to do next, not by topic. Scope d
 5. [x] **Alt text for in-body images.** A "Describe images" action on the article editor lists every image without a description and writes them back into the body. Remaining: the same check on the create screen.
 6. [x] **Downscale in-body uploads.** Anything wider than 1400px is re-encoded to 1400px on upload; failures keep the original file. Required adding JPEG/WebP support to GD in the image.
 7. [ ] **Database backup and a restore drill.** A nightly dump plus one real restore into a scratch database, timed and documented. A backup nobody has restored is not a backup. Depends on: 1.
-8. [ ] **Account recovery.** Email password reset (Filament's flow now that Resend is configured), a second admin account, and login throttling. Today a forgotten password means server access or `tinker`. Depends on: 1.
+8. [ ] **Account recovery.** Filament's password reset request/reset pages are wired and send through the configured mailer; set the Resend environment before relying on them. Remaining: a second admin account and login throttling. The CLI reset stays documented as the offline fallback. Depends on: 1.
 
 ## Soon after launch
 
@@ -41,6 +41,9 @@ Last updated: 1 November 2026. Ordered by what to do next, not by topic. Scope d
 23. [ ] Keep the CLI password reset documented as break-glass recovery.
 
 ## Done
+
+- [x] Dedicated `/fellowships` and `/other-opportunities` pages, linked from the job menu and listed in the sitemap.
+- [x] Optional sender choice (`MAIL_SENDER_ADDRESSES`) in the email composer, stored per email.
 
 - [x] Content schema, publication and expiry scopes, factories, tests.
 - [x] Filament 5.11 panel at `/mdosi`, admin-only.

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\EmailStatus;
 use App\Enums\MessageStatus;
+use App\Mail\ComposedEmail;
 use App\Models\Email;
 use App\Models\Message;
 use App\Models\User;
@@ -151,5 +152,72 @@ class PanelInboxTest extends TestCase
 
         $this->assertSame(MessageStatus::New, $message->fresh()->status);
         $this->assertNull($message->fresh()->handled_at);
+    }
+
+    public function test_the_default_sender_is_used_when_none_is_chosen(): void
+    {
+        config([
+            'mail.from.address' => 'info@plusthree.io',
+            'mail.senders' => ['info@plusthree.io'],
+        ]);
+
+        $email = Email::factory()->create(['from_address' => null]);
+
+        $this->assertSame('info@plusthree.io', $email->senderAddress());
+    }
+
+    public function test_a_chosen_sender_is_used_for_delivery(): void
+    {
+        config([
+            'mail.from.address' => 'info@plusthree.io',
+            'mail.senders' => ['info@plusthree.io', 'hello@plusthree.io'],
+        ]);
+
+        Mail::fake();
+
+        $email = Email::factory()->create([
+            'from_address' => 'hello@plusthree.io',
+            'recipients' => ['one@example.com'],
+        ]);
+
+        $this->assertTrue(EmailDelivery::send($email));
+
+        Mail::assertSent(ComposedEmail::class, fn (ComposedEmail $mail): bool => $mail->envelope()->from->address === 'hello@plusthree.io');
+    }
+
+    public function test_an_unconfigured_sender_falls_back_to_the_default(): void
+    {
+        config([
+            'mail.from.address' => 'info@plusthree.io',
+            'mail.senders' => ['info@plusthree.io'],
+        ]);
+
+        Mail::fake();
+
+        $email = Email::factory()->create([
+            'from_address' => 'stranger@example.com',
+            'recipients' => ['one@example.com'],
+        ]);
+
+        $this->assertSame('info@plusthree.io', $email->senderAddress());
+        $this->assertTrue(EmailDelivery::send($email));
+
+        Mail::assertSent(ComposedEmail::class, fn (ComposedEmail $mail): bool => $mail->envelope()->from->address === 'info@plusthree.io');
+    }
+
+    public function test_the_composer_only_offers_a_sender_picker_when_there_is_a_choice(): void
+    {
+        $admin = $this->admin();
+
+        config(['mail.senders' => ['info@plusthree.io']]);
+
+        $this->actingAs($admin)->get('/mdosi/emails/create')->assertOk()
+            ->assertDontSee('Send from');
+
+        config(['mail.senders' => ['info@plusthree.io', 'hello@plusthree.io']]);
+
+        $this->actingAs($admin)->get('/mdosi/emails/create')->assertOk()
+            ->assertSee('Send from')
+            ->assertSee('hello@plusthree.io');
     }
 }

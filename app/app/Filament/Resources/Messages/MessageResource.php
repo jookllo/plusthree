@@ -21,6 +21,11 @@ class MessageResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'company', 'role_title'];
+    }
+
     protected static ?string $modelLabel = 'message';
 
     protected static ?string $pluralModelLabel = 'messages';

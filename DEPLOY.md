@@ -56,11 +56,13 @@ FILESYSTEM_DISK=local
 MAIL_MAILER=resend
 MAIL_FROM_ADDRESS=info@plusthree.io
 MAIL_FROM_NAME="Plusthree"
+MAIL_SENDER_ADDRESSES=info@plusthree.io,hello@plusthree.io
 RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
 
 BCRYPT_ROUNDS=12
 
 # Panel sign-in with Google. Comma-separated allowlist; empty disables it.
+GOOGLE_LOGIN_ENABLED=false
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_REDIRECT_URL=https://your-domain.example/mdosi/auth/google/callback
@@ -72,7 +74,9 @@ Notes:
 - `APP_URL` must be the final HTTPS URL. Trusted proxies are configured in `app/bootstrap/app.php` so Dokploy's TLS termination is honoured.
 - `SEO_INDEXABLE=false` serves `noindex, nofollow` on every page and a `robots.txt` that blocks crawling. Set it to `true` only when the domain is final and real content is published; `APP_DEBUG=true` forces it back off. Filtered job searches stay `noindex` either way, and `/mdosi` is always disallowed.
 - Keep `QUEUE_CONNECTION=sync` until a worker is configured — `database` without a worker silently queues work that never runs.
-- `MAIL_MAILER=resend` sends through Resend; `RESEND_API_KEY` is required and `MAIL_FROM_ADDRESS` must be on a domain verified in Resend (SPF/DKIM records added at Cloudflare). With `MAIL_MAILER=log` locally, panel emails are written to `storage/logs/laravel.log` instead of being delivered.
+- `MAIL_MAILER=resend` sends through Resend; `RESEND_API_KEY` is required and `MAIL_FROM_ADDRESS` must be on a domain verified in Resend (SPF/DKIM records added at Cloudflare). With `MAIL_MAILER=log` locally, panel emails and password-reset links are written to `storage/logs/laravel.log` instead of being delivered.
+- `MAIL_SENDER_ADDRESSES` is the comma-separated list of verified addresses the panel may send from. With two or more, each email gets a **Send from** choice; every listed address must be on the verified Resend domain. The first one is the default.
+- The same mailer sends **Forgot password?** links from `/mdosi/login`. The link goes to the address on the admin account, so that address must be one the owner can read.
 - The panel sends synchronously, one recipient per provider call, and stores the result on the record. There is no queue worker, so do not switch these sends to `Mail::queue()` without adding one.
 
 ## 4a. Receiving mail
@@ -103,7 +107,7 @@ The panel accepts Google accounts only from the `ADMIN_EMAILS` allowlist. Everyo
 2. **Credentials → Create credentials → OAuth client ID → Web application.**
    - Authorised JavaScript origin: `https://your-domain.example`
    - Authorised redirect URI: `https://your-domain.example/mdosi/auth/google/callback`
-3. Put the client ID and secret into Dokploy as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, set `ADMIN_EMAILS`, and redeploy.
+3. Put the client ID and secret into Dokploy as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`, set `ADMIN_EMAILS`, set `GOOGLE_LOGIN_ENABLED=true` when you want the button, and redeploy. While the flag is false the button stays hidden and the routes return 503.
 
 The password login stays enabled as the break-glass route, so a broken OAuth client cannot lock you out.
 

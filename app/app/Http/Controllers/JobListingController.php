@@ -6,10 +6,31 @@ use App\Enums\EmploymentType;
 use App\Models\JobListing;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class JobListingController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
+    {
+        return $this->listing($request);
+    }
+
+    public function fellowships(Request $request): View
+    {
+        return $this->listing($request, EmploymentType::Fellowship);
+    }
+
+    public function otherOpportunities(Request $request): View
+    {
+        return $this->listing($request, EmploymentType::Other);
+    }
+
+    /**
+     * The board, and the two type-specific landing pages, share one query and
+     * one view. A landing page fixes the type and replaces the filter select
+     * with its own heading and explanation.
+     */
+    private function listing(Request $request, ?EmploymentType $landing = null): View
     {
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:100'],
@@ -17,7 +38,7 @@ class JobListingController extends Controller
         ]);
 
         $query = trim($filters['q'] ?? '');
-        $type = $filters['type'] ?? null;
+        $type = $landing?->value ?? ($filters['type'] ?? null);
 
         $jobs = JobListing::query()
             ->open()
@@ -40,6 +61,17 @@ class JobListingController extends Controller
             'jobs' => $jobs,
             'query' => $query,
             'type' => $type,
+            'landing' => $landing,
+            'heading' => match ($landing) {
+                EmploymentType::Fellowship => 'Fellowships',
+                EmploymentType::Other => 'Other opportunities',
+                default => 'Open roles',
+            },
+            'intro' => match ($landing) {
+                EmploymentType::Fellowship => 'Fellowships, graduate programmes and leadership schemes open to African talent.',
+                EmploymentType::Other => 'Scholarships, grants, volunteer roles and other opportunities that are not a standard job.',
+                default => null,
+            },
         ]);
     }
 

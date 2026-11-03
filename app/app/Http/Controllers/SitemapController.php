@@ -14,6 +14,8 @@ class SitemapController extends Controller
         $urls = [
             ['loc' => route('home'), 'lastmod' => null],
             ['loc' => route('jobs.index'), 'lastmod' => null],
+            ['loc' => route('jobs.fellowships'), 'lastmod' => null],
+            ['loc' => route('jobs.other'), 'lastmod' => null],
             ['loc' => route('blog.index'), 'lastmod' => null],
         ];
 
@@ -68,6 +70,8 @@ class SitemapController extends Controller
             '',
             'Canonical site: '.route('home'),
             'Job listings: '.route('jobs.index'),
+            'Fellowships: '.route('jobs.fellowships'),
+            'Other opportunities: '.route('jobs.other'),
             'Career advice: '.route('blog.index'),
             'Sitemap: '.route('sitemap'),
             '',

@@ -22,6 +22,11 @@ class EmailResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'subject';
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['subject'];
+    }
+
     protected static ?string $modelLabel = 'email';
 
     protected static ?string $pluralModelLabel = 'emails';

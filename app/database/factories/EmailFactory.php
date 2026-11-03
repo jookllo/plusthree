@@ -20,6 +20,7 @@ class EmailFactory extends Factory
     {
         return [
             'subject' => fake()->sentence(5),
+            'from_address' => null,
             'body' => '<p>'.fake()->paragraph(3).'</p>',
             'recipients' => [fake()->unique()->safeEmail()],
             'status' => EmailStatus::Draft,

@@ -81,20 +81,66 @@ class PublicPagesTest extends TestCase
             ->assertDontSee('Product Designer');
     }
 
-    public function test_header_offers_a_job_menu_and_an_employer_email(): void
+    public function test_header_offers_a_job_menu_and_an_employer_link(): void
     {
         $this->get('/')->assertOk()
             ->assertSee('Find a job')
             ->assertSee('Careers')
             ->assertSee('Fellowships')
             ->assertSee('Other opportunities')
-            ->assertSee(route('jobs.index', ['type' => 'fellowship']), false)
-            ->assertSee(route('jobs.index', ['type' => 'other']), false)
-            ->assertSee('href="mailto:info@plusthree.io"', false)
-            ->assertSee('info@plusthree.io')
+            ->assertSee('href="'.route('jobs.fellowships').'"', false)
+            ->assertSee('href="'.route('jobs.other').'"', false)
+            ->assertSee('href="'.route('employers.show').'"', false)
+            ->assertSee('For employers')
             // The old keyword shortcuts were removed at the owner's request.
             ->assertDontSee('Design &amp; creative', false)
             ->assertDontSee('Social impact');
+    }
+
+    public function test_fellowships_and_other_opportunities_have_their_own_pages(): void
+    {
+        JobListing::factory()->open()->create(['title' => 'Product Designer']);
+        JobListing::factory()->open()->create([
+            'title' => 'Climate Leadership Fellow',
+            'employment_type' => EmploymentType::Fellowship,
+        ]);
+        JobListing::factory()->open()->create([
+            'title' => 'Community Grant',
+            'employment_type' => EmploymentType::Other,
+        ]);
+
+        $this->get('/fellowships')->assertOk()
+            ->assertSee('Climate Leadership Fellow')
+            ->assertSee('Fellowships')
+            ->assertDontSee('Product Designer')
+            ->assertDontSee('Community Grant')
+            ->assertDontSee('name="type"', false);
+
+        $this->get('/other-opportunities')->assertOk()
+            ->assertSee('Community Grant')
+            ->assertSee('Other opportunities')
+            ->assertDontSee('Climate Leadership Fellow')
+            ->assertDontSee('Product Designer')
+            ->assertDontSee('name="type"', false);
+    }
+
+    public function test_landing_pages_search_inside_their_own_type(): void
+    {
+        JobListing::factory()->open()->create([
+            'title' => 'Climate Leadership Fellow',
+            'employment_type' => EmploymentType::Fellowship,
+        ]);
+        JobListing::factory()->open()->create([
+            'title' => 'Community Grant',
+            'employment_type' => EmploymentType::Other,
+        ]);
+
+        $this->get('/fellowships?q=grant')->assertOk()
+            ->assertSee('Nothing here yet.')
+            ->assertDontSee('Community Grant');
+
+        $this->get('/fellowships?q=climate')->assertOk()
+            ->assertSee('Climate Leadership Fellow');
     }
 
     public function test_job_board_empty_state_and_escaped_input(): void

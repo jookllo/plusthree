@@ -35,6 +35,10 @@ class EmailsTable
                         EmailStatus::Sent => 'success',
                         EmailStatus::Failed => 'danger',
                     }),
+                TextColumn::make('from_address')
+                    ->label('From')
+                    ->formatStateUsing(fn (Email $record): string => $record->senderAddress())
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('sent_at')
                     ->label('Sent')
                     ->dateTime('j M Y H:i')

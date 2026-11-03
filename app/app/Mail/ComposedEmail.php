@@ -5,6 +5,7 @@ namespace App\Mail;
 use App\Models\Email;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 
@@ -23,7 +24,13 @@ class ComposedEmail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: $this->email->subject);
+        return new Envelope(
+            subject: $this->email->subject,
+            from: new Address(
+                $this->email->senderAddress(),
+                (string) config('mail.from.name'),
+            ),
+        );
     }
 
     public function content(): Content

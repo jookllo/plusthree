@@ -45,9 +45,10 @@ class TaxonomySeeder extends Seeder
     ];
 
     /**
-     * Cross-cutting tags. Deliberately excludes things already stored as
-     * structured fields (employment type, work mode, country), so tags do not
-     * duplicate data the filters can already use.
+     * Cross-cutting tags. Deliberately avoids duplicating most structured
+     * fields (employment type, work mode, country). Fellowship and Other
+     * opportunities are the owner-requested exception: they are useful as
+     * editorial tags on articles as well as on listings.
      *
      * @var list<string>
      */
@@ -60,6 +61,8 @@ class TaxonomySeeder extends Seeder
         'Freelance',
         'Visa sponsorship',
         'Leadership',
+        'Fellowship',
+        'Other opportunities',
     ];
 
     public function run(): void

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Emails\Pages;
 
 use App\Enums\EmailStatus;
 use App\Filament\Resources\Emails\EmailResource;
+use App\Models\Email;
 use App\Models\Message;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -26,6 +27,7 @@ class CreateEmail extends CreateRecord
             'recipients' => $to !== '' ? [$to] : [],
             'subject' => trim((string) request()->query('subject')),
             'body' => $this->initialBody($message),
+            'from_address' => Email::configuredSenders()[0] ?? null,
         ]);
     }
 

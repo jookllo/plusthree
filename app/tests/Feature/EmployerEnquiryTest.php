@@ -17,6 +17,8 @@ class EmployerEnquiryTest extends TestCase
             ->assertSee('Share an opportunity')
             ->assertSee('action="'.route('employers.store').'"', false)
             ->assertSee('name="body"', false)
+            ->assertSee('Select a type')
+            ->assertDontSee('Not sure')
             ->assertSee('info@plusthree.io');
     }
 

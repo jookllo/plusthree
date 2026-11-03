@@ -1,5 +1,6 @@
 <div style="font-family:Arial,Helvetica,sans-serif;color:#23305C;">
     <p style="margin:0 0 6px;font-size:12px;color:#626775;">
+        From {{ $email->senderAddress() }}<br>
         To: {{ $email->recipientSummary(5) }}
     </p>
     <h3 style="margin:0 0 18px;font-size:18px;line-height:1.3;">{{ $email->subject }}</h3>

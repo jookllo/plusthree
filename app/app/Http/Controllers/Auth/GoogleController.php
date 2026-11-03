@@ -109,6 +109,10 @@ class GoogleController
 
     private function ensureConfigured(): void
     {
+        if (! config('services.google.enabled')) {
+            throw new HttpException(503, 'Google sign-in is disabled.');
+        }
+
         if (blank(config('services.google.client_id')) || blank(config('services.google.client_secret'))) {
             throw new HttpException(503, 'Google sign-in is not configured.');
         }

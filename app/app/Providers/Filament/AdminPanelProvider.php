@@ -27,9 +27,13 @@ class AdminPanelProvider extends PanelProvider
             ->id('mdosi')
             ->path('mdosi')
             ->login()
+            ->passwordReset()
+            ->sidebarCollapsibleOnDesktop()
             ->renderHook(
                 PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
-                fn (): string => view('filament.google-login')->render(),
+                fn (): string => $this->googleSignInIsConfigured()
+                    ? view('filament.google-login')->render()
+                    : '',
             )
             ->brandName('plusthree')
             ->colors([
@@ -70,5 +74,16 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    /**
+     * The Google button is hidden until credentials exist, so a half-configured
+     * deployment never offers a sign-in path that cannot work.
+     */
+    private function googleSignInIsConfigured(): bool
+    {
+        return (bool) config('services.google.enabled')
+            && filled(config('services.google.client_id'))
+            && filled(config('services.google.client_secret'));
     }
 }

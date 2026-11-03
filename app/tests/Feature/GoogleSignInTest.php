@@ -19,6 +19,9 @@ class GoogleSignInTest extends TestCase
         parent::setUp();
 
         config([
+            // Google is off by default; these tests exercise the feature once
+            // the owner turns it on.
+            'services.google.enabled' => true,
             'services.google.client_id' => 'test-client-id',
             'services.google.client_secret' => 'test-client-secret',
             'admin.allowed_emails' => ['owner@example.com'],
@@ -99,6 +102,17 @@ class GoogleSignInTest extends TestCase
     public function test_sign_in_is_unavailable_until_google_credentials_are_configured(): void
     {
         config(['services.google.client_id' => null]);
+
+        $this->get('/mdosi/auth/google')->assertStatus(503);
+        $this->get('/mdosi/auth/google/callback')->assertStatus(503);
+    }
+
+    public function test_sign_in_stays_disabled_until_the_owner_turns_it_on(): void
+    {
+        config(['services.google.enabled' => false]);
+
+        $this->get('/mdosi/login')->assertOk()
+            ->assertDontSee('Sign in with Google');
 
         $this->get('/mdosi/auth/google')->assertStatus(503);
         $this->get('/mdosi/auth/google/callback')->assertStatus(503);

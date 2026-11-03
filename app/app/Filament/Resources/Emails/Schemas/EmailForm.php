@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\Emails\Schemas;
 
+use App\Models\Email;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -16,6 +18,17 @@ class EmailForm
                 TextInput::make('subject')
                     ->required()
                     ->maxLength(200)
+                    ->columnSpanFull(),
+                Select::make('from_address')
+                    ->label('Send from')
+                    ->options(fn (): array => array_combine(
+                        Email::configuredSenders(),
+                        Email::configuredSenders(),
+                    ))
+                    ->default(fn (): ?string => Email::configuredSenders()[0] ?? null)
+                    ->in(fn (): array => Email::configuredSenders())
+                    ->visible(fn (): bool => count(Email::configuredSenders()) > 1)
+                    ->helperText('Only addresses on a domain verified in the mail provider will be accepted.')
                     ->columnSpanFull(),
                 TagsInput::make('recipients')
                     ->label('Recipients')

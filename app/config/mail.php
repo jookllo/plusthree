@@ -115,4 +115,20 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Panel Sender Addresses
+    |--------------------------------------------------------------------------
+    |
+    | Addresses the panel composer may send from. Every address must be on a
+    | domain verified in the mail provider. The first one is the default, and
+    | the composer hides its sender picker when only one is configured.
+    |
+    */
+
+    'senders' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('MAIL_SENDER_ADDRESSES', (string) env('MAIL_FROM_ADDRESS', 'hello@example.com'))),
+    ))),
+
 ];
