@@ -152,7 +152,7 @@ details[open] summary{margin-bottom:12px}
 .breadcrumb a{color:var(--ink)}
 .detail-page{padding-bottom:72px}
 .detail-header{padding:24px 0 32px;border-bottom:2px solid var(--ink)}
-.detail-header h1{font-size:clamp(32px,4vw,48px);letter-spacing:-1.5px;max-width:18ch;overflow-wrap:anywhere}
+.detail-header h1{font-size:clamp(30px,3.6vw,44px);letter-spacing:-1.2px;overflow-wrap:anywhere}
 .detail-kicker{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;max-width:420px;margin-bottom:14px}
 .detail-kicker>span{white-space:nowrap}
 .detail-header .job-meta{margin-top:16px;font-size:14px}
