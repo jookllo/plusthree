@@ -40,6 +40,22 @@ class SeoTest extends TestCase
             ->assertSee('content="noindex, nofollow"', false);
     }
 
+    public function test_unfiltered_pagination_is_indexable_and_canonicalises_to_itself(): void
+    {
+        config(['seo.indexable' => true]);
+
+        // 10 per page, so 11 open roles produce a second page.
+        JobListing::factory()->open()->count(11)->create();
+
+        $this->get('/jobs?page=2')->assertOk()
+            ->assertSee('<meta name="robots" content="index, follow">', false)
+            ->assertSee('<link rel="canonical" href="'.url('/jobs').'?page=2">', false);
+
+        // The first page stays canonicalised to the bare listing URL.
+        $this->get('/jobs?page=1')->assertOk()
+            ->assertSee('<link rel="canonical" href="'.url('/jobs').'">', false);
+    }
+
     public function test_canonical_urls_drop_filters_and_pagination(): void
     {
         $this->get('/jobs?q=designer&page=2')->assertOk()

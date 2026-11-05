@@ -13,7 +13,19 @@
     $indexable = config('seo.indexable') && ! $hasFilter && ! ($preview ?? false);
 
     $canonical = trim($__env->yieldContent('canonical'));
-    $canonical = $canonical !== '' ? $canonical : url()->current();
+
+    if ($canonical === '') {
+        $canonical = url()->current();
+
+        // Page 2 of a listing is a different page, not a duplicate of page 1.
+        // Canonicalising it to the unfiltered first page would tell Google to
+        // ignore every role that only appears further down the board.
+        $page = (int) request()->query('page', 1);
+
+        if (! $hasFilter && $page > 1) {
+            $canonical = url()->current().'?page='.$page;
+        }
+    }
 
     $ogImage = trim($__env->yieldContent('og-image'));
     $ogType = trim($__env->yieldContent('og-type')) ?: 'website';
