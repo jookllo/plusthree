@@ -1,13 +1,18 @@
 @extends('layouts.site')
 
-@section('title', $job->title.' — Plusthree')
-@section('meta-description', Str::limit(strip_tags($job->description ?? ''), 155))
+@section('title', $job->metaTitle().' — Plusthree')
+@section('meta-description', $job->metaDescription())
 @section('og-type', 'article')
 @section('canonical', route('jobs.show', $job->slug))
+@if ($job->featured_image_path)
+    @section('og-image', url(Storage::disk('public')->url($job->featured_image_path)))
+@endif
 
-@push('structured-data')
-    @include('partials.json-ld', ['data' => \App\Support\StructuredData::jobPosting($job)])
-@endpush
+@if ($job->isOpen())
+    @push('structured-data')
+        @include('partials.json-ld', ['data' => \App\Support\StructuredData::jobPosting($job)])
+    @endpush
+@endif
 
 @section('content')
     @php
@@ -41,20 +46,45 @@
             </div>
         </header>
 
+        @if ($preview ?? false)
+            <p class="preview-banner" role="status">
+                Preview — this listing is not published. Only people with this link can see it.
+            </p>
+        @endif
+
         @unless ($job->isOpen())
             <p class="closed-notice" role="status">
-                This role closed on
-                {{ $job->closing_at?->timezone('Africa/Nairobi')->format('j M Y') ?? 'an earlier date' }}
-                and is no longer accepting applications.
+                @if ($job->closing_at)
+                    This role closed on
+                    {{ $job->closing_at->timezone('Africa/Nairobi')->format('j M Y') }}
+                    and is no longer accepting applications.
+                @else
+                    This role is no longer available.
+                @endif
+            </p>
+        @elseif ($job->isClosingSoon())
+            <p class="closing-soon" role="status">
+                {{ $job->closingSoonLabel() }} — applications close
+                {{ $job->closing_at->timezone('Africa/Nairobi')->format('j M Y') }}.
             </p>
         @endunless
+
+        @if ($job->featured_image_path)
+            <figure class="job-figure">
+                <img src="{{ Storage::disk('public')->url($job->featured_image_path) }}"
+                     alt="{{ $job->featured_image_alt }}"
+                     width="1600"
+                     height="900"
+                     loading="lazy">
+            </figure>
+        @endif
 
         <div class="detail-grid">
             <div class="detail-body">
                 <section aria-labelledby="role-heading">
                     <h2 id="role-heading">The role</h2>
                     <div class="prose">
-                        {!! nl2br(e($job->description)) !!}
+                        {!! $job->renderedDescription() !!}
                     </div>
                 </section>
 
@@ -62,7 +92,7 @@
                     <section aria-labelledby="requirements-heading">
                         <h2 id="requirements-heading">What you’ll bring</h2>
                         <div class="prose">
-                            {!! nl2br(e($job->requirements)) !!}
+                            {!! $job->renderedRequirements() !!}
                         </div>
                     </section>
                 @endif

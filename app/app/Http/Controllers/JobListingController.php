@@ -35,10 +35,12 @@ class JobListingController extends Controller
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:100'],
             'type' => ['nullable', Rule::in(EmploymentType::values())],
+            'closing' => ['nullable', Rule::in(['soon'])],
         ]);
 
         $query = trim($filters['q'] ?? '');
         $type = $landing?->value ?? ($filters['type'] ?? null);
+        $closing = $filters['closing'] ?? null;
 
         $jobs = JobListing::query()
             ->open()
@@ -53,6 +55,7 @@ class JobListingController extends Controller
                 });
             })
             ->when($type, fn ($builder) => $builder->where('employment_type', $type))
+            ->when($closing === 'soon', fn ($builder) => $builder->closingSoon())
             ->latest('published_at')
             ->paginate(10)
             ->withQueryString();
@@ -61,6 +64,7 @@ class JobListingController extends Controller
             'jobs' => $jobs,
             'query' => $query,
             'type' => $type,
+            'closing' => $closing,
             'landing' => $landing,
             'heading' => match ($landing) {
                 EmploymentType::Fellowship => 'Fellowships',
@@ -78,11 +82,25 @@ class JobListingController extends Controller
     public function show(string $slug)
     {
         $job = JobListing::query()
-            ->published()
+            ->publiclyReadable()
             ->with(['company', 'categories', 'tags'])
             ->where('slug', $slug)
             ->firstOrFail();
 
         return view('jobs.show', ['job' => $job]);
+    }
+
+    /**
+     * Drafts, future-dated and archived listings, reachable only through a
+     * short-lived signed URL generated in the admin panel.
+     */
+    public function preview(string $slug)
+    {
+        $job = JobListing::query()
+            ->with(['company', 'categories', 'tags'])
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        return view('jobs.show', ['job' => $job, 'preview' => true]);
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\JobListing;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class PublicPagesTest extends TestCase
@@ -53,6 +54,19 @@ class PublicPagesTest extends TestCase
             ->assertSee('name="theme-color"', false);
     }
 
+    public function test_part_time_roles_can_be_filtered(): void
+    {
+        JobListing::factory()->open()->create([
+            'title' => 'Part-time Editor',
+            'employment_type' => EmploymentType::PartTime,
+        ]);
+        JobListing::factory()->open()->create(['title' => 'Full-time Editor']);
+
+        $this->get('/jobs?type=part_time')->assertOk()
+            ->assertSee('Part-time Editor')
+            ->assertDontSee('Full-time Editor');
+    }
+
     public function test_job_board_filters_by_keyword_and_contract_type(): void
     {
         JobListing::factory()->open()->create(['title' => 'Product Designer']);
@@ -95,20 +109,128 @@ class PublicPagesTest extends TestCase
             ->assertDontSee('Product Designer');
     }
 
-    public function test_header_offers_a_job_menu_and_an_employer_link(): void
+    public function test_header_links_job_categories_directly_and_an_employer_link(): void
     {
         $this->get('/')->assertOk()
-            ->assertSee('Find a job')
             ->assertSee('Careers')
             ->assertSee('Fellowships')
             ->assertSee('Other opportunities')
+            ->assertSee('href="'.route('jobs.index').'"', false)
             ->assertSee('href="'.route('jobs.fellowships').'"', false)
             ->assertSee('href="'.route('jobs.other').'"', false)
             ->assertSee('href="'.route('employers.show').'"', false)
             ->assertSee('For employers')
+            // The owner asked for the three categories as a visible menu, not
+            // a "Find a job" disclosure.
+            ->assertDontSee('Find a job')
+            ->assertDontSee('nav-menu', false)
             // The old keyword shortcuts were removed at the owner's request.
             ->assertDontSee('Design &amp; creative', false)
             ->assertDontSee('Social impact');
+    }
+
+    public function test_search_boxes_carry_a_hidden_label_and_no_prompt(): void
+    {
+        JobListing::factory()->open()->create(['title' => 'Product Designer']);
+
+        $this->get('/')->assertOk()
+            ->assertDontSee('What do you want to do?')
+            ->assertSee('<label for="q" class="visually-hidden">Search jobs</label>', false);
+
+        $this->get('/jobs')->assertOk()
+            ->assertDontSee('What do you want to do?')
+            ->assertSee('<label for="q" class="visually-hidden">Search jobs</label>', false);
+    }
+
+    public function test_homepage_latest_opportunities_does_not_count_roles(): void
+    {
+        JobListing::factory()->open()->count(3)->create();
+
+        $this->get('/')->assertOk()
+            ->assertDontSee('3 roles')
+            ->assertDontSee('1 role');
+    }
+
+    public function test_job_board_uses_numbered_pagination(): void
+    {
+        JobListing::factory()->open()->count(12)->create();
+
+        $this->get('/jobs')->assertOk()
+            ->assertSee('Page 1 of 2')
+            ->assertSee('rel="next"', false)
+            ->assertSee('aria-label="Page 2"', false);
+
+        $this->get('/jobs?page=2')->assertOk()
+            ->assertSee('Page 2 of 2')
+            ->assertSee('rel="prev"', false);
+    }
+
+    public function test_jobs_closing_within_a_week_are_flagged_and_filterable(): void
+    {
+        $soon = JobListing::factory()->closingSoon()->create(['title' => 'Programme Officer']);
+        JobListing::factory()->open()->create(['title' => 'Product Designer']);
+
+        $this->get('/jobs')->assertOk()
+            ->assertSee('Programme Officer')
+            ->assertSee('Closing soon')
+            ->assertDontSee('Closes today');
+
+        $this->get('/jobs?closing=soon')->assertOk()
+            ->assertSee('Programme Officer')
+            ->assertDontSee('Product Designer');
+
+        $this->get('/jobs/'.$soon->slug)->assertOk()
+            ->assertSee('Closing soon')
+            ->assertSee('applications close', false);
+    }
+
+    public function test_archived_job_stays_readable_but_is_not_advertised(): void
+    {
+        $archived = JobListing::factory()->archived()->create(['title' => 'Retired Role']);
+
+        $this->get('/jobs/'.$archived->slug)->assertOk()
+            ->assertSee('Retired Role')
+            ->assertSee('no longer available')
+            ->assertDontSee('Apply on employer site');
+
+        $this->get('/jobs')->assertOk()->assertDontSee('Retired Role');
+        $this->get('/sitemap.xml')->assertOk()->assertDontSee(route('jobs.show', $archived->slug), false);
+    }
+
+    public function test_job_detail_supports_rich_text_a_featured_image_and_seo_overrides(): void
+    {
+        Storage::fake('public');
+        Storage::disk('public')->put('jobs/featured.jpg', 'fake-image');
+
+        $job = JobListing::factory()->open()->create([
+            'title' => 'Programme Officer',
+            'description' => '<p>Lead <strong>field work</strong>.</p><script>alert(1)</script>',
+            'featured_image_path' => 'jobs/featured.jpg',
+            'featured_image_alt' => 'A team reviewing a map outdoors',
+            'seo_title' => 'Programme Officer in Nairobi',
+            'seo_description' => 'Lead field work across Kenya.',
+        ]);
+
+        $this->get('/jobs/'.$job->slug)->assertOk()
+            ->assertSee('<strong>field work</strong>', false)
+            ->assertDontSee('<script>alert(1)</script>', false)
+            ->assertSee('jobs/featured.jpg', false)
+            ->assertSee('alt="A team reviewing a map outdoors"', false)
+            ->assertSee('<title>Programme Officer in Nairobi — Plusthree</title>', false)
+            ->assertSee('name="description" content="Lead field work across Kenya."', false);
+    }
+
+    public function test_draft_job_preview_requires_a_signature(): void
+    {
+        $draft = JobListing::factory()->create(['title' => 'Secret Draft Role']);
+
+        $this->get('/jobs/'.$draft->slug.'/preview')->assertForbidden();
+
+        $url = URL::temporarySignedRoute('jobs.preview', now()->addMinutes(10), ['slug' => $draft->slug]);
+
+        $this->get($url)->assertOk()
+            ->assertSee('Secret Draft Role')
+            ->assertSee('this listing is not published');
     }
 
     public function test_fellowships_and_other_opportunities_have_their_own_pages(): void

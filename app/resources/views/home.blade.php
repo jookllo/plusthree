@@ -13,7 +13,7 @@
             </div>
             <form class="search-form" action="{{ route('jobs.index') }}" method="get" role="search">
                 <div class="search-field">
-                    <label for="q">What do you want to do?</label>
+                    <label for="q" class="visually-hidden">Search jobs</label>
                     <input id="q" name="q" maxlength="100" placeholder="Job title, skill or keyword">
                 </div>
                 <button class="button" type="submit">
@@ -28,7 +28,6 @@
         <section id="jobs" class="job-section" aria-labelledby="jobs-heading">
             <div class="section-heading">
                 <h2 id="jobs-heading">Latest opportunities</h2>
-                <span>{{ $jobs->count() }} {{ $jobs->count() === 1 ? 'role' : 'roles' }}</span>
             </div>
 
             @forelse ($jobs as $job)
@@ -49,7 +48,7 @@
 
         <aside id="career" class="career-column" aria-labelledby="career-heading">
             <div class="section-heading">
-                <h2 id="career-heading">The career edit</h2>
+                <h2 id="career-heading">The Career Edit</h2>
                 <span>Read &amp; grow</span>
             </div>
 

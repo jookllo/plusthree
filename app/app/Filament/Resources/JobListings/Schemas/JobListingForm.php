@@ -7,10 +7,14 @@ use App\Enums\PublicationStatus;
 use App\Enums\WorkMode;
 use App\Models\Category;
 use App\Models\JobListing;
+use App\Support\InlineImage;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -44,13 +48,66 @@ class JobListingForm
                 TextInput::make('location_country')
                     ->maxLength(80)
                     ->helperText('Where the role is based or who may apply. Kept out of the public search box by design.'),
-                Textarea::make('description')
+                RichEditor::make('description')
+                    ->label('Role description')
                     ->required()
-                    ->rows(6)
+                    ->columnSpanFull()
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('jobs/inline')
+                    ->fileAttachmentsVisibility('public')
+                    ->fileAttachmentsAcceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->fileAttachmentsMaxSize(4096)
+                    ->saveUploadedFileAttachmentUsing(
+                        fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => InlineImage::store($file, 'jobs/inline')
+                    )
+                    ->toolbarButtons([
+                        ['bold', 'italic', 'underline', 'link'],
+                        ['h2', 'h3'],
+                        ['bulletList', 'orderedList', 'blockquote'],
+                        ['attachFiles'],
+                        ['undo', 'redo'],
+                    ])
+                    ->floatingToolbars([
+                        'paragraph' => ['bold', 'italic', 'underline', 'link'],
+                    ])
+                    ->helperText('What the role involves, the team and the terms. Images are inserted where the cursor is.'),
+                RichEditor::make('requirements')
+                    ->label('What you’ll bring')
+                    ->columnSpanFull()
+                    ->fileAttachmentsDisk('public')
+                    ->fileAttachmentsDirectory('jobs/inline')
+                    ->fileAttachmentsVisibility('public')
+                    ->fileAttachmentsAcceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->fileAttachmentsMaxSize(4096)
+                    ->saveUploadedFileAttachmentUsing(
+                        fn (\Livewire\Features\SupportFileUploads\TemporaryUploadedFile $file): string => InlineImage::store($file, 'jobs/inline')
+                    )
+                    ->toolbarButtons([
+                        ['bold', 'italic', 'underline', 'link'],
+                        ['bulletList', 'orderedList'],
+                        ['undo', 'redo'],
+                    ])
+                    ->helperText('Optional. Skills, experience and qualifications.'),
+                FileUpload::make('featured_image_path')
+                    ->label('Featured image')
+                    ->image()
+                    ->disk('public')
+                    ->directory('jobs')
+                    ->visibility('public')
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                    ->maxSize(4096)
+                    ->imageAspectRatio('16:9')
+                    ->automaticallyCropImagesToAspectRatio()
+                    ->automaticallyResizeImagesToWidth('1600')
+                    ->automaticallyResizeImagesToHeight('900')
+                    ->automaticallyUpscaleImagesWhenResizing(false)
+                    ->helperText('Optional. Shown at the top of the job page. Cropped to 16:9 and resized to 1600×900.')
                     ->columnSpanFull(),
-                Textarea::make('requirements')
-                    ->rows(4)
-                    ->columnSpanFull(),
+                TextInput::make('featured_image_alt')
+                    ->label('Image alt text')
+                    ->maxLength(255)
+                    ->required(fn (Get $get): bool => filled($get('featured_image_path')))
+                    ->helperText('Describe the image for screen readers. Required when an image is set.'),
                 TextInput::make('application_url')
                     ->label('Application URL')
                     ->url()
@@ -79,10 +136,19 @@ class JobListingForm
                     ->options(PublicationStatus::options())
                     ->default(PublicationStatus::Draft)
                     ->required()
-                    ->helperText('Setting this to Published makes the listing live immediately.'),
+                    ->helperText('Published makes the listing live immediately. Archived removes it from every list and the sitemap, but its page stays readable for anyone with the old link.'),
                 DatePicker::make('closing_at')
                     ->label('Closing date')
-                    ->helperText('Applications close at the end of this day, Nairobi time. Blank means no deadline.'),
+                    ->helperText('Applications close at the end of this day, Nairobi time. Blank means no deadline. Roles inside the last week show a “Closing soon” warning.'),
+                TextInput::make('seo_title')
+                    ->label('SEO title')
+                    ->maxLength(255)
+                    ->helperText('Falls back to the role title.'),
+                Textarea::make('seo_description')
+                    ->label('SEO description')
+                    ->rows(2)
+                    ->maxLength(320)
+                    ->helperText('Falls back to the opening text of the description.'),
             ]);
     }
 }

@@ -5,11 +5,12 @@
     $description = trim($__env->yieldContent('meta-description'));
     $description = $description !== '' ? $description : config('seo.default_description');
 
-    // Filter and search URLs are duplicates of the listing they came from.
+    // Filter and search URLs are duplicates of the listing they came from;
+    // a signed preview of an unpublished record must not be indexed either.
     $hasFilter = collect(config('seo.filter_parameters'))
         ->contains(fn (string $parameter): bool => request()->filled($parameter));
 
-    $indexable = config('seo.indexable') && ! $hasFilter;
+    $indexable = config('seo.indexable') && ! $hasFilter && ! ($preview ?? false);
 
     $canonical = trim($__env->yieldContent('canonical'));
     $canonical = $canonical !== '' ? $canonical : url()->current();

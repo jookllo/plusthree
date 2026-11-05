@@ -44,7 +44,7 @@ Environment facts this design assumes, verified 31 October 2026:
 | `slug` | varchar(200) not null | unique |
 | `description` | longtext not null | |
 | `requirements` | longtext null | |
-| `employment_type` | varchar(20) not null | `full_time`, `contract`, `internship` |
+| `employment_type` | varchar(20) not null | `full_time`, `part_time`, `contract`, `internship`, `fellowship`, `other` |
 | `work_mode` | varchar(20) not null | `on_site`, `hybrid`, `remote` |
 | `location_city` | varchar(120) null | |
 | `location_country` | varchar(80) null | country name; ISO-2 code can be added later |
@@ -53,8 +53,13 @@ Environment facts this design assumes, verified 31 October 2026:
 | `status` | varchar(20) not null | `draft`, `published`, `archived` |
 | `published_at` | timestamp null | UTC |
 | `closing_at` | timestamp null | UTC; null = no deadline |
+| `featured_image_path` | varchar(2048) null | added 5 Nov 2026; public disk |
+| `featured_image_alt` | varchar(255) null | alt text for the featured image |
+| `seo_title` / `seo_description` | varchar(255) / varchar(320) null | per-listing metadata overrides |
 | `created_by` / `updated_by` | bigint unsigned null FK | → `users.id`, null on delete |
 | `created_at` / `updated_at` | timestamp null | |
+
+`description` and `requirements` hold editor HTML on job listings, rendered only through `App\Support\ArticleBody` — the same trust boundary as article bodies. Plain-text rows written before the rich editor remain readable.
 
 #### Location, remote and dates
 
@@ -105,7 +110,7 @@ Add `is_admin` boolean, default `false`, indexed. No other change to the starter
 
 PHP backed enums, stored as `varchar` with Eloquent casts — not MySQL `ENUM`, because altering a MySQL enum later is a table rebuild and Laravel portability suffers.
 
-- `EmploymentType`: `full_time` (label "Full-time"), `contract`, `internship` — matches the existing UI filter values.
+- `EmploymentType`: `full_time`, `part_time`, `contract`, `internship`, `fellowship`, `other` — matches the public filter values and the `/fellowships` and `/other-opportunities` landing pages. Part-time is an arrangement, not a sector, so it belongs here rather than in job categories.
 - `WorkMode`: `on_site`, `hybrid`, `remote`.
 - `PublicationStatus`: `draft`, `published`, `archived`.
 
@@ -239,4 +244,22 @@ Verification actually run:
 - Guard positive control: running a non-database test with `DB_DATABASE=plusthree` aborts with a `RuntimeException` before any table is touched.
 
 Not done in this step: Filament, Livewire, admin UI, `/jobs` or `/blog` routes, replacing `config/preview.php`, uploads, search rewrite, SEO metadata beyond the article fallback accessors.
+
+## 15. Implementation record — 5 November 2026
+
+Added the job editorial columns without changing existing rows:
+
+- `app/database/migrations/2026_11_05_000001_add_editorial_fields_to_job_listings_table.php` — nullable `featured_image_path`, `featured_image_alt`, `seo_title`, `seo_description`.
+- `description` and `requirements` are now editor HTML; rendering goes through `App\Support\ArticleBody` via `JobListing::renderedDescription()` and `renderedRequirements()`, so pre-existing plain-text rows still render safely.
+
+Changed semantics:
+
+- `EmploymentType` gained `part_time` ("Part-time"), mapped to `PART_TIME` in `JobPosting` structured data. It is an arrangement, not a job category.
+- `JobListing::scopePubliclyReadable()` — `published_at` set and in the past, status `published` **or** `archived`. Used only by the detail route; lists, landing pages, the sitemap and `llms.txt` keep using `scopeOpen()`.
+- `JobListing::scopeClosingSoon()` and `CLOSING_SOON_DAYS` (7) drive the urgency flags and `?closing=soon`.
+- `JobPosting` JSON-LD is emitted only when `isOpen()`. An expired or archived page keeps its 200 response, closed notice and inbound links but advertises no vacancy.
+
+Verification: `php artisan test` → **123 tests, 489 assertions passed, 2 skipped** against `plusthree_testing`; `php artisan migrate` applied the editorial-columns migration to the development database; `pnpm build` regenerated assets.
+
+Deliberately not done: automatic archiving on expiry (visibility is already enforced by `scopeOpen()`), and the 301-after-grace-period redirect, which needs sector pages first.
 

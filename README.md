@@ -1,6 +1,6 @@
 # Plusthree — project guide and implementation handoff
 
-Last inspected: **31 October 2026** (Africa/Nairobi).
+Last inspected: **5 November 2026** (Africa/Nairobi).
 
 Plusthree is a job board and career blog connecting African talent with global work. The tagline is **“WHERE AFRICA’S GEMS MEET GLOBAL WORK.”** Visitors should browse without an account. The owner should publish jobs and articles through a private admin panel.
 
@@ -15,13 +15,13 @@ Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROA
 | Backend | Laravel 12 with Composer lockfile; public pages, panel and console commands | Email delivery and scheduling are not configured |
 | Database | Dedicated MySQL development and testing databases configured; content-schema migrations applied | Development holds sample records only; production is empty |
 | Content schema | `companies`, `job_listings`, `articles`, `categories`, `tags`, pivot tables and `users.is_admin`; publication/expiry scopes, enums, factories | No full-text search or saved searches. See [SCHEMA.md](SCHEMA.md) |
-| Publishing admin | Filament 5 panel at `/mdosi`; admin-only access with an optional Google sign-in and a password fallback plus password reset; CRUD for companies, job listings, articles, categories and tags; rich text, images, draft preview; collapsible sidebar and global search | No user-management screen or 2FA |
+| Publishing admin | Filament 5 panel at `/mdosi`; admin-only access with an optional Google sign-in and a password fallback plus password reset; CRUD for companies, job listings, articles, categories and tags; rich text, images, draft preview; collapsible sidebar and global search. Job listings carry the same editorial fields as articles (rich description/requirements, featured image and alt text, SEO overrides, preview) | No user-management screen or 2FA |
 | Inbox | Panel **Messages** (employer enquiries stored from `/for-employers`, unread badge, reply) and **Emails** (rich-text compose, drafts, preview, send through Resend with a stored result) | No inbound mailbox, templates, contact lists or attachments |
 | Frontend | Blade, Tailwind 4, Vite 7, pnpm lockfile | No Vue or separate frontend |
-| Header | “Find a job” menu (Careers, Fellowships, Other opportunities), Career advice, About plusthree, and “For employers” as an email link | Location is not a header option |
-| Homepage | Responsive masthead, provisional logo, gold search area, ruled job list, editorial sidebar, about/employer sections | Real content is still sample content |
-| Search | Database keyword (`LIKE`) search plus an exact employment-type filter, paginated | Not full-text; no stemming, typo tolerance or relevance ranking |
-| Job pages | `/jobs`, `/jobs/{slug}` with application links, expiry states and structured data | Applications happen on the employer's site |
+| Header | Inline links: Careers, Fellowships, Other opportunities, Career advice, About plusthree, plus “For employers” | Location is not a header option |
+| Homepage | Responsive masthead, provisional logo, gold search area, ruled job list (six roles, no pagination), editorial sidebar, about/employer sections | Real content is still sample content |
+| Search | Database keyword (`LIKE`) search plus an exact employment-type filter, shareable GET URLs, numbered pagination on `/jobs` | Not full-text; no stemming, typo tolerance, relevance ranking or sector filter |
+| Job pages | `/jobs`, `/jobs/{slug}` with application links, closing-soon urgency, expiry/archived states and structured data | Applications happen on the employer's site |
 | Career advice | Database-backed `/blog`, `/blog/{slug}` and `/blog/category/{slug}` | Article search and tag pages are not built |
 | Branding | Supplied colours, Africa logo with red uppercase tagline, saved logo concepts | Logo remains provisional; raster PNG, not a finished vector identity |
 | Accessibility basics | Labels, semantic headings, skip link, visible keyboard focus, native details controls | Not a complete accessibility audit |
@@ -34,13 +34,16 @@ Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROA
 - `GET /` is named `home`.
 - `GET /up` is Laravel's configured health route, not a full database/storage health check.
 - Homepage anchors: `#main`, `#jobs`, `#career`, `#about`, `#publishing`.
-- Header: **Find a job** is a menu with *Careers* (`/jobs`), *Fellowships* (`/jobs?type=fellowship`) and *Other opportunities* (`/jobs?type=other`). It is a native `<details>` element, so it works by keyboard and without JavaScript. *Career advice* opens `/blog`, *About plusthree* opens `/#about`, and *For employers* is a `mailto:info@plusthree.io` link.
+- Header: five inline links — *Careers* (`/jobs`), *Fellowships* (`/fellowships`), *Other opportunities* (`/other-opportunities`), *Career advice* (`/blog`) and *About plusthree* (`/#about`) — plus *For employers* (`/for-employers`). This replaced the previous “Find a job” dropdown on 5 November 2026. There is no JavaScript menu button: on narrow screens the links wrap to two centred rows, and the active page is marked with `aria-current`.
 - `q`: optional string, maximum 100 characters. Trimmed and matched case-insensitively with `LIKE` against job **title, description and company name**.
-- `type`: optional exact value: `full_time`, `contract`, `internship`, `fellowship` or `other`.
-- Keyword and type conditions are combined and preserved in the query string through pagination (10 per page).
+- `type`: optional exact value: `full_time`, `part_time`, `contract`, `internship`, `fellowship` or `other`.
+- `closing=soon`: optional flag listing only roles whose deadline falls within the next seven days (`JobListing::CLOSING_SOON_DAYS`), counted in Africa/Nairobi dates.
+- Keyword, type and closing conditions are combined and preserved in the query string through numbered pagination (10 per page, windowed page links with first/last and Prev/Next). The homepage always shows six roles and links to `/jobs` instead of paginating.
+- Each row and the detail page flag urgency as *Closes today*, *Closes tomorrow* or *Closing soon*.
 - The thematic “Explore” shortcuts (remote work, internships, design & creative, social impact) were removed at the owner's request; the header menu replaces them.
 - The “Where?” location field was removed at the user's request. Location is still shown on listing rows, and `location=` URL parameters are ignored.
 - Filtered job searches stay `noindex` and canonicalise to `/jobs`.
+- **Job lifecycle:** passing `closing_at` does not change a listing's status. Lists, landing pages, the sitemap and `llms.txt` use `open()` (published and not past the deadline), so an expired role drops out with no scheduler. The detail page uses `publiclyReadable()` (published **or** archived), so old links never dead-end: it shows “This role closed on …” (or “no longer available” for an archived role), removes the application links, and omits `JobPosting` JSON-LD so search engines are not told the vacancy is open. Archiving in the panel therefore hides a role everywhere but keeps its page readable. A 301 to the sector page after a grace period is the agreed next step once sector pages exist.
 - `GET /for-employers` is the employer form (name, email, organisation, role, opportunity type, link, details) and the header's “For employers” link points to it. `POST /for-employers` stores a row in `messages` and shows a confirmation; it sends no email, so a mail outage cannot lose an enquiry. A hidden honeypot field is accepted and discarded, and submissions are throttled to 6 per minute per IP. The page also offers `info@plusthree.io` as a fallback.
 - Panel **Inbox → Messages** lists enquiries with an unread badge, a New/Handled filter, mark handled/unread, delete, and a **Reply** action that opens a new email with the sender's address, a `Re:` subject and the original text quoted.
 - Panel **Inbox → Emails** is the composer and outbox: rich-text body, one or more recipients, preview, and **Send** through Resend. Each email is sent to recipients one at a time and the record keeps `draft`, `sent` (with a timestamp) or `failed` (with the provider's reason and how many were delivered). Drafts are reusable and can be sent later.
@@ -100,7 +103,7 @@ Deferred: CV collection, applicant tracking, candidate accounts, employer self-s
 | `app/app/Models/` | `Company`, `JobListing`, `Article`, `Category`, `Tag` — content models now read by the public pages |
 | `app/app/Enums/` | `EmploymentType`, `WorkMode`, `PublicationStatus` backed enums |
 | `app/app/Support/` | `HasUniqueSlug`, `Publishable` (visibility scopes), `NairobiTime` (UTC boundary conversion) |
-| `app/database/migrations/` | Starter users/cache/queue tables plus the `2026_10_31_*` content-schema migrations |
+| `app/database/migrations/` | Starter users/cache/queue tables plus the `2026_10_31_*` content-schema migrations and later additions (`emails.from_address`, job editorial fields) |
 | `app/database/factories/` | Factories for every content model, with draft/published/open/closed/remote states |
 | `app/tests/TestCase.php` | Fail-fast guard refusing any database other than `plusthree_testing` |
 | `SCHEMA.md` | Content schema design, decisions, and implementation record |
@@ -307,6 +310,8 @@ Implemented: Filament 5.11 at `/mdosi`, brand-neutral admin theme, login, an exp
 
 Articles are written in Filament's rich-text editor: bold, italic, underline, headings, lists, quotes and links, with a floating toolbar over a text selection and in-body image uploads to `articles/inline` on the public disk. The body is stored as HTML and rendered through `App\Support\ArticleBody`, which allowlists elements and attributes with Symfony HtmlSanitizer (already a Filament dependency) and strips scripts, event handlers and `javascript:` URLs. Plain-text bodies written before the editor are still escaped and keep their line breaks. A **Preview** action opens the public page for published articles and a 30-minute signed URL for drafts; the signed route is registered with the `signed` middleware and drafts stay 404 on the public route.
 
+Since 5 November 2026 job listings have the same editorial capabilities as articles: rich-text description and requirements, a featured image with alt text, SEO title/description overrides, a **Preview** action (signed `jobs.preview` route for drafts) and the **Describe images** action. `metaTitle()`, `metaDescription()`, `renderedDescription()` and `renderedRequirements()` keep the public job page on the same sanitiser boundary as articles. The remaining differences are deliberate: jobs add company, contract type, work mode, location, application route and closing date; articles add an author and excerpt.
+
 In-body uploads are downscaled to 1400px wide on arrival (`App\Support\InlineImage`), which required JPEG and WebP support in GD — the build previously had neither, so every photo silently skipped resizing. A **Describe images** action lists every in-body image without alt text and writes descriptions back into the body. `php artisan images:prune` reports files under `articles/inline` that no article references; `--force` deletes them, with a 24-hour grace period and a dry run by default.
 
 Sign-in with Google is available on the panel login (Socialite) but **disabled by default**: the button appears only when `GOOGLE_LOGIN_ENABLED=true` and both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set, so a half-configured or deliberately paused deployment never offers a path that cannot work. The routes return 503 while it is off. Only addresses in `ADMIN_EMAILS` are accepted; a refused address creates no account and leaves no session, and the attempt is logged. New accounts are admins; existing accounts keep their current `is_admin`. The password login stays enabled as the break-glass route.
@@ -332,7 +337,7 @@ Acceptance: a non-admin cannot publish or access drafts; the owner can create, p
 
 ### Milestone 3 — Real job discovery and detail pages (implemented 31 October 2026)
 
-Implemented: `/jobs` lists published, open listings from `job_listings` with keyword search (title, description, company name) and contract-type filtering in shareable GET URLs, 10 per page with preserved query strings. `/fellowships` and `/other-opportunities` are their own pages: they reuse the listing query and view but fix the employment type, drop the contract-type select and explain what belongs there, so the header menu does not send visitors to a filtered URL. `/jobs/{slug}` shows a published job with employer, description, requirements, location, work mode and closing date. Open jobs expose an http/https application link or an email link; closed jobs remain readable with applications disabled; draft, future-dated, archived and expired roles never appear in lists. `config/preview.php` and the fictional roles were removed. Article and job detail routes are read-only and need no login.
+Implemented: `/jobs` lists published, open listings from `job_listings` with keyword search (title, description, company name) and contract-type filtering in shareable GET URLs, 10 per page with preserved query strings and numbered pagination. `/fellowships` and `/other-opportunities` are their own pages: they reuse the listing query and view but fix the employment type, drop the contract-type select and explain what belongs there, so the header links do not send visitors to a filtered URL. `/jobs/{slug}` shows a published job with employer, description, requirements, location, work mode and closing date. Open jobs expose an http/https application link or an email link; closed and archived jobs remain readable with applications disabled; draft, future-dated and expired roles never appear in lists. `config/preview.php` and the fictional roles were removed. Article and job detail routes are read-only and need no login. Since 5 November 2026 the board also flags roles closing within seven days and offers `?closing=soon`.
 
 Remaining below is the original reference; search is still substring matching (no full-text), and there is no salary display or `JobPosting` structured data yet.
 
@@ -381,9 +386,9 @@ Acceptance: images are real assets with documented origin, layout does not jump 
 
 ### Milestone 6 — SEO and indexing (metadata, sitemap and schema implemented 1 November 2026)
 
-Implemented: every public page renders a title, description, canonical URL, Open Graph and Twitter metadata through `partials/seo-meta`; articles and job listings override the defaults. `/sitemap.xml` lists the home, job and blog indexes plus every open job, published article and non-empty article category with modification times. `/robots.txt` is generated (the static file was removed) and blocks everything until indexing is enabled. `App\Support\StructuredData` emits `WebSite` on the home page, `Article` on articles and `JobPosting` on open jobs. Indexing is opt-in through `SEO_INDEXABLE`, refused while `APP_DEBUG` is on, and filtered job searches stay `noindex` with a canonical pointing at `/jobs`.
+Implemented: every public page renders a title, description, canonical URL, Open Graph and Twitter metadata through `partials/seo-meta`; articles and job listings override the defaults. `/sitemap.xml` lists the home, job and blog indexes plus every open job, published article and non-empty article category with modification times. `/robots.txt` is generated (the static file was removed) and blocks everything until indexing is enabled. `App\Support\StructuredData` emits `WebSite` on the home page, `Article` on articles and `JobPosting` only on open jobs — an expired or archived role keeps its page but stops advertising a vacancy. Employment types map to `FULL_TIME`, `PART_TIME`, `CONTRACTOR`, `INTERN` and `OTHER`. Indexing is opt-in through `SEO_INDEXABLE`, refused while `APP_DEBUG` is on, and filtered job searches stay `noindex` with a canonical pointing at `/jobs`.
 
-Still outstanding: Search Console verification and sitemap submission after the domain exists, slug redirect policy, expired-job metadata handling beyond removal from the sitemap, and admin overrides for non-article pages.
+Still outstanding: Search Console verification and sitemap submission after the domain exists, slug redirect policy, and the 301-after-grace-period redirect for long-closed roles.
 
 - Add reusable per-page title, description, canonical and social-sharing metadata with useful defaults and admin overrides.
 - Generate XML sitemaps from eligible published records; include accurate modification times.
@@ -428,7 +433,8 @@ Use `php artisan view:clear` when troubleshooting stale compiled views. Do not u
 
 Historical verification during implementation:
 
-- **1 November 2026 (current):** full suite **74 tests, 239 assertions passed** (2 skipped: GD is not installed on this host) against `plusthree_testing`, including public job/blog pages, visibility leaks, closed-job application rules, unsafe URL schemes, generated article art, featured-image rendering, rich-text sanitisation (scripts, event handlers and `javascript:` URLs), plain-text body compatibility, signed draft previews, canonical URLs, sitemap eligibility, robots policy, schema.org JSON-LD, in-body image descriptions and orphaned-image pruning. Earlier the same day: 43 tests/125 assertions after the public pages; 30 tests/80 assertions after the admin panel; 24 tests/69 assertions after the content schema.
+- **5 November 2026 (current):** full suite **123 tests, 489 assertions passed** (2 skipped: GD is not installed on this host) against `plusthree_testing`, adding coverage for part-time listings and `PART_TIME` structured data, archived-but-readable job pages, and closed roles omitting `JobPosting`. Earlier the same day, the focused `PublicPagesTest|SeoTest|VisibilityScopeTest` run passed at **51 tests, 251 assertions**.
+- **1 November 2026:** full suite **74 tests, 239 assertions passed** (2 skipped: GD is not installed on this host) against `plusthree_testing`, including public job/blog pages, visibility leaks, closed-job application rules, unsafe URL schemes, generated article art, featured-image rendering, rich-text sanitisation (scripts, event handlers and `javascript:` URLs), plain-text body compatibility, signed draft previews, canonical URLs, sitemap eligibility, robots policy, schema.org JSON-LD, in-body image descriptions and orphaned-image pruning. Earlier the same day: 43 tests/125 assertions after the public pages; 30 tests/80 assertions after the admin panel; 24 tests/69 assertions after the content schema.
 - 8 content-schema migrations applied to the development database; the test-database guard was positively verified to abort before touching a non-test database.
 - After removing the location control: focused discovery suite **3 tests, 12 assertions passed** and assets built successfully.
 - Homepage previously returned HTTP 200 and desktop/mobile screenshots were inspected.
@@ -452,7 +458,9 @@ Missing test coverage includes Filament CRUD interactions, the upload widget its
 | Vite manifest missing | Build assets or start Vite; check `app/public/build/manifest.json` |
 | CSS changes do not appear | Rebuild, inspect stale `public/hot` from a stopped Vite process, refresh browser |
 | Old `location=` query visible | Obsolete URL state; current route ignores it; use the base URL |
-| Published item returns 404 | Check `status`, `published_at` (future dates are hidden), the slug, and for jobs whether the closing date has passed |
+| Published item returns 404 | Check `status` (drafts are hidden), `published_at` (future dates are hidden) and the slug. An expired or archived **job** still opens at its own URL with a closed notice; only a never-published draft 404s |
+| An expired job is gone from `/jobs` but still in the panel | Expected: passing `closing_at` does not change the status. Archive it manually if you want it out of the panel's active view |
+| A job shows “Closes today” but the deadline looks later | The window is counted in Africa/Nairobi dates, and `closing_at` is stored as 23:59:59 Nairobi time on the chosen day |
 | Article images 404 after deploy | Confirm the `/var/www/html/storage/app/public` volume is mounted and `public/storage` exists; files are lost without the volume |
 | Article/listing shows the wrong image or none | Lists show only uploaded images; articles without one use a generated hero panel on the article page and nothing on cards |
 | `/admin` returns 404 | Expected — the panel lives at `/mdosi`; `/admin` is deliberately unused |

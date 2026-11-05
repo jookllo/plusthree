@@ -84,8 +84,9 @@ class ContentSchemaTest extends TestCase
 
     public function test_enum_values_stay_in_step_with_the_public_filters(): void
     {
-        $this->assertSame(['full_time', 'contract', 'internship', 'fellowship', 'other'], EmploymentType::values());
+        $this->assertSame(['full_time', 'part_time', 'contract', 'internship', 'fellowship', 'other'], EmploymentType::values());
         $this->assertSame('Full-time', EmploymentType::FullTime->label());
+        $this->assertSame('Part-time', EmploymentType::PartTime->label());
         $this->assertSame('Contract', EmploymentType::Contract->label());
         $this->assertSame('Internship', EmploymentType::Internship->label());
         $this->assertSame('Fellowship', EmploymentType::Fellowship->label());

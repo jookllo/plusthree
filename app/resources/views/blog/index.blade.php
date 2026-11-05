@@ -6,7 +6,7 @@
 @section('content')
     <section class="page-band">
         <div class="wrap">
-            <p class="band-kicker">The career edit</p>
+            <p class="band-kicker">The Career Edit</p>
             <h1>Advice that moves you forward.</h1>
             <p class="band-lede">Clear, practical guidance on applications, interviews and the working life that follows.</p>
         </div>

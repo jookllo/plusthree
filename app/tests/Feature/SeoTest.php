@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\EmploymentType;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\JobListing;
@@ -33,6 +34,9 @@ class SeoTest extends TestCase
         config(['seo.indexable' => true]);
 
         $this->get('/jobs?q=designer&type=contract')->assertOk()
+            ->assertSee('content="noindex, nofollow"', false);
+
+        $this->get('/jobs?closing=soon')->assertOk()
             ->assertSee('content="noindex, nofollow"', false);
     }
 
@@ -162,6 +166,44 @@ class SeoTest extends TestCase
         $this->assertSame($job->company->name, $json['hiringOrganization']['name']);
         $this->assertSame('Nairobi', $json['jobLocation']['address']['addressLocality']);
         $this->assertSame($job->closing_at->toIso8601String(), $json['validThrough']);
+    }
+
+    public function test_closed_listings_do_not_advertise_a_job_posting(): void
+    {
+        $closed = [
+            JobListing::factory()->closed()->create(),
+            JobListing::factory()->archived()->create(),
+        ];
+
+        foreach ($closed as $job) {
+            $html = $this->get('/jobs/'.$job->slug)->assertOk()->getContent();
+
+            // Expired or retired roles keep their page but must not keep
+            // telling search engines that the vacancy is still open.
+            $this->assertStringNotContainsString('JobPosting', $html);
+        }
+    }
+
+    public function test_part_time_listings_emit_the_part_time_structured_data_value(): void
+    {
+        $job = JobListing::factory()->open()->create(['employment_type' => EmploymentType::PartTime]);
+
+        $json = $this->structuredData($this->get('/jobs/'.$job->slug)->getContent());
+
+        $this->assertSame('PART_TIME', $json['employmentType']);
+    }
+
+    public function test_fellowship_and_other_listings_emit_structured_data(): void
+    {
+        foreach ([EmploymentType::Fellowship, EmploymentType::Other] as $type) {
+            $job = JobListing::factory()->open()->create(['employment_type' => $type]);
+
+            $json = $this->structuredData($this->get('/jobs/'.$job->slug)->getContent());
+
+            // schema.org has no fellowship or grant value; the copy carries
+            // the detail, but the markup must not blow up on the type.
+            $this->assertSame('OTHER', $json['employmentType']);
+        }
     }
 
     public function test_structured_data_does_not_break_out_of_the_script_tag(): void

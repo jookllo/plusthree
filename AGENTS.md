@@ -6,13 +6,13 @@ Applies to this project tree. Last reviewed 31 October 2026. Read the root READM
 
 Build a public African job board and career blog with owner-managed publishing. Browsing requires no login. The current application is a local design preview, not a CMS or production launch.
 
-Implemented: Laravel 12, MySQL connection and content-schema migrations, Blade/Tailwind/Vite, database-backed homepage, `/jobs` search and detail pages, `/blog` index, article and category pages, content models with publication/expiry scopes, factories and tests, article featured-image uploads with generated fallback art, and a Filament 5.11 publishing panel at `/mdosi` restricted to `users.is_admin` accounts.
+Implemented: Laravel 12, MySQL connection and content-schema migrations, Blade/Tailwind/Vite, database-backed homepage, `/jobs` search and detail pages with numbered pagination and closing-soon urgency, `/blog` index, article and category pages, content models with publication/expiry scopes, factories and tests, featured-image uploads with generated fallback art, and a Filament 5.11 publishing panel at `/mdosi` restricted to `users.is_admin` accounts, where job listings have the same editorial tooling as articles.
 
 Deployed 1 November 2026 at `https://plusthree.io` through Dokploy (`mtaa.chakulamoto.fit` panel): MySQL service, environment, Cloudflare domain with Let's Encrypt, and the `plusthree-uploads` volume at `/var/www/html/storage/app/public`. The production database is empty and indexing is off.
 
 Panel sign-in with Google is implemented via Socialite with an `ADMIN_EMAILS` allowlist (`App\Http\Controllers\Auth\GoogleController`); the password login remains as break-glass.
 
-Not implemented: full-text search, two-factor authentication, user-management screens, the scheduled image prune, backups, monitoring, real photography, and real content. Password reset is wired through the configured mailer but depends on the production Resend environment.
+Not implemented: full-text search, a job sector filter, two-factor authentication, user-management screens, automatic archiving of expired roles, the scheduled image prune, backups, monitoring, real photography, and real content. Password reset is wired through the configured mailer but depends on the production Resend environment.
 
 Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), are edited through the `/mdosi` panel, and are read by the public pages: `GET /`, `/jobs`, `/jobs/{slug}`, `/blog`, `/blog/{slug}`, `/blog/category/{slug}`. Only `User` exists as an account model; the panel requires `users.is_admin` (not mass assignable) and the starter Test User is not an admin. `config/preview.php` and the four fictional roles were removed. `/up` is the framework health route. Do not claim the development database contains real vacancies or editorial — it holds a few explicitly labelled “Sample:” records used for layout checks.
 
@@ -23,7 +23,7 @@ Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), ar
 - Provisional logo is `app/public/images/plusthree-logo.png`; source is `output/logos/plusthree-africa-red-tagline.png`. Final logo work was deferred. Preserve all concepts. The favicon set is derived from the +3 mark by `scripts/make-favicons.py`; regenerate it after any logo change rather than drawing a separate symbol, then bump `?v=` in `layouts/site.blade.php` so the Cloudflare-cached copy is refetched.
 - Laravel + MySQL + Blade/Tailwind is the selected stack. Livewire/Filament are planned. No Vue/separate frontend is needed by default.
 - **Do not restore the “Where?” location field unless requested.** Location remains useful on jobs. Current `location` query parameters are ignored.
-- **Header structure is owner-specified:** “Find a job” is a menu containing Careers, Fellowships and Other opportunities, each a real page (`/jobs`, `/fellowships`, `/other-opportunities`), not a query string on `/jobs`; the separate “Explore” keyword shortcuts were removed and should not return without a request. “For employers” opens the employer form at `/for-employers`, not a homepage anchor.
+- **Header structure is owner-specified:** the header is a row of inline links — Careers (`/jobs`), Fellowships (`/fellowships`), Other opportunities (`/other-opportunities`), Career advice (`/blog`) and About plusthree (`/#about`) — with “For employers” opening the employer form at `/for-employers`, not a homepage anchor. This replaced the earlier “Find a job” dropdown at the owner's request (5 November 2026); do not restore the dropdown or the “Explore” keyword shortcuts without an explicit request. On narrow screens the links wrap to two centred rows rather than collapsing into a menu button.
 - The owner rejected a generic marketing hero with oversized claims and rounded cards. Preserve job discovery, ruled/scannable listings, compact navigation and the editorial career column.
 - The owner asked about images. Photos/illustrations have not actually been integrated. Source suitable assets when working on that task; do not require the owner to download them first, or pretend the current text panel is a photograph.
 - Public users apply through external employer links/email initially. Do not add CV storage, applicant tracking, payments, accounts or employer self-service without a scope decision.
@@ -84,11 +84,11 @@ Content models exist (`Company`, `JobListing`, `Article`, `Category`, `Tag`), ar
 ## Implementation sequence
 
 1. Content schema and publication rules — **implemented 31 October 2026** (models, migrations, factories, scopes and tests; see SCHEMA.md). Admin capability column exists but no panel uses it.
-2. Publishing admin — **core implemented 31 October 2026; rich text, preview, password reset and a collapsible sidebar 1–3 November 2026**: Filament 5.11 at `/mdosi`, admin-only access, CRUD resources, article featured and in-body images, a rich-text editor, a signed draft preview and Filament's password request/reset pages. Remaining: the describe-images check on the create screen, a scheduler for `images:prune`, 2FA, user management.
-3. Database-backed public jobs/search/pagination/detail/application/expiry states — **implemented 1 November 2026**.
+2. Publishing admin — **core implemented 31 October 2026; rich text, preview, password reset and a collapsible sidebar 1–3 November 2026; job/article editorial parity 5 November 2026**: Filament 5.11 at `/mdosi`, admin-only access, CRUD resources, featured and in-body images, rich-text editors, signed draft previews for articles and jobs, SEO overrides and Filament's password request/reset pages. Remaining: the describe-images check on the create screen, a scheduler for `images:prune`, 2FA, user management.
+3. Database-backed public jobs/search/pagination/detail/application/expiry states — **implemented 1 November 2026; numbered pagination and closing-soon urgency 5 November 2026**. Sector filter and the 301-after-grace-period redirect remain.
 4. Blog index/article pages/categories and homepage integration — **implemented 1 November 2026**; article search and tag pages remain.
 5. Imagery and responsive design finish — **article featured images, in-body images and 20 fallback art panels implemented**; real photography and responsive `srcset` remain.
-6. SEO metadata, sitemap, canonical/noindex policy and structured data — **implemented 1 November 2026**; slug redirects, expired-job metadata and Search Console remain.
+6. SEO metadata, sitemap, canonical/noindex policy and structured data — **implemented 1 November 2026; closed-role `JobPosting` gating 5 November 2026**; slug redirects, the 301 grace-period redirect and Search Console remain.
 7. Delivery plumbing — **CI and image pruning implemented 1 November 2026** (`.github/workflows/ci.yml`, `php artisan images:prune`); scheduling remains.
 8. Production deployment and operations, plus end-to-end/accessibility/performance checks.
 
@@ -98,6 +98,10 @@ See README milestone sections for detailed acceptance criteria. A different user
 
 - Use Laravel conventions: migrations, Eloquent relationships/scopes, controllers and form requests as complexity grows. Keep the homepage route name and existing links working through deliberate transitions.
 - Centralise public visibility rules. Draft, future and archived records must not leak through lists, details, search, sitemap or JSON-LD. Open job queries also enforce deadlines independently of scheduler timing.
+- **Job lifecycle:** `closing_at` passing does not change `status`; visibility is query-time through `scopeOpen()`. Expired and archived roles stay readable at `/jobs/{slug}` (`scopePubliclyReadable()`) with a closed notice and no application links, because old links and search-engine equity are worth keeping. Lists, landing pages, the sitemap and `llms.txt` use `open()` only. `JobPosting` JSON-LD is emitted only when `isOpen()`; a closed page must not advertise a live vacancy. The agreed next step, not yet built, is a 301 to the sector page (or `/jobs`) after a grace period once sector pages exist.
+- **Closing-soon urgency** is a presentation rule, not a status: `JobListing::CLOSING_SOON_DAYS` (7) measured in Africa/Nairobi dates, surfaced as a flag on rows, a notice on the detail page, `?closing=soon`, and an admin column/filter. Keep the window in one constant.
+- **Pagination is numbered** (windowed ±2 with first/last and Prev/Next) on `/jobs` and `/blog` via `partials/pagination`. The homepage stays fixed at six roles with a link to `/jobs`; do not add a paginated homepage.
+- **Part-time is an employment type**, not a job category. Categories describe sectors; `EmploymentType` describes the arrangement, and it drives the public filter, the employer form and structured data.
 - Use UTC persistence with explicit display/input timezone handling; owner context is Africa/Nairobi.
 - Choose stable unique slugs and an intentional redirect policy.
 - Validate and parameterise search; escape displayed input; use pagination and eager loading for real data. Full-text search is future work, not current functionality.
@@ -153,7 +157,7 @@ The pnpm wrapper is a shell script, not a JavaScript module. The existing Compos
 - Schema/admin changes: test on isolated MySQL, including denied access and publication visibility.
 - SEO changes: inspect rendered HTML and public/private sitemap/schema outcomes.
 - Do not rewrite tests merely to hide a regression. Update intentional behaviour expectations with an explanation.
-- Historical results: full suite 30 tests/80 assertions on 31 October 2026 after the panel; 24 tests/69 assertions earlier the same day after the content schema; 7 tests/21 assertions after redesign; focused search suite 3 tests/12 assertions after location removal.
+- Historical results: full suite **123 tests / 489 assertions, 2 skipped** on 5 November 2026 (part-time, archived-readable and closed-`JobPosting` coverage); **74 tests / 239 assertions** on 1 November 2026 after the panel, blog, jobs and SEO work; 30 tests/80 assertions on 31 October 2026 after the panel; 24 tests/69 assertions earlier the same day after the content schema; 7 tests/21 assertions after redesign; focused search suite 3 tests/12 assertions after location removal.
 - Indexing is opt-in through `SEO_INDEXABLE` (see `config/seo.php`); `APP_DEBUG=true` overrides it off, and filtered job searches stay `noindex`. `/sitemap.xml` and `/robots.txt` are routes — `public/robots.txt` was removed. Do not restore a static robots file, and do not switch indexing on before the domain and real content exist.
 
 ## Documentation and completion

@@ -77,7 +77,7 @@ final class StructuredData
             '@context' => 'https://schema.org',
             '@type' => 'JobPosting',
             'title' => $job->title,
-            'description' => nl2br(e($job->description)),
+            'description' => (string) ArticleBody::render($job->description),
             'datePosted' => $job->published_at?->toIso8601String(),
             'employmentType' => self::employmentType($job->employment_type),
             'hiringOrganization' => [
@@ -87,6 +87,10 @@ final class StructuredData
             'url' => route('jobs.show', $job->slug),
             'directApply' => filled($job->application_url),
         ];
+
+        if ($job->featured_image_path) {
+            $data['image'] = url(Storage::disk('public')->url($job->featured_image_path));
+        }
 
         if ($job->closing_at) {
             $data['validThrough'] = $job->closing_at->toIso8601String();
@@ -138,8 +142,12 @@ final class StructuredData
     {
         return match ($type) {
             EmploymentType::FullTime => 'FULL_TIME',
+            EmploymentType::PartTime => 'PART_TIME',
             EmploymentType::Contract => 'CONTRACTOR',
             EmploymentType::Internship => 'INTERN',
+            // schema.org has no dedicated value for these; the listing's own
+            // copy explains what kind of opportunity it is.
+            EmploymentType::Fellowship, EmploymentType::Other => 'OTHER',
         };
     }
 }

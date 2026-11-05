@@ -1,6 +1,6 @@
 # TODO / backlog
 
-Last updated: 3 November 2026. Ordered by what to do next, not by topic. Scope detail and acceptance criteria live in [README.md](README.md) and [ROADMAP.md](ROADMAP.md).
+Last updated: 5 November 2026. Ordered by what to do next, not by topic. Scope detail and acceptance criteria live in [README.md](README.md) and [ROADMAP.md](ROADMAP.md).
 
 ## Before anything else
 
@@ -23,26 +23,38 @@ Last updated: 3 November 2026. Ordered by what to do next, not by topic. Scope d
 11. [ ] **Error monitoring and uptime checks.** Depends on: 1.
 12. [ ] **Scheduler and queue workers** once any background job exists. Depends on: nothing yet.
 
+## Job lifecycle follow-ups (5 November 2026)
+
+13. [ ] **301 long-closed roles after a grace period.** Expired and archived roles currently keep a readable page with the closed notice and no `JobPosting`. Once job sector pages exist, redirect a role to its sector (or `/jobs`) after roughly 90 days so the old URL still passes equity. Depends on: sector pages.
+14. [ ] **Decide whether to auto-archive expired roles.** `closing_at` passing does not change `status`, so expired roles stay `Published` in the panel and invisible publicly. Either schedule `jobs:archive-expired` nightly or leave it manual. Needs an owner decision.
+15. [ ] **Job sector filter.** Job categories ("Sectors") are display-only: no filter, no landing page, not searchable, not in the sitemap. Add a Sector select to `/jobs` (shareable, `noindex` while filtered) before asking the owner to populate them in production.
+16. [ ] **Describe-images check on the create screen** for articles and jobs; it currently runs from the edit screen only.
+
 ## Design and content polish
 
-13. [ ] **Photography.** The owner has not supplied real assets; nothing on the site is a real photograph yet. Needed: licence/provenance recorded and saved in the workspace, not a temporary directory.
-14. [ ] **Responsive `srcset`** for article and in-body images.
-15. [ ] **Imagery for the about band and job listings** — lists show a photo only when one exists.
-16. [ ] **Typography decision for blog body text** (system fonts today).
-17. [ ] **Optional quieter fallback art** — halve the stripe weight and pull the motif colour closer to the base if the article-hero backdrop reads too strongly behind headlines.
-18. [ ] **Visible dark-mode toggle** in the panel top bar (Filament's switcher already sits in the avatar menu).
+17. [ ] **Photography.** The owner has not supplied real assets; nothing on the site is a real photograph yet. Needed: licence/provenance recorded and saved in the workspace, not a temporary directory.
+18. [ ] **Responsive `srcset`** for article and in-body images.
+19. [ ] **Imagery for the about band and job listings** — lists show a photo only when one exists.
+20. [ ] **Typography decision for blog body text** (system fonts today).
+21. [ ] **Optional quieter fallback art** — halve the stripe weight and pull the motif colour closer to the base if the article-hero backdrop reads too strongly behind headlines.
+22. [ ] **Visible dark-mode toggle** in the panel top bar (Filament's switcher already sits in the avatar menu).
 
 ## Deferred by the owner (31 October 2026)
 
-19. [x] Google sign-in for `/mdosi` — Socialite, `ADMIN_EMAILS` allowlist enforced at the callback, Google-only accounts for new admins, password login kept as break-glass. Remaining: add the Google credentials in Dokploy.
-20. [ ] Optional two-factor authentication.
-21. [ ] User-management screen (admins are currently granted through `tinker`).
-22. [ ] Per-role permissions if a second editor joins.
-23. [ ] Keep the CLI password reset documented as break-glass recovery.
+23. [x] Google sign-in for `/mdosi` — Socialite, `ADMIN_EMAILS` allowlist enforced at the callback, Google-only accounts for new admins, password login kept as break-glass. Remaining: add the Google credentials in Dokploy.
+24. [ ] Optional two-factor authentication.
+25. [ ] User-management screen (admins are currently granted through `tinker`).
+26. [ ] Per-role permissions if a second editor joins.
+27. [ ] Keep the CLI password reset documented as break-glass recovery.
 
 ## Done
 
-- [x] Dedicated `/fellowships` and `/other-opportunities` pages, linked from the job menu and listed in the sitemap.
+- [x] Header converted from a “Find a job” dropdown to five inline links (5 November 2026).
+- [x] Numbered pagination on `/jobs` and `/blog`; homepage role count removed (5 November 2026).
+- [x] Closing-soon urgency labels and the `?closing=soon` filter (5 November 2026).
+- [x] Job listings gained article-parity editing: rich description/requirements, featured image and alt text, SEO overrides, preview and describe-images (5 November 2026).
+- [x] Archived jobs stay readable with the closed notice and no `JobPosting`; Part-time added as an employment type (5 November 2026).
+- [x] Dedicated `/fellowships` and `/other-opportunities` pages, listed in the sitemap.
 - [x] Optional sender choice (`MAIL_SENDER_ADDRESSES`) in the email composer, stored per email.
 
 - [x] Content schema, publication and expiry scopes, factories, tests.

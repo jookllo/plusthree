@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\EmploymentType;
 use App\Enums\PublicationStatus;
 use App\Enums\WorkMode;
+use App\Support\ArticleBody;
 use App\Support\HasUniqueSlug;
 use App\Support\Publishable;
 use Database\Factories\JobListingFactory;
@@ -13,11 +14,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class JobListing extends Model
 {
     /** @use HasFactory<JobListingFactory> */
     use HasFactory, HasUniqueSlug, Publishable;
+
+    /**
+     * How many days before the deadline a listing is flagged as urgent.
+     */
+    public const CLOSING_SOON_DAYS = 7;
 
     /**
      * @var list<string>
@@ -28,6 +36,8 @@ class JobListing extends Model
         'slug',
         'description',
         'requirements',
+        'featured_image_path',
+        'featured_image_alt',
         'employment_type',
         'work_mode',
         'location_city',
@@ -37,6 +47,8 @@ class JobListing extends Model
         'status',
         'published_at',
         'closing_at',
+        'seo_title',
+        'seo_description',
         'created_by',
         'updated_by',
     ];
@@ -90,9 +102,31 @@ class JobListing extends Model
         });
     }
 
+    /**
+     * Records whose detail page may be served: published as normal, plus
+     * archived roles so old links keep working instead of dead-ending. Drafts
+     * and future-dated records stay private; only the signed preview shows them.
+     */
+    public function scopePubliclyReadable(Builder $query): void
+    {
+        $query->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->whereIn('status', [PublicationStatus::Published, PublicationStatus::Archived]);
+    }
+
     public function scopeRemote(Builder $query): void
     {
         $query->where('work_mode', WorkMode::Remote);
+    }
+
+    /**
+     * Open roles whose deadline falls inside the urgency window.
+     */
+    public function scopeClosingSoon(Builder $query): void
+    {
+        $query->whereNotNull('closing_at')
+            ->where('closing_at', '>', now())
+            ->where('closing_at', '<=', now()->addDays(self::CLOSING_SOON_DAYS));
     }
 
     public function scopeEmploymentType(Builder $query, EmploymentType $type): void
@@ -114,6 +148,89 @@ class JobListing extends Model
         return $this->published_at !== null
             && $this->closing_at !== null
             && $this->closing_at->lessThanOrEqualTo(now());
+    }
+
+    /**
+     * Whole days left before the deadline, counted in Nairobi dates so a
+     * listing closing tonight says "today" rather than "0.4 days".
+     */
+    public function daysUntilClosing(): ?int
+    {
+        if ($this->closing_at === null) {
+            return null;
+        }
+
+        $today = now('Africa/Nairobi')->startOfDay();
+        $closes = $this->closing_at->copy()->timezone('Africa/Nairobi')->startOfDay();
+
+        return (int) round($today->diffInDays($closes));
+    }
+
+    /**
+     * Whether the deadline is close enough to warn visitors about.
+     */
+    public function isClosingSoon(): bool
+    {
+        $days = $this->daysUntilClosing();
+
+        return $this->isOpen()
+            && $days !== null
+            && $days >= 0
+            && $days <= self::CLOSING_SOON_DAYS;
+    }
+
+    /**
+     * Short urgency label for lists; null when the deadline is not near.
+     */
+    public function closingSoonLabel(): ?string
+    {
+        if (! $this->isClosingSoon()) {
+            return null;
+        }
+
+        return match ($this->daysUntilClosing()) {
+            0 => 'Closes today',
+            1 => 'Closes tomorrow',
+            default => 'Closing soon',
+        };
+    }
+
+    /**
+     * Search/social title: the override when set, otherwise the role title.
+     */
+    public function metaTitle(): string
+    {
+        return filled($this->seo_title) ? $this->seo_title : $this->title;
+    }
+
+    /**
+     * Meta description: the override when set, otherwise the role's opening text.
+     */
+    public function metaDescription(): ?string
+    {
+        if (filled($this->seo_description)) {
+            return $this->seo_description;
+        }
+
+        $text = ArticleBody::plainText($this->description);
+
+        return $text === '' ? null : Str::limit($text, 155);
+    }
+
+    /**
+     * The role description as sanitised, display-ready HTML.
+     */
+    public function renderedDescription(): HtmlString
+    {
+        return ArticleBody::render($this->description);
+    }
+
+    /**
+     * The requirements as sanitised, display-ready HTML.
+     */
+    public function renderedRequirements(): HtmlString
+    {
+        return ArticleBody::render($this->requirements);
     }
 
     /**

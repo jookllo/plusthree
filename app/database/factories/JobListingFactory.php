@@ -27,6 +27,8 @@ class JobListingFactory extends Factory
             'slug' => null,
             'description' => fake()->paragraph(4),
             'requirements' => fake()->paragraph(3),
+            'featured_image_path' => null,
+            'featured_image_alt' => null,
             'employment_type' => EmploymentType::FullTime,
             'work_mode' => WorkMode::OnSite,
             'location_city' => 'Nairobi',
@@ -58,6 +60,16 @@ class JobListingFactory extends Factory
     {
         return $this->published()->state(fn (): array => [
             'closing_at' => now()->subDay(),
+        ]);
+    }
+
+    /**
+     * Open, but inside the closing-soon window.
+     */
+    public function closingSoon(): static
+    {
+        return $this->published()->state(fn (): array => [
+            'closing_at' => now()->addDays(2),
         ]);
     }
 

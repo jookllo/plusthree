@@ -22,24 +22,20 @@
         <img src="{{ asset('images/plusthree-logo.png') }}" width="280" height="112" alt="Plusthree — WHERE AFRICA’S GEMS MEET GLOBAL WORK.">
     </a>
     <nav aria-label="Main navigation">
-        <details class="nav-menu">
-            <summary @class(['active' => request()->routeIs('jobs.*')])>Find a job</summary>
-            <ul class="nav-menu-panel">
-                <li>
-                    <a href="{{ route('jobs.index') }}"
-                       @class(['active' => request()->routeIs('jobs.index') && ! in_array(request()->query('type'), [\App\Enums\EmploymentType::Fellowship->value, \App\Enums\EmploymentType::Other->value], true)])>Careers</a>
-                </li>
-                <li>
-                    <a href="{{ route('jobs.fellowships') }}"
-                       @class(['active' => request()->routeIs('jobs.fellowships') || request()->query('type') === \App\Enums\EmploymentType::Fellowship->value])>Fellowships</a>
-                </li>
-                <li>
-                    <a href="{{ route('jobs.other') }}"
-                       @class(['active' => request()->routeIs('jobs.other') || request()->query('type') === \App\Enums\EmploymentType::Other->value])>Other opportunities</a>
-                </li>
-            </ul>
-        </details>
-        <a href="{{ route('blog.index') }}" @class(['active' => request()->routeIs('blog.*')])>Career advice</a>
+        @php
+            $filters = request()->query();
+            $onCareers = request()->routeIs('jobs.index')
+                && ! in_array($filters['type'] ?? null, [\App\Enums\EmploymentType::Fellowship->value, \App\Enums\EmploymentType::Other->value], true);
+            $onFellowships = request()->routeIs('jobs.fellowships')
+                || ($filters['type'] ?? null) === \App\Enums\EmploymentType::Fellowship->value;
+            $onOther = request()->routeIs('jobs.other')
+                || ($filters['type'] ?? null) === \App\Enums\EmploymentType::Other->value;
+            $onBlog = request()->routeIs('blog.*');
+        @endphp
+        <a href="{{ route('jobs.index') }}" @class(['active' => $onCareers]) @if ($onCareers) aria-current="page" @endif>Careers</a>
+        <a href="{{ route('jobs.fellowships') }}" @class(['active' => $onFellowships]) @if ($onFellowships) aria-current="page" @endif>Fellowships</a>
+        <a href="{{ route('jobs.other') }}" @class(['active' => $onOther]) @if ($onOther) aria-current="page" @endif>Other opportunities</a>
+        <a href="{{ route('blog.index') }}" @class(['active' => $onBlog]) @if ($onBlog) aria-current="page" @endif>Career advice</a>
         <a href="{{ route('home') }}#about">About plusthree</a>
     </nav>
     <a class="nav-note" href="{{ route('employers.show') }}">For employers</a>

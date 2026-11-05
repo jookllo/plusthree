@@ -23,6 +23,9 @@ Route::get('/mdosi/auth/google/callback', [GoogleController::class, 'callback'])
 Route::get('/jobs', [JobListingController::class, 'index'])->name('jobs.index');
 Route::get('/fellowships', [JobListingController::class, 'fellowships'])->name('jobs.fellowships');
 Route::get('/other-opportunities', [JobListingController::class, 'otherOpportunities'])->name('jobs.other');
+Route::get('/jobs/{slug}/preview', [JobListingController::class, 'preview'])
+    ->middleware('signed')
+    ->name('jobs.preview');
 Route::get('/jobs/{slug}', [JobListingController::class, 'show'])->name('jobs.show');
 
 // Employer enquiries are stored for the panel inbox, never emailed on submit.

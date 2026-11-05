@@ -5,10 +5,12 @@ namespace App\Filament\Resources\JobListings\Tables;
 use App\Enums\EmploymentType;
 use App\Enums\PublicationStatus;
 use App\Enums\WorkMode;
+use App\Models\JobListing;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
@@ -53,6 +55,12 @@ class JobListingsTable
                     ->timezone('Africa/Nairobi')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('closing_soon')
+                    ->label('Urgency')
+                    ->badge()
+                    ->state(fn (JobListing $record): ?string => $record->closingSoonLabel())
+                    ->color('danger')
+                    ->placeholder('—'),
                 TextColumn::make('slug')
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -69,6 +77,9 @@ class JobListingsTable
                     ->options(EmploymentType::options()),
                 SelectFilter::make('work_mode')
                     ->options(WorkMode::options()),
+                Filter::make('closing_soon')
+                    ->label('Closing soon')
+                    ->query(fn ($query) => $query->closingSoon()),
             ])
             ->recordActions([
                 EditAction::make(),

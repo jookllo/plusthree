@@ -11,6 +11,9 @@
         </p>
         <h3><a href="{{ route('jobs.show', $job->slug) }}">{{ $job->title }}</a></h3>
         <div class="job-meta">
+            @if ($closingLabel = $job->closingSoonLabel())
+                <span class="job-flag">{{ $closingLabel }}</span>
+            @endif
             @if ($location !== '')
                 <span>{{ $location }}</span>
             @endif

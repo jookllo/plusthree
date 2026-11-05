@@ -36,6 +36,6 @@ return [
     |
     */
 
-    'filter_parameters' => ['q', 'type'],
+    'filter_parameters' => ['q', 'type', 'closing'],
 
 ];

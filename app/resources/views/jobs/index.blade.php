@@ -15,7 +15,7 @@
 
             <form @class(['search-form', 'search-form-wide' => ! $landing, 'search-form-landing' => $landing]) action="{{ request()->url() }}" method="get" role="search">
                 <div class="search-field">
-                    <label for="q">What do you want to do?</label>
+                    <label for="q" class="visually-hidden">Search jobs</label>
                     <input id="q" name="q" maxlength="100" value="{{ $query }}" placeholder="Job title, skill or company">
                 </div>
                 @unless ($landing)
@@ -29,14 +29,17 @@
                         </select>
                     </div>
                 @endunless
+                @if ($closing)
+                    <input type="hidden" name="closing" value="{{ $closing }}">
+                @endif
                 <button class="button" type="submit">
                     Search
                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></svg>
                 </button>
             </form>
 
-            @if ($query !== '' || ($type && ! $landing))
-                <div class="quick-links">
+            <div class="quick-links">
+                @if ($query !== '' || ($type && ! $landing) || $closing)
                     <span>Filtered by</span>
                     @if ($query !== '')
                         <span class="active-filter">{{ $query }}</span>
@@ -44,9 +47,15 @@
                     @if ($type && ! $landing)
                         <span class="active-filter">{{ \App\Enums\EmploymentType::from($type)->label() }}</span>
                     @endif
+                    @if ($closing)
+                        <span class="active-filter">Closing soon</span>
+                    @endif
                     <a href="{{ request()->url() }}">Clear filters</a>
-                </div>
-            @endif
+                @endif
+                @unless ($closing)
+                    <a class="filter-shortcut" href="{{ request()->fullUrlWithQuery(['closing' => 'soon', 'page' => null]) }}">Closing soon only</a>
+                @endunless
+            </div>
 
             @if ($landing)
                 <p class="landing-note">
