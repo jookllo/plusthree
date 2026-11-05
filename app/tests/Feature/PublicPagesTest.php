@@ -142,6 +142,33 @@ class PublicPagesTest extends TestCase
             ->assertSee('<label for="q" class="visually-hidden">Search jobs</label>', false);
     }
 
+    public function test_homepage_paginates_its_roles_instead_of_linking_away(): void
+    {
+        JobListing::factory()->open()->count(7)->create();
+
+        $this->get('/')->assertOk()
+            ->assertSee('Page 1 of 2')
+            ->assertSee('aria-label="Page 2"', false)
+            ->assertDontSee('See all open roles');
+
+        $this->get('/?page=2')->assertOk()
+            ->assertSee('Page 2 of 2')
+            ->assertSee('rel="prev"', false);
+    }
+
+    public function test_roles_closing_soon_are_listed_first_and_flagged(): void
+    {
+        JobListing::factory()->open()->create(['title' => 'Later Role']);
+        JobListing::factory()->closingSoon()->create(['title' => 'Urgent Role']);
+
+        foreach (['/', '/jobs'] as $url) {
+            $this->get($url)->assertOk()
+                ->assertSeeInOrder(['Urgent Role', 'Later Role'])
+                ->assertSee('job-row--urgent', false)
+                ->assertSee('job-flag', false);
+        }
+    }
+
     public function test_homepage_latest_opportunities_does_not_count_roles(): void
     {
         JobListing::factory()->open()->count(3)->create();

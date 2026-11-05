@@ -64,9 +64,13 @@ button,summary{cursor:pointer}
 .job-sector{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
 .job-sector>span{font-size:11px}
 .job-content h3{font-size:22px;margin:8px 0 8px;line-height:1.25;letter-spacing:-.3px}
-.job-meta{display:flex;gap:0;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.job-meta{display:flex;align-items:center;gap:0;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .job-meta span+span:before{content:'/';margin:0 12px;color:var(--muted)}
-.job-flag{color:var(--red);font-weight:bold}
+.job-flag{background:var(--red);color:var(--white);font-size:11px;font-weight:bold;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;align-self:center}
+.job-row--urgent{box-shadow:inset 3px 0 0 var(--red);background:var(--pale-red);padding-left:16px}
+.job-row--urgent .job-content h3 a{text-decoration-color:var(--red)}
+.job-flag+span:before{content:none;margin:0}
+.job-flag+span{margin-left:12px}
 details{margin-top:12px}
 summary{font-size:13px;color:var(--deep-green);font-weight:600;width:fit-content}
 summary:hover{text-decoration:underline}

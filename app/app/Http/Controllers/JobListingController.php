@@ -56,7 +56,7 @@ class JobListingController extends Controller
             })
             ->when($type, fn ($builder) => $builder->where('employment_type', $type))
             ->when($closing === 'soon', fn ($builder) => $builder->closingSoon())
-            ->latest('published_at')
+            ->mostUrgent()
             ->paginate(10)
             ->withQueryString();
 

@@ -40,9 +40,7 @@
             @endforelse
 
             @if ($jobs->isNotEmpty())
-                <div class="listing-footnote">
-                    <a href="{{ route('jobs.index') }}">See all open roles</a>
-                </div>
+                @include('partials.pagination', ['paginator' => $jobs])
             @endif
         </section>
 

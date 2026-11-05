@@ -129,6 +129,26 @@ class JobListing extends Model
             ->where('closing_at', '<=', now()->addDays(self::CLOSING_SOON_DAYS));
     }
 
+    /**
+     * Deadline first, then recency.
+     *
+     * Roles inside the urgency window come first, soonest deadline at the top,
+     * so a visitor scanning the board cannot miss the one closing tomorrow.
+     * Everything else falls back to newest-published order.
+     */
+    public function scopeMostUrgent(Builder $query): void
+    {
+        $cutoff = now()->addDays(self::CLOSING_SOON_DAYS);
+
+        $query->orderByRaw(
+            'case when closing_at is not null and closing_at <= ? then 0 else 1 end',
+            [$cutoff],
+        )->orderByRaw(
+            'case when closing_at is not null and closing_at <= ? then closing_at end asc',
+            [$cutoff],
+        )->orderByDesc('published_at');
+    }
+
     public function scopeEmploymentType(Builder $query, EmploymentType $type): void
     {
         $query->where('employment_type', $type);

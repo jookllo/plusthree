@@ -19,7 +19,7 @@ Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROA
 | Inbox | Panel **Messages** (employer enquiries stored from `/for-employers`, unread badge, reply) and **Emails** (rich-text compose, drafts, preview, send through Resend with a stored result) | No inbound mailbox, templates, contact lists or attachments |
 | Frontend | Blade, Tailwind 4, Vite 7, pnpm lockfile | No Vue or separate frontend |
 | Header | Inline links: Careers, Fellowships, Other opportunities, Career advice, About plusthree, plus “For employers” | Location is not a header option |
-| Homepage | Responsive masthead, provisional logo, gold search area, ruled job list (six roles, no pagination), editorial sidebar, about/employer sections | Real content is still sample content |
+| Homepage | Responsive masthead, provisional logo, gold search area, ruled job list paginated six at a time, editorial sidebar, about/employer sections | Real content is still sample content |
 | Search | Database keyword (`LIKE`) search plus an exact employment-type filter, shareable GET URLs, numbered pagination on `/jobs` | Not full-text; no stemming, typo tolerance, relevance ranking or sector filter |
 | Job pages | `/jobs`, `/jobs/{slug}` with application links, closing-soon urgency, expiry/archived states and structured data | Applications happen on the employer's site |
 | Career advice | Database-backed `/blog`, `/blog/{slug}` and `/blog/category/{slug}` | Article search and tag pages are not built |
@@ -38,7 +38,8 @@ Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROA
 - `q`: optional string, maximum 100 characters. Trimmed and matched case-insensitively with `LIKE` against job **title, description and company name**.
 - `type`: optional exact value: `full_time`, `part_time`, `contract`, `internship`, `fellowship` or `other`.
 - `closing=soon`: optional flag listing only roles whose deadline falls within the next seven days (`JobListing::CLOSING_SOON_DAYS`), counted in Africa/Nairobi dates.
-- Keyword, type and closing conditions are combined and preserved in the query string through numbered pagination (10 per page, windowed page links with first/last and Prev/Next). The homepage always shows six roles and links to `/jobs` instead of paginating.
+- Keyword, type and closing conditions are combined and preserved in the query string through numbered pagination (10 per page, windowed page links with first/last and Prev/Next). The homepage paginates six roles per page through the same partial.
+- Job lists are ordered by urgency: roles closing within seven days come first with the soonest deadline at the top, then everything else newest-first. Those rows carry a red “Closes today/tomorrow” chip, a red left rule and a pale-red fill, so the warning is visible while scanning rather than only in the copy.
 - Each row and the detail page flag urgency as *Closes today*, *Closes tomorrow* or *Closing soon*.
 - The thematic “Explore” shortcuts (remote work, internships, design & creative, social impact) were removed at the owner's request; the header menu replaces them.
 - The “Where?” location field was removed at the user's request. Location is still shown on listing rows, and `location=` URL parameters are ignored.

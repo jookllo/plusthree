@@ -11,10 +11,10 @@ class HomeController extends Controller
     {
         $jobs = JobListing::query()
             ->open()
+            ->mostUrgent()
             ->with('company')
-            ->latest('published_at')
-            ->take(6)
-            ->get();
+            ->paginate(6)
+            ->withQueryString();
 
         $articles = Article::query()
             ->published()

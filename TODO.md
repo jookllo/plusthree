@@ -49,6 +49,8 @@ Last updated: 5 November 2026. Ordered by what to do next, not by topic. Scope d
 
 ## Done
 
+- [x] Homepage paginates six roles at a time instead of linking to “See all open roles” (5 November 2026).
+- [x] Closing-soon roles sort to the top of every list and carry a red chip, red rule and tinted row (5 November 2026).
 - [x] Header converted from a “Find a job” dropdown to five inline links (5 November 2026).
 - [x] Numbered pagination on `/jobs` and `/blog`; homepage role count removed (5 November 2026).
 - [x] Closing-soon urgency labels and the `?closing=soon` filter (5 November 2026).

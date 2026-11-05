@@ -2,7 +2,7 @@
     $initial = mb_strtoupper(mb_substr($job->company->name, 0, 1));
     $location = collect([$job->location_city, $job->location_country])->filter()->implode(', ');
 @endphp
-<article class="job-row">
+<article @class(['job-row', 'job-row--urgent' => $job->isClosingSoon()])>
     <div class="job-symbol green" aria-hidden="true">{{ $initial }}</div>
     <div class="job-content">
         <p class="job-sector">
@@ -18,7 +18,7 @@
                 <span>{{ $location }}</span>
             @endif
             <span>{{ $job->work_mode->label() }}</span>
-            @if ($job->closing_at)
+            @if ($job->closing_at && ! $closingLabel)
                 <span>Closes {{ $job->closing_at->timezone('Africa/Nairobi')->format('j M Y') }}</span>
             @endif
         </div>
