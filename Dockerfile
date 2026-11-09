@@ -12,7 +12,7 @@ RUN pnpm build
 # ---- PHP dependencies ------------------------------------------------------
 # The official composer image has no PHP extensions; Filament requires ext-intl,
 # so dependencies are resolved on a PHP image that has them installed.
-FROM php:8.3-cli AS vendor
+FROM php:8.5-cli AS vendor
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libicu-dev libzip-dev unzip \
@@ -29,7 +29,7 @@ COPY app/ ./
 RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-scripts
 
 # ---- Runtime ---------------------------------------------------------------
-FROM php:8.3-apache AS runtime
+FROM php:8.5-apache AS runtime
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
