@@ -89,5 +89,17 @@
         @endforelse
 
         @include('partials.pagination', ['paginator' => $jobs])
+
+        @include('partials.page-links', [
+            'label' => 'Browse by sector',
+            'pages' => $sectorPages,
+            'routeName' => 'jobs.sector',
+        ])
+
+        @include('partials.page-links', [
+            'label' => 'Browse by country',
+            'pages' => $countryPages,
+            'routeName' => 'jobs.country',
+        ])
     </div>
 @endsection

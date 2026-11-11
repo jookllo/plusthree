@@ -126,9 +126,10 @@ details[open] summary{margin-bottom:12px}
 .enquiry-sent p{font-size:15px;margin-top:12px;max-width:52ch}
 .enquiry-sent a{color:var(--ink);font-weight:bold}
 .honeypot{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-.footer{display:flex;gap:32px;align-items:center;padding-block:28px;font-size:12px}
+.footer{display:flex;flex-wrap:wrap;gap:12px 32px;align-items:center;padding-block:28px;font-size:12px}
 .footer-brand{font-size:25px;font-weight:bold;text-decoration:none}
-.footer p{flex:1}
+.footer p{flex:1;min-width:0}
+.footer-contact{flex:1 1 240px}
 .empty-state{padding:44px 0}
 .empty-state h3{font-size:20px}
 .empty-state p{margin:12px 0;font-size:15px}
@@ -137,7 +138,7 @@ details[open] summary{margin-bottom:12px}
 /* ---- Public listing, detail and editorial pages ------------------------- */
 .search-form-wide{grid-template-columns:minmax(0,1fr) 190px auto}
 .search-form-landing{grid-template-columns:minmax(0,1fr) auto}
-.landing-note{margin-top:16px;font-size:13px;color:var(--muted)}
+.landing-note{margin-top:16px;font-size:13px;color:var(--ink)}
 .landing-note a{color:var(--ink);font-weight:bold}
 .filter-field select{height:auto;min-height:36px;border:0;background:var(--white);width:100%}
 .active-filter{border:1px solid var(--ink);padding:2px 8px;font-weight:bold}
@@ -175,6 +176,13 @@ details[open] summary{margin-bottom:12px}
 .job-figure img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
 .tag-list{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:24px 0 0;padding:0}
 .tag-list li{font-size:12px;border:1px solid var(--rule);padding:3px 9px;background:var(--paper)}
+.aside-more{margin-top:16px;font-size:13px}
+.page-links{margin-top:44px;padding-top:22px;border-top:1px solid var(--rule)}
+.page-links h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.page-links ul{display:flex;flex-wrap:wrap;gap:8px 10px;list-style:none;margin:0;padding:0}
+.page-links a{display:inline-flex;align-items:baseline;gap:6px;font-size:13px;border:1px solid var(--rule);background:var(--white);padding:5px 10px;text-decoration:none}
+.page-links a:hover{border-color:var(--ink)}
+.page-links a span{color:var(--muted);font-size:11px}
 .page-band{background:var(--gold);border-bottom:1px solid var(--ink);padding:36px 0 28px}
 .band-kicker{font-size:12px;font-weight:bold;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
 .page-band h1{font-size:clamp(30px,3.6vw,46px);letter-spacing:-1.5px;max-width:20ch}

@@ -29,10 +29,15 @@
 
     $ogImage = trim($__env->yieldContent('og-image'));
     $ogType = trim($__env->yieldContent('og-type')) ?: 'website';
+
+    // A page can override the policy, e.g. a sector page with too few roles to
+    // be worth indexing. Everything else follows the indexable switch.
+    $robots = trim($__env->yieldContent('robots'));
+    $robots = $robots !== '' ? $robots : ($indexable ? 'index, follow' : 'noindex, nofollow');
 @endphp
 <title>{{ $pageTitle }}</title>
 <meta name="description" content="{{ $description }}">
-<meta name="robots" content="{{ $indexable ? 'index, follow' : 'noindex, nofollow' }}">
+<meta name="robots" content="{{ $robots }}">
 <link rel="canonical" href="{{ $canonical }}">
 
 <meta property="og:site_name" content="{{ $siteName }}">

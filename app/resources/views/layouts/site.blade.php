@@ -12,6 +12,9 @@
     <link rel="manifest" href="{{ asset('site.webmanifest') }}">
     <meta name="theme-color" content="#23305C">
     @stack('structured-data')
+    {{-- Sitewide publisher identity, after any page-specific block so the page's
+         own schema is the first thing a reader of the head meets. --}}
+    @include('partials.json-ld', ['data' => \App\Support\StructuredData::organization()])
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
@@ -46,6 +49,7 @@
 <footer class="wrap footer">
     <a href="{{ route('home') }}" class="footer-brand">plusthree</a>
     <p>© {{ date('Y') }} Plusthree</p>
+    <p class="footer-contact">Questions or a role to share? <a href="mailto:{{ config('seo.contact_email') }}">{{ config('seo.contact_email') }}</a></p>
     <a href="#main">Back to top</a>
 </footer>
 </body>

@@ -1,6 +1,6 @@
 # TODO / backlog
 
-Last updated: 5 November 2026. Ordered by what to do next, not by topic. Scope detail and acceptance criteria live in [README.md](README.md) and [ROADMAP.md](ROADMAP.md).
+Last updated: 11 November 2026. Ordered by what to do next, not by topic. Scope detail and acceptance criteria live in [README.md](README.md) and [ROADMAP.md](ROADMAP.md).
 
 ## Before anything else
 
@@ -25,10 +25,11 @@ Last updated: 5 November 2026. Ordered by what to do next, not by topic. Scope d
 
 ## Job lifecycle follow-ups (5 November 2026)
 
-13. [ ] **301 long-closed roles after a grace period.** Expired and archived roles currently keep a readable page with the closed notice and no `JobPosting`. Once job sector pages exist, redirect a role to its sector (or `/jobs`) after roughly 90 days so the old URL still passes equity. Depends on: sector pages.
+13. [ ] **301 long-closed roles after a grace period.** Expired and archived roles currently keep a readable page with the closed notice and no `JobPosting`. Sector pages now exist, so redirect a role to its sector (or `/jobs`) after roughly 90 days so the old URL still passes equity.
 14. [ ] **Decide whether to auto-archive expired roles.** `closing_at` passing does not change `status`, so expired roles stay `Published` in the panel and invisible publicly. Either schedule `jobs:archive-expired` nightly or leave it manual. Needs an owner decision.
-15. [ ] **Job sector filter.** Job categories ("Sectors") are display-only: no filter, no landing page, not searchable, not in the sitemap. Add a Sector select to `/jobs` (shareable, `noindex` while filtered) before asking the owner to populate them in production.
+15. [ ] **Job sector filter.** Sectors now have landing pages and appear on each job, but the `/jobs` search form still has no Sector select. Add one (shareable, `noindex` while filtered) before asking the owner to populate them in production.
 16. [ ] **Describe-images check on the create screen** for articles and jobs; it currently runs from the edit screen only.
+17. [ ] **IndexNow and the Google Indexing API.** Ping IndexNow when a job is published so Bing and Yandex see it within minutes; Google recommends the Indexing API over sitemaps for job URLs. Both need a scheduler (see 12).
 
 ## Design and content polish
 
@@ -49,6 +50,9 @@ Last updated: 5 November 2026. Ordered by what to do next, not by topic. Scope d
 
 ## Done
 
+- [x] Sector and country landing pages (`/jobs/sector/{slug}`, `/jobs/in/{country}`) with internal links, sitemap inclusion at three open roles and `noindex` below that (11 November 2026).
+- [x] `JobPosting` made Google-compliant: ISO country codes, remote eligibility, `identifier`, employer `sameAs`, email applications as `directApply` (11 November 2026).
+- [x] `Organization` JSON-LD with `info@plusthree.io` and a footer contact line on every page (11 November 2026).
 - [x] Job lists went back to newest-first so new roles are not buried; closing-soon work is now a chip on the row plus a notice above the list linking to `?closing=soon` (11 November 2026).
 - [x] The header's first link was renamed from “Careers” to “Jobs” (11 November 2026).
 - [x] Homepage paginates six roles at a time instead of linking to “See all open roles” (5 November 2026).

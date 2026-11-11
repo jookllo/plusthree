@@ -28,6 +28,12 @@ class JobListing extends Model
     public const CLOSING_SOON_DAYS = 7;
 
     /**
+     * Open roles a sector or country page needs before it is worth indexing.
+     * Below this the page stays reachable but `noindex`.
+     */
+    public const LANDING_PAGE_MIN_ROLES = 3;
+
+    /**
      * @var list<string>
      */
     protected $fillable = [
@@ -149,6 +155,55 @@ class JobListing extends Model
     public function scopeEmploymentType(Builder $query, EmploymentType $type): void
     {
         $query->where('employment_type', $type);
+    }
+
+    /**
+     * Countries that currently have at least one open role, as landing pages.
+     *
+     * These are the board's only crawlable location targets; the search form
+     * deliberately has no location field, and filtered URLs stay noindex.
+     *
+     * @return list<array{name: string, slug: string, total: int}>
+     */
+    public static function countryPages(): array
+    {
+        return static::query()
+            ->open()
+            ->whereNotNull('location_country')
+            ->where('location_country', '<>', '')
+            ->selectRaw('location_country as name, count(*) as total')
+            ->groupBy('location_country')
+            ->orderByDesc('total')
+            ->orderBy('location_country')
+            ->get()
+            ->map(fn (object $row): array => [
+                'name' => (string) $row->name,
+                'slug' => Str::slug((string) $row->name),
+                'total' => (int) $row->total,
+            ])
+            ->all();
+    }
+
+    /**
+     * Job sectors (categories of kind `job`) with at least one open role.
+     *
+     * @return list<array{name: string, slug: string, total: int}>
+     */
+    public static function sectorPages(): array
+    {
+        return Category::query()
+            ->where('kind', Category::KIND_JOB)
+            ->withCount(['jobListings as open_total' => fn (Builder $query) => $query->open()])
+            ->orderBy('name')
+            ->get()
+            ->filter(fn (Category $category): bool => $category->open_total > 0)
+            ->map(fn (Category $category): array => [
+                'name' => $category->name,
+                'slug' => $category->slug,
+                'total' => (int) $category->open_total,
+            ])
+            ->values()
+            ->all();
     }
 
     public function isOpen(): bool

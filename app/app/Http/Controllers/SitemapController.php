@@ -28,6 +28,20 @@ class SitemapController extends Controller
                 $urls[] = ['loc' => route('jobs.show', $job->slug), 'lastmod' => $job->updated_at];
             });
 
+        // Sector and country pages only once they carry enough roles to be a
+        // useful result; thinner pages are deliberately noindex and kept out.
+        foreach (JobListing::sectorPages() as $page) {
+            if ($page['total'] >= JobListing::LANDING_PAGE_MIN_ROLES) {
+                $urls[] = ['loc' => route('jobs.sector', $page['slug']), 'lastmod' => null];
+            }
+        }
+
+        foreach (JobListing::countryPages() as $page) {
+            if ($page['total'] >= JobListing::LANDING_PAGE_MIN_ROLES) {
+                $urls[] = ['loc' => route('jobs.country', $page['slug']), 'lastmod' => null];
+            }
+        }
+
         Article::query()
             ->published()
             ->select(['slug', 'updated_at'])

@@ -242,6 +242,85 @@ class PublicPagesTest extends TestCase
             ->assertSeeInOrder(['One Day Left', 'Six Days Left']);
     }
 
+    public function test_sector_pages_list_only_roles_from_that_sector(): void
+    {
+        $sector = Category::factory()->job()->create(['name' => 'Social impact']);
+        $other = Category::factory()->job()->create(['name' => 'Finance']);
+
+        $included = JobListing::factory()->open()->create(['title' => 'Programme Officer']);
+        $included->categories()->attach($sector);
+
+        $excluded = JobListing::factory()->open()->create(['title' => 'Accountant']);
+        $excluded->categories()->attach($other);
+
+        $this->get('/jobs/sector/'.$sector->slug)->assertOk()
+            ->assertSee('Social impact jobs')
+            ->assertSee('Programme Officer')
+            ->assertDontSee('Accountant');
+    }
+
+    public function test_sector_pages_stay_noindex_until_they_have_enough_roles(): void
+    {
+        config(['seo.indexable' => true]);
+
+        $sector = Category::factory()->job()->create(['name' => 'Social impact']);
+        JobListing::factory()->open()->create()->categories()->attach($sector);
+
+        $this->get('/jobs/sector/'.$sector->slug)->assertOk()
+            ->assertSee('<meta name="robots" content="noindex, follow">', false);
+
+        JobListing::factory()->open()->count(2)->create()
+            ->each(fn (JobListing $job) => $job->categories()->attach($sector));
+
+        $this->get('/jobs/sector/'.$sector->slug)->assertOk()
+            ->assertSee('<meta name="robots" content="index, follow">', false);
+    }
+
+    public function test_country_pages_list_roles_in_that_country(): void
+    {
+        JobListing::factory()->open()->create([
+            'title' => 'Nairobi Role',
+            'location_city' => 'Nairobi',
+            'location_country' => 'Kenya',
+        ]);
+        JobListing::factory()->open()->create([
+            'title' => 'Kampala Role',
+            'location_city' => 'Kampala',
+            'location_country' => 'Uganda',
+        ]);
+
+        $this->get('/jobs/in/kenya')->assertOk()
+            ->assertSee('Jobs in Kenya')
+            ->assertSee('Nairobi Role')
+            ->assertDontSee('Kampala Role');
+    }
+
+    public function test_a_country_page_that_does_not_exist_is_not_found(): void
+    {
+        JobListing::factory()->open()->create(['location_country' => 'Kenya']);
+
+        $this->get('/jobs/in/atlantis')->assertNotFound();
+        $this->get('/jobs/sector/no-such-sector')->assertNotFound();
+    }
+
+    public function test_the_board_links_to_its_sector_and_country_pages(): void
+    {
+        $sector = Category::factory()->job()->create(['name' => 'Social impact']);
+        $job = JobListing::factory()->open()->create(['location_country' => 'Kenya']);
+        $job->categories()->attach($sector);
+
+        $this->get('/jobs')->assertOk()
+            ->assertSee('Browse by sector')
+            ->assertSee('Browse by country')
+            ->assertSee('href="'.route('jobs.sector', $sector->slug).'"', false)
+            ->assertSee('href="'.route('jobs.country', 'kenya').'"', false);
+
+        // The detail page links back to both, so the pages are not orphaned.
+        $this->get('/jobs/'.$job->slug)->assertOk()
+            ->assertSee('href="'.route('jobs.sector', $sector->slug).'"', false)
+            ->assertSee('href="'.route('jobs.country', 'kenya').'"', false);
+    }
+
     public function test_homepage_latest_opportunities_does_not_count_roles(): void
     {
         JobListing::factory()->open()->count(3)->create();

@@ -73,6 +73,8 @@ final class StructuredData
      */
     public static function jobPosting(JobListing $job): array
     {
+        $company = $job->company;
+
         $data = [
             '@context' => 'https://schema.org',
             '@type' => 'JobPosting',
@@ -80,12 +82,23 @@ final class StructuredData
             'description' => (string) ArticleBody::render($job->description),
             'datePosted' => $job->published_at?->toIso8601String(),
             'employmentType' => self::employmentType($job->employment_type),
-            'hiringOrganization' => [
-                '@type' => 'Organization',
-                'name' => $job->company?->name,
+            'identifier' => [
+                '@type' => 'PropertyValue',
+                'name' => config('seo.site_name'),
+                'value' => (string) $job->getKey(),
             ],
+            'hiringOrganization' => array_filter([
+                '@type' => 'Organization',
+                'name' => $company?->name,
+                'sameAs' => filled($company?->website) ? $company->website : null,
+                'logo' => $company?->logo_path
+                    ? url(Storage::disk('public')->url($company->logo_path))
+                    : null,
+            ]),
             'url' => route('jobs.show', $job->slug),
-            'directApply' => filled($job->application_url),
+            // An email application is still a direct route to the employer,
+            // which is how Google defines this property.
+            'directApply' => filled($job->application_url) || filled($job->application_email),
         ];
 
         if ($job->featured_image_path) {
@@ -98,16 +111,19 @@ final class StructuredData
 
         $address = array_filter([
             'addressLocality' => $job->location_city,
-            'addressCountry' => $job->location_country,
+            // Google requires the ISO 3166-1 alpha-2 code here, not the name.
+            'addressCountry' => Countries::isoCode($job->location_country),
         ]);
 
         if ($job->work_mode === WorkMode::Remote) {
             $data['jobLocationType'] = 'TELECOMMUTE';
 
-            if ($address !== []) {
+            // A 100% remote posting must name at least one country applicants
+            // can work from, otherwise Google cannot place it.
+            if (filled($job->location_country)) {
                 $data['applicantLocationRequirements'] = [
                     '@type' => 'Country',
-                    'name' => $job->location_country ?? $job->location_city,
+                    'name' => $job->location_country,
                 ];
             }
         } elseif ($address !== []) {
@@ -117,9 +133,38 @@ final class StructuredData
             ];
         }
 
-        $data['hiringOrganization'] = array_filter($data['hiringOrganization']);
-
         return array_filter($data, fn (mixed $value): bool => $value !== null);
+    }
+
+    /**
+     * The publisher as an entity in its own right, so the address in the footer
+     * is machine-readable too.
+     *
+     * @return array<string, mixed>
+     */
+    public static function organization(): array
+    {
+        $email = config('seo.contact_email');
+
+        return array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            '@id' => route('home').'#organization',
+            'name' => config('seo.site_name'),
+            'url' => route('home'),
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => url(config('seo.logo')),
+            ],
+            'email' => $email,
+            'contactPoint' => filled($email) ? [[
+                '@type' => 'ContactPoint',
+                'contactType' => 'customer support',
+                'email' => $email,
+                'availableLanguage' => 'English',
+            ]] : null,
+            'sameAs' => config('seo.same_as') ?: null,
+        ]);
     }
 
     /**

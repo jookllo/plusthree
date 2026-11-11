@@ -47,7 +47,8 @@ class JobListingForm
                     ->maxLength(120),
                 TextInput::make('location_country')
                     ->maxLength(80)
-                    ->helperText('Where the role is based or who may apply. Kept out of the public search box by design.'),
+                    ->required(fn (Get $get): bool => $get('work_mode') === WorkMode::Remote->value)
+                    ->helperText('The country the role is based in, or the country remote applicants must be eligible to work from. Required for remote roles: Google cannot place a remote posting without it.'),
                 RichEditor::make('description')
                     ->label('Role description')
                     ->required()

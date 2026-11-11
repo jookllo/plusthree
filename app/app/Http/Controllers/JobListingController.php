@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\EmploymentType;
+use App\Models\Category;
 use App\Models\JobListing;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -83,6 +84,69 @@ class JobListingController extends Controller
                 default => null,
             },
             'closingSoonCount' => JobListing::closingSoonTotal($type ? EmploymentType::from($type) : null),
+            'sectorPages' => JobListing::sectorPages(),
+            'countryPages' => JobListing::countryPages(),
+        ]);
+    }
+
+    /**
+     * One sector, such as social impact or monitoring and evaluation. These are
+     * the pages that can rank for "social impact jobs Africa"; the search form
+     * has no sector filter, and filtered URLs stay noindex.
+     */
+    public function sector(string $slug): View
+    {
+        $category = Category::query()
+            ->where('kind', Category::KIND_JOB)
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        $jobs = JobListing::query()
+            ->open()
+            ->with('company')
+            ->whereHas('categories', fn ($query) => $query->whereKey($category->getKey()))
+            ->latest('published_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('jobs.landing', [
+            'heading' => $category->name.' jobs',
+            'intro' => 'Open '.mb_strtolower($category->name).' roles for African talent and the diaspora.',
+            'jobs' => $jobs,
+            'indexable' => $jobs->total() >= JobListing::LANDING_PAGE_MIN_ROLES,
+            'related' => JobListing::sectorPages(),
+            'relatedLabel' => 'Browse another sector',
+            'relatedRoute' => 'jobs.sector',
+        ]);
+    }
+
+    /**
+     * One country. Slugs are resolved against the countries that actually have
+     * open roles, so a stale or invented slug 404s instead of rendering an
+     * empty page for search engines to index.
+     */
+    public function country(string $country): View
+    {
+        $match = collect(JobListing::countryPages())->firstWhere('slug', $country);
+
+        abort_if($match === null, 404);
+
+        $jobs = JobListing::query()
+            ->open()
+            ->with('company')
+            ->where('location_country', $match['name'])
+            ->latest('published_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('jobs.landing', [
+            'heading' => 'Jobs in '.$match['name'],
+            'intro' => 'Open roles based in '.$match['name'].', plus fellowships and other opportunities.',
+            'jobs' => $jobs,
+            'indexable' => $jobs->total() >= JobListing::LANDING_PAGE_MIN_ROLES,
+            'related' => JobListing::countryPages(),
+            'relatedLabel' => 'Browse another country',
+            'relatedRoute' => 'jobs.country',
         ]);
     }
 

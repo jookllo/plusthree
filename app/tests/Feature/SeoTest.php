@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\EmploymentType;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Company;
 use App\Models\JobListing;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -184,6 +185,89 @@ class SeoTest extends TestCase
         $this->assertSame($job->closing_at->toIso8601String(), $json['validThrough']);
     }
 
+    public function test_job_location_publishes_the_iso_country_code(): void
+    {
+        $job = JobListing::factory()->open()->create([
+            'location_city' => 'Dakar',
+            'location_country' => 'Senegal',
+        ]);
+
+        $json = $this->structuredData($this->get('/jobs/'.$job->slug)->getContent(), 'JobPosting');
+
+        // Google matches the two-letter code, not the display name.
+        $this->assertSame('SN', $json['jobLocation']['address']['addressCountry']);
+    }
+
+    public function test_remote_jobs_name_the_country_applicants_must_work_from(): void
+    {
+        $job = JobListing::factory()->open()->remote()->create([
+            'location_city' => null,
+            'location_country' => 'Kenya',
+        ]);
+
+        $json = $this->structuredData($this->get('/jobs/'.$job->slug)->getContent(), 'JobPosting');
+
+        $this->assertSame('TELECOMMUTE', $json['jobLocationType']);
+        $this->assertSame('Kenya', $json['applicantLocationRequirements']['name']);
+        $this->assertArrayNotHasKey('jobLocation', $json);
+    }
+
+    public function test_email_applications_count_as_direct_apply(): void
+    {
+        $job = JobListing::factory()->open()->create([
+            'application_url' => null,
+            'application_email' => 'jobs@example.org',
+        ]);
+
+        $json = $this->structuredData($this->get('/jobs/'.$job->slug)->getContent(), 'JobPosting');
+
+        // Google treats "send your application to this address" as direct.
+        $this->assertTrue($json['directApply']);
+    }
+
+    public function test_job_postings_carry_an_identifier_and_the_employer_website(): void
+    {
+        $company = Company::factory()->create(['website' => 'https://example.org']);
+        $job = JobListing::factory()->open()->create(['company_id' => $company->id]);
+
+        $json = $this->structuredData($this->get('/jobs/'.$job->slug)->getContent(), 'JobPosting');
+
+        $this->assertSame((string) $job->getKey(), $json['identifier']['value']);
+        $this->assertSame('https://example.org', $json['hiringOrganization']['sameAs']);
+    }
+
+    public function test_every_page_publishes_the_organization_contact_point(): void
+    {
+        foreach (['/', '/jobs', '/blog', '/for-employers'] as $url) {
+            $json = $this->structuredData($this->get($url)->getContent(), 'Organization');
+
+            $this->assertSame('info@plusthree.io', $json['email']);
+            $this->assertSame('info@plusthree.io', $json['contactPoint'][0]['email']);
+            $this->assertSame('customer support', $json['contactPoint'][0]['contactType']);
+        }
+
+        // The visible address must match the structured one.
+        $this->get('/jobs')->assertSee('mailto:info@plusthree.io', false);
+    }
+
+    public function test_sitemap_lists_sector_and_country_pages_once_they_are_worth_indexing(): void
+    {
+        $thin = Category::factory()->job()->create(['name' => 'Thin Sector']);
+        $thick = Category::factory()->job()->create(['name' => 'Deep Sector']);
+
+        JobListing::factory()->open()->create(['location_country' => 'Kenya'])
+            ->categories()->attach($thin);
+
+        JobListing::factory()->open()->count(3)->create(['location_country' => 'Uganda'])
+            ->each(fn (JobListing $job) => $job->categories()->attach($thick));
+
+        $this->get('/sitemap.xml')->assertOk()
+            ->assertSee(route('jobs.sector', $thick->slug), false)
+            ->assertSee(route('jobs.country', 'uganda'), false)
+            ->assertDontSee(route('jobs.sector', $thin->slug), false)
+            ->assertDontSee(route('jobs.country', 'kenya'), false);
+    }
+
     public function test_closed_listings_do_not_advertise_a_job_posting(): void
     {
         $closed = [
@@ -250,16 +334,22 @@ class SeoTest extends TestCase
     /**
      * @return array<string, mixed>
      */
-    private function structuredData(string $html): array
+    private function structuredData(string $html, ?string $type = null): array
     {
-        $this->assertMatchesRegularExpression('/<script type="application\/ld\+json">(.+?)<\/script>/s', $html);
+        preg_match_all('/<script type="application\/ld\+json">(.+?)<\/script>/s', $html, $matches);
 
-        preg_match('/<script type="application\/ld\+json">(.+?)<\/script>/s', $html, $matches);
+        $this->assertNotEmpty($matches[1], 'No structured data found.');
 
-        $decoded = json_decode($matches[1], true);
+        foreach ($matches[1] as $block) {
+            $decoded = json_decode($block, true);
 
-        $this->assertIsArray($decoded, 'Structured data is not valid JSON.');
+            $this->assertIsArray($decoded, 'Structured data is not valid JSON.');
 
-        return $decoded;
+            if ($type === null || ($decoded['@type'] ?? null) === $type) {
+                return $decoded;
+            }
+        }
+
+        $this->fail('No structured data block of type '.$type.' found.');
     }
 }

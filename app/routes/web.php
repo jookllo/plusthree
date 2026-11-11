@@ -23,6 +23,12 @@ Route::get('/mdosi/auth/google/callback', [GoogleController::class, 'callback'])
 Route::get('/jobs', [JobListingController::class, 'index'])->name('jobs.index');
 Route::get('/fellowships', [JobListingController::class, 'fellowships'])->name('jobs.fellowships');
 Route::get('/other-opportunities', [JobListingController::class, 'otherOpportunities'])->name('jobs.other');
+
+// Crawlable landing pages for sectors and countries. They sit above the
+// /jobs/{slug} catch-all so a sector named like a role cannot shadow it.
+Route::get('/jobs/sector/{slug}', [JobListingController::class, 'sector'])->name('jobs.sector');
+Route::get('/jobs/in/{country}', [JobListingController::class, 'country'])->name('jobs.country');
+
 Route::get('/jobs/{slug}/preview', [JobListingController::class, 'preview'])
     ->middleware('signed')
     ->name('jobs.preview');

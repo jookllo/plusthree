@@ -145,12 +145,28 @@
                 @if ($job->categories->isNotEmpty() || $job->tags->isNotEmpty())
                     <ul class="tag-list" aria-label="Sectors and tags">
                         @foreach ($job->categories as $category)
-                            <li>{{ $category->name }}</li>
+                            <li>
+                                {{-- Sector pages only exist while the sector has open
+                                     roles, so a closed listing shows plain text. --}}
+                                @if ($job->isOpen())
+                                    <a href="{{ route('jobs.sector', $category->slug) }}">{{ $category->name }}</a>
+                                @else
+                                    {{ $category->name }}
+                                @endif
+                            </li>
                         @endforeach
                         @foreach ($job->tags as $tag)
                             <li>{{ $tag->name }}</li>
                         @endforeach
                     </ul>
+                @endif
+
+                @if ($job->isOpen() && filled($job->location_country))
+                    <p class="aside-more">
+                        <a href="{{ route('jobs.country', \Illuminate\Support\Str::slug($job->location_country)) }}">
+                            More roles in {{ $job->location_country }}
+                        </a>
+                    </p>
                 @endif
             </aside>
         </div>

@@ -23,6 +23,28 @@ return [
 
     'default_description' => 'Explore opportunities across Africa and beyond, with practical advice for your next career move.',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Contact
+    |--------------------------------------------------------------------------
+    |
+    | The address shown in the footer and published as the Organization's
+    | contactPoint. Keep it a single value so the visible page and the
+    | structured data cannot drift apart.
+    |
+    */
+
+    'contact_email' => env('SEO_CONTACT_EMAIL', 'info@plusthree.io'),
+
+    /*
+    | Profiles that describe the same organization, as a comma-separated list.
+    | Empty by default: do not add a profile until the owner has one.
+    */
+    'same_as' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('SEO_SAME_AS', '')),
+    ))),
+
     'logo' => '/images/plusthree-logo.png',
 
     /*
