@@ -47,10 +47,24 @@
     @yield('content')
 </main>
 <footer class="wrap footer">
-    <a href="{{ route('home') }}" class="footer-brand">plusthree</a>
-    <p>© {{ date('Y') }} Plusthree</p>
-    <p class="footer-contact">Questions or a role to share? <a href="mailto:{{ config('seo.contact_email') }}">{{ config('seo.contact_email') }}</a></p>
-    <a href="#main">Back to top</a>
+    <div class="footer-left">
+        <a href="{{ route('home') }}" class="footer-brand">plusthree</a>
+        <p>© {{ date('Y') }} Plusthree</p>
+    </div>
+
+    {{-- The owner asked for the address as an icon rather than a sentence; the
+         email itself stays in the accessible name and the href. --}}
+    <a class="footer-mail" href="mailto:{{ config('seo.contact_email') }}">
+        <span class="visually-hidden">Email {{ config('seo.contact_email') }}</span>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true" focusable="false">
+            <rect x="3" y="5" width="18" height="14" rx="2"/>
+            <path d="m3.7 6.3 8.3 6.2 8.3-6.2"/>
+        </svg>
+    </a>
+
+    <a class="footer-back" href="#main">Back to top</a>
 </footer>
 </body>
 </html>

@@ -246,8 +246,12 @@ class SeoTest extends TestCase
             $this->assertSame('customer support', $json['contactPoint'][0]['contactType']);
         }
 
-        // The visible address must match the structured one.
-        $this->get('/jobs')->assertSee('mailto:info@plusthree.io', false);
+        // The visible address must match the structured one. The footer shows a
+        // mail icon rather than the sentence, so the accessible name carries it.
+        $this->get('/jobs')->assertSee('mailto:info@plusthree.io', false)
+            ->assertSee('class="footer-mail"', false)
+            ->assertSee('Email info@plusthree.io')
+            ->assertDontSee('Questions or a role to share');
     }
 
     public function test_sitemap_lists_sector_and_country_pages_once_they_are_worth_indexing(): void

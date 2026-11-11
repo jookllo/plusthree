@@ -52,7 +52,7 @@ Last updated: 11 November 2026. Ordered by what to do next, not by topic. Scope 
 
 - [x] Sector and country landing pages (`/jobs/sector/{slug}`, `/jobs/in/{country}`) with internal links, sitemap inclusion at three open roles and `noindex` below that (11 November 2026).
 - [x] `JobPosting` made Google-compliant: ISO country codes, remote eligibility, `identifier`, employer `sameAs`, email applications as `directApply` (11 November 2026).
-- [x] `Organization` JSON-LD with `info@plusthree.io` and a footer contact line on every page (11 November 2026).
+- [x] `Organization` JSON-LD with `info@plusthree.io` and a footer contact link on every page; the footer link is a white mail icon in a navy circle, as the owner asked (11 November 2026).
 - [x] Job lists went back to newest-first so new roles are not buried; closing-soon work is now a chip on the row plus a notice above the list linking to `?closing=soon` (11 November 2026).
 - [x] The header's first link was renamed from “Careers” to “Jobs” (11 November 2026).
 - [x] Homepage paginates six roles at a time instead of linking to “See all open roles” (5 November 2026).
