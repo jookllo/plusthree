@@ -67,10 +67,11 @@ button,summary{cursor:pointer}
 .job-meta{display:flex;align-items:center;gap:0;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .job-meta span+span:before{content:'/';margin:0 12px;color:var(--muted)}
 .job-flag{background:var(--red);color:var(--white);font-size:11px;font-weight:bold;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;align-self:center}
-.job-row--urgent{box-shadow:inset 3px 0 0 var(--red);background:var(--pale-red);padding-left:16px}
-.job-row--urgent .job-content h3 a{text-decoration-color:var(--red)}
 .job-flag+span:before{content:none;margin:0}
 .job-flag+span{margin-left:12px}
+.urgency-bar{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px;font-size:14px;margin:24px 0 0;padding:12px 16px;border-left:4px solid var(--red);background:var(--pale-red)}
+.urgency-bar strong{font-size:16px}
+.urgency-bar a{font-weight:600;text-decoration:underline}
 details{margin-top:12px}
 summary{font-size:13px;color:var(--deep-green);font-weight:600;width:fit-content}
 summary:hover{text-decoration:underline}

@@ -55,8 +55,14 @@ class JobListingController extends Controller
                 });
             })
             ->when($type, fn ($builder) => $builder->where('employment_type', $type))
-            ->when($closing === 'soon', fn ($builder) => $builder->closingSoon())
-            ->mostUrgent()
+            // Newest first, so a role published this morning is visible without
+            // scrolling past everything with a nearer deadline. The deadline
+            // view is one click away and orders by what closes soonest.
+            ->when(
+                $closing === 'soon',
+                fn ($builder) => $builder->closingSoon()->orderBy('closing_at'),
+                fn ($builder) => $builder->latest('published_at'),
+            )
             ->paginate(10)
             ->withQueryString();
 
@@ -76,6 +82,7 @@ class JobListingController extends Controller
                 EmploymentType::Other => 'Scholarships, grants, volunteer roles and other opportunities that are not a standard job.',
                 default => null,
             },
+            'closingSoonCount' => JobListing::closingSoonTotal($type ? EmploymentType::from($type) : null),
         ]);
     }
 

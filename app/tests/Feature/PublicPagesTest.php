@@ -109,10 +109,31 @@ class PublicPagesTest extends TestCase
             ->assertDontSee('Product Designer');
     }
 
+    public function test_urgency_notice_counts_only_the_page_type(): void
+    {
+        JobListing::factory()->closingSoon()->create(['title' => 'Standard Urgent Role']);
+        JobListing::factory()->closingSoon()->create([
+            'title' => 'Fellowship Urgent Role',
+            'employment_type' => EmploymentType::Fellowship,
+        ]);
+
+        // The board counts both urgent roles and points at the unfiltered view.
+        $this->get('/jobs')->assertOk()
+            ->assertSee('roles close within a week', false)
+            ->assertSee('href="'.route('jobs.index', ['closing' => 'soon']).'"', false);
+
+        // The Fellowships landing page must not advertise a standard job.
+        $this->get('/fellowships')->assertOk()
+            ->assertSee('role closes within a week', false)
+            ->assertDontSee('roles close within a week', false)
+            ->assertSee('href="'.str_replace('&', '&amp;', route('jobs.index', ['closing' => 'soon', 'type' => 'fellowship'])).'"', false);
+    }
+
     public function test_header_links_job_categories_directly_and_an_employer_link(): void
     {
         $this->get('/')->assertOk()
-            ->assertSee('Careers')
+            ->assertSee('Jobs')
+            ->assertDontSee('Careers')
             ->assertSee('Fellowships')
             ->assertSee('Other opportunities')
             ->assertSee('href="'.route('jobs.index').'"', false)
@@ -156,17 +177,69 @@ class PublicPagesTest extends TestCase
             ->assertSee('rel="prev"', false);
     }
 
-    public function test_roles_closing_soon_are_listed_first_and_flagged(): void
+    public function test_new_roles_stay_on_top_while_closing_soon_is_signposted(): void
     {
-        JobListing::factory()->open()->create(['title' => 'Later Role']);
-        JobListing::factory()->closingSoon()->create(['title' => 'Urgent Role']);
+        // The urgent role is older: if the list sorted by deadline it would sit
+        // above the fresh role, which is exactly what the owner reported.
+        JobListing::factory()->closingSoon()->create([
+            'title' => 'Older Urgent Role',
+            'published_at' => now()->subDays(3),
+        ]);
+        JobListing::factory()->open()->create([
+            'title' => 'Fresh Role',
+            'published_at' => now()->subHour(),
+        ]);
 
         foreach (['/', '/jobs'] as $url) {
             $this->get($url)->assertOk()
-                ->assertSeeInOrder(['Urgent Role', 'Later Role'])
-                ->assertSee('job-row--urgent', false)
-                ->assertSee('job-flag', false);
+                ->assertSeeInOrder(['Fresh Role', 'Older Urgent Role'])
+                ->assertSee('job-flag', false)
+                ->assertDontSee('job-row--urgent', false)
+                ->assertSee('role closes within a week', false)
+                ->assertSee('closing=soon', false);
         }
+    }
+
+    public function test_urgency_notice_counts_open_roles_and_stays_off_the_filtered_view(): void
+    {
+        JobListing::factory()->closingSoon()->count(2)->create();
+        JobListing::factory()->open()->create();
+
+        $this->get('/jobs')->assertOk()
+            ->assertSee('roles close within a week', false)
+            ->assertSee('See what’s closing soon');
+
+        $this->get('/jobs?closing=soon')->assertOk()
+            ->assertDontSee('roles close within a week', false)
+            ->assertDontSee('See what’s closing soon');
+    }
+
+    public function test_urgency_notice_is_hidden_when_nothing_is_closing_soon(): void
+    {
+        JobListing::factory()->open()->create();
+
+        foreach (['/', '/jobs'] as $url) {
+            $this->get($url)->assertOk()
+                ->assertDontSee('urgency-bar', false)
+                ->assertDontSee('See what’s closing soon');
+        }
+    }
+
+    public function test_closing_soon_view_orders_by_the_nearest_deadline(): void
+    {
+        JobListing::factory()->closingSoon()->create([
+            'title' => 'Six Days Left',
+            'closing_at' => now()->addDays(6),
+            'published_at' => now()->subHour(),
+        ]);
+        JobListing::factory()->closingSoon()->create([
+            'title' => 'One Day Left',
+            'closing_at' => now()->addDay(),
+            'published_at' => now()->subDays(4),
+        ]);
+
+        $this->get('/jobs?closing=soon')->assertOk()
+            ->assertSeeInOrder(['One Day Left', 'Six Days Left']);
     }
 
     public function test_homepage_latest_opportunities_does_not_count_roles(): void

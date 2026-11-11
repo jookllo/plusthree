@@ -2,7 +2,7 @@
     $initial = mb_strtoupper(mb_substr($job->company->name, 0, 1));
     $location = collect([$job->location_city, $job->location_country])->filter()->implode(', ');
 @endphp
-<article @class(['job-row', 'job-row--urgent' => $job->isClosingSoon()])>
+<article class="job-row">
     <div class="job-symbol green" aria-hidden="true">{{ $initial }}</div>
     <div class="job-content">
         <p class="job-sector">

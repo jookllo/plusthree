@@ -30,6 +30,14 @@
                 <h2 id="jobs-heading">Latest opportunities</h2>
             </div>
 
+            @if ($closingSoonCount > 0)
+                <p class="urgency-bar">
+                    <strong>{{ $closingSoonCount }}</strong>
+                    {{ $closingSoonCount === 1 ? 'role closes' : 'roles close' }} within a week.
+                    <a href="{{ route('jobs.index', ['closing' => 'soon']) }}">See what’s closing soon</a>
+                </p>
+            @endif
+
             @forelse ($jobs as $job)
                 @include('partials.job-row', ['job' => $job])
             @empty

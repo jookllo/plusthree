@@ -130,23 +130,20 @@ class JobListing extends Model
     }
 
     /**
-     * Deadline first, then recency.
+     * How many open roles sit inside the urgency window right now.
      *
-     * Roles inside the urgency window come first, soonest deadline at the top,
-     * so a visitor scanning the board cannot miss the one closing tomorrow.
-     * Everything else falls back to newest-published order.
+     * Drives the listing pages' urgency notice, which links to the
+     * `closing=soon` view instead of lifting every near-deadline role above
+     * the new ones. Counted within the page's own type so the Fellowships and
+     * Other opportunities pages do not advertise standard jobs.
      */
-    public function scopeMostUrgent(Builder $query): void
+    public static function closingSoonTotal(?EmploymentType $type = null): int
     {
-        $cutoff = now()->addDays(self::CLOSING_SOON_DAYS);
-
-        $query->orderByRaw(
-            'case when closing_at is not null and closing_at <= ? then 0 else 1 end',
-            [$cutoff],
-        )->orderByRaw(
-            'case when closing_at is not null and closing_at <= ? then closing_at end asc',
-            [$cutoff],
-        )->orderByDesc('published_at');
+        return static::query()
+            ->open()
+            ->closingSoon()
+            ->when($type, fn (Builder $query) => $query->where('employment_type', $type))
+            ->count();
     }
 
     public function scopeEmploymentType(Builder $query, EmploymentType $type): void

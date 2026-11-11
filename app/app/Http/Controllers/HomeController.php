@@ -11,8 +11,8 @@ class HomeController extends Controller
     {
         $jobs = JobListing::query()
             ->open()
-            ->mostUrgent()
             ->with('company')
+            ->latest('published_at')
             ->paginate(6)
             ->withQueryString();
 
@@ -28,6 +28,7 @@ class HomeController extends Controller
             'articles' => $articles,
             'leadArticle' => $articles->first(),
             'moreArticles' => $articles->skip(1),
+            'closingSoonCount' => JobListing::closingSoonTotal(),
         ]);
     }
 }

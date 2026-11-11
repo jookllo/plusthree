@@ -24,7 +24,7 @@
     <nav aria-label="Main navigation">
         @php
             $filters = request()->query();
-            $onCareers = request()->routeIs('jobs.index')
+            $onJobs = request()->routeIs('jobs.index')
                 && ! in_array($filters['type'] ?? null, [\App\Enums\EmploymentType::Fellowship->value, \App\Enums\EmploymentType::Other->value], true);
             $onFellowships = request()->routeIs('jobs.fellowships')
                 || ($filters['type'] ?? null) === \App\Enums\EmploymentType::Fellowship->value;
@@ -32,7 +32,7 @@
                 || ($filters['type'] ?? null) === \App\Enums\EmploymentType::Other->value;
             $onBlog = request()->routeIs('blog.*');
         @endphp
-        <a href="{{ route('jobs.index') }}" @class(['active' => $onCareers]) @if ($onCareers) aria-current="page" @endif>Careers</a>
+        <a href="{{ route('jobs.index') }}" @class(['active' => $onJobs]) @if ($onJobs) aria-current="page" @endif>Jobs</a>
         <a href="{{ route('jobs.fellowships') }}" @class(['active' => $onFellowships]) @if ($onFellowships) aria-current="page" @endif>Fellowships</a>
         <a href="{{ route('jobs.other') }}" @class(['active' => $onOther]) @if ($onOther) aria-current="page" @endif>Other opportunities</a>
         <a href="{{ route('blog.index') }}" @class(['active' => $onBlog]) @if ($onBlog) aria-current="page" @endif>Career advice</a>
