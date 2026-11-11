@@ -21,15 +21,13 @@ class InlineImageTest extends TestCase
 
     public function test_a_wide_image_is_downscaled_to_the_maximum_width(): void
     {
-        if (! extension_loaded('gd')) {
-            $this->markTestSkipped('GD is not available in this environment.');
+        if (! extension_loaded('gd') || ! function_exists('imagejpeg')) {
+            $this->markTestSkipped('GD with JPEG support is not available in this environment.');
         }
 
         Storage::fake('public');
 
-        $source = imagecreatetruecolor(3000, 2000);
-        imagejpeg($source, Storage::disk('public')->path('articles/inline/wide.jpg'), 90);
-        imagedestroy($source);
+        $this->writeImage('articles/inline/wide.jpg', 3000, 2000);
 
         $this->assertTrue(InlineImage::downscale('public', 'articles/inline/wide.jpg'));
 
@@ -41,15 +39,13 @@ class InlineImageTest extends TestCase
 
     public function test_an_image_within_the_limit_is_left_untouched(): void
     {
-        if (! extension_loaded('gd')) {
-            $this->markTestSkipped('GD is not available in this environment.');
+        if (! extension_loaded('gd') || ! function_exists('imagejpeg')) {
+            $this->markTestSkipped('GD with JPEG support is not available in this environment.');
         }
 
         Storage::fake('public');
 
-        $source = imagecreatetruecolor(800, 600);
-        imagejpeg($source, Storage::disk('public')->path('articles/inline/small.jpg'), 90);
-        imagedestroy($source);
+        $this->writeImage('articles/inline/small.jpg', 800, 600);
 
         $before = md5_file(Storage::disk('public')->path('articles/inline/small.jpg'));
 
@@ -64,5 +60,19 @@ class InlineImageTest extends TestCase
 
         $this->assertFalse(InlineImage::downscale('public', 'articles/inline/broken.jpg'));
         Storage::disk('public')->assertExists('articles/inline/broken.jpg');
+    }
+
+    /**
+     * Write a JPEG fixture. Storage::fake() starts from an empty directory, so
+     * the parent folder has to be created before GD can open a stream there.
+     */
+    private function writeImage(string $path, int $width, int $height): void
+    {
+        $disk = Storage::disk('public');
+        $disk->makeDirectory(dirname($path));
+
+        $image = imagecreatetruecolor($width, $height);
+        imagejpeg($image, $disk->path($path), 90);
+        imagedestroy($image);
     }
 }
