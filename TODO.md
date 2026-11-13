@@ -1,6 +1,6 @@
 # TODO / backlog
 
-Last updated: 11 November 2026. Ordered by what to do next, not by topic. Scope detail and acceptance criteria live in [README.md](README.md) and [ROADMAP.md](ROADMAP.md).
+Last updated: 13 November 2026. Ordered by what to do next, not by topic. Scope detail and acceptance criteria live in [README.md](README.md) and [ROADMAP.md](ROADMAP.md).
 
 ## Before anything else
 
@@ -50,6 +50,7 @@ Last updated: 11 November 2026. Ordered by what to do next, not by topic. Scope 
 
 ## Done
 
+- [x] Cheki analytics and session recorder on every public page, from `config/analytics.php`, off in local and testing and absent from the `/mdosi` panel (13 November 2026).
 - [x] Sector and country landing pages (`/jobs/sector/{slug}`, `/jobs/in/{country}`) with internal links, sitemap inclusion at three open roles and `noindex` below that (11 November 2026).
 - [x] `JobPosting` made Google-compliant: ISO country codes, remote eligibility, `identifier`, employer `sameAs`, email applications as `directApply` (11 November 2026).
 - [x] `Organization` JSON-LD with `info@plusthree.io` and a footer contact link on every page; the footer link is a white mail icon in a navy circle, as the owner asked (11 November 2026).

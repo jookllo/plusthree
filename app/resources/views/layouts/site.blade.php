@@ -16,6 +16,15 @@
          own schema is the first thing a reader of the head meets. --}}
     @include('partials.json-ld', ['data' => \App\Support\StructuredData::organization()])
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if (config('analytics.enabled'))
+        {{-- Cheki page analytics and session recorder. Public pages only: the
+             /mdosi panel renders through Filament's own layout, so it stays out
+             of the report. Both are deferred, so neither blocks parsing. --}}
+        <script defer src="{{ config('analytics.host') }}/script.js"
+                data-website-id="{{ config('analytics.website_id') }}"></script>
+        <script defer src="{{ config('analytics.host') }}/recorder.js"
+                data-website-id="{{ config('analytics.website_id') }}"></script>
+    @endif
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>

@@ -33,6 +33,13 @@ APP_TIMEZONE=UTC
 # false serves "noindex, nofollow" and a robots.txt that blocks everything.
 SEO_INDEXABLE=false
 
+# Cheki analytics. On automatically when APP_ENV=production, so no action is
+# needed here; set ANALYTICS_ENABLED=false to keep a staging copy out of the
+# same report.
+# ANALYTICS_ENABLED=
+ANALYTICS_HOST=https://cheki.plusthree.io
+ANALYTICS_WEBSITE_ID=517fdb7f-a001-43a8-989f-75a6823dea18
+
 LOG_CHANNEL=stack
 LOG_STACK=daily
 LOG_LEVEL=warning
