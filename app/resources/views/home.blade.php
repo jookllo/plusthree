@@ -64,6 +64,15 @@
                         @foreach ($events as $event)
                             @php($when = $event->startsAtNairobi())
                             <li class="event-row">
+                                @if ($loop->first && $event->banner_path)
+                                    <figure class="event-banner">
+                                        <img src="{{ Storage::disk('public')->url($event->banner_path) }}"
+                                             alt="{{ $event->banner_alt }}"
+                                             width="1200"
+                                             height="675"
+                                             loading="lazy">
+                                    </figure>
+                                @endif
                                 <p class="event-when">
                                     <time datetime="{{ $event->starts_at->toIso8601String() }}">
                                         {{ $when->format('D j M') }}@if ($when->format('H:i') !== '00:00')

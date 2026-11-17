@@ -167,4 +167,38 @@ class EventsTest extends TestCase
             \Illuminate\Support\Carbon::parse($state)->format('Y-m-d H:i:s'),
         );
     }
+
+    public function test_the_soonest_event_shows_its_banner_with_alt_text(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $lead = Event::factory()->create([
+            'title' => 'Banner Event',
+            'starts_at' => now()->addDays(2),
+            'banner_path' => 'events/banner.png',
+            'banner_alt' => 'Candidates queueing at a hiring fair',
+        ]);
+
+        $later = Event::factory()->create([
+            'title' => 'Later Event',
+            'starts_at' => now()->addDays(8),
+            'banner_path' => 'events/later.png',
+            'banner_alt' => 'A workshop room',
+        ]);
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringContainsString('alt="Candidates queueing at a hiring fair"', $html);
+        $this->assertStringNotContainsString('alt="A workshop room"', $html, 'Only the soonest event carries a banner.');
+    }
+
+    public function test_events_without_a_banner_render_no_image(): void
+    {
+        Event::factory()->create(['title' => 'Plain Event', 'starts_at' => now()->addDays(2)]);
+
+        $html = $this->get('/')->assertOk()->getContent();
+
+        $this->assertStringNotContainsString('event-banner', $html);
+    }
+
 }

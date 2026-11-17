@@ -86,6 +86,8 @@ details[open] summary{margin-bottom:12px}
 .event-list{list-style:none;margin:0;padding:0}
 .event-row{padding:18px 0;border-top:1px solid var(--rule)}
 .event-row:first-child{border-top:0;padding-top:22px}
+.event-banner{margin:0 0 14px}
+.event-banner img{display:block;width:100%;height:auto}
 .event-when{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:bold;color:var(--deep-green)}
 .event-row h3{font-family:var(--editorial);font-size:20px;font-weight:normal;line-height:1.25;margin:6px 0 4px}
 .event-where{font-size:13px}

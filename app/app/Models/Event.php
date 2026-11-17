@@ -29,6 +29,8 @@ class Event extends Model
         'title',
         'starts_at',
         'location',
+        'banner_path',
+        'banner_alt',
         'description',
         'url',
         'published_at',
