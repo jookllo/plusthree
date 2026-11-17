@@ -81,8 +81,15 @@ details[open] summary{margin-bottom:12px}
 .role-preview{padding:16px;background:var(--white);border:1px solid var(--rule)}
 .listing-footnote{font-size:18px;font-family:var(--editorial);margin-top:28px}
 .listing-footnote span{display:block;font-family:var(--body);font-size:13px;line-height:1.65;color:var(--muted);margin-top:8px}
-.career-column{border-left:1px solid var(--rule);padding-left:32px}
-.career-column .section-heading h2{font-family:var(--editorial);font-size:26px;font-weight:normal}
+.side-column{display:flex;flex-direction:column;gap:40px;border-left:1px solid var(--rule);padding-left:32px}
+.side-column .section-heading h2{font-family:var(--editorial);font-size:26px;font-weight:normal}
+.event-list{list-style:none;margin:0;padding:0}
+.event-row{padding:18px 0;border-top:1px solid var(--rule)}
+.event-row:first-child{border-top:0;padding-top:22px}
+.event-when{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:bold;color:var(--deep-green)}
+.event-row h3{font-family:var(--editorial);font-size:20px;font-weight:normal;line-height:1.25;margin:6px 0 4px}
+.event-where{font-size:13px}
+.event-about{font-size:13px;color:var(--muted);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .story-art{height:190px;background:var(--deep-green);position:relative;overflow:clip;margin:20px 0}
 .cv-paper{background:var(--paper);color:var(--ink);width:145px;height:190px;position:absolute;left:28px;top:24px;transform:rotate(-9deg);padding:20px}
 .paper-heading{font-size:16px;font-weight:bold}
@@ -233,7 +240,7 @@ details[open] summary{margin-bottom:12px}
 .search-intro p{margin-top:8px}
 .content-grid{gap:28px;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
 .employers-page{grid-template-columns:minmax(0,1fr);gap:28px}
-.career-column{padding-left:24px}
+.side-column{padding-left:24px}
 .section-heading{display:block}
 .section-heading>span{display:block;margin-top:8px}
 .art-caption{font-size:29px;right:12px}
@@ -267,7 +274,7 @@ details[open] summary{margin-bottom:12px}
 .job-sector>span{display:none}
 .job-content h3{font-size:20px}
 .job-meta{font-size:12px}
-.career-column{border:0;padding:0}
+.side-column{border:0;padding:0;gap:36px}
 .story-art{height:220px}
 .cv-paper{left:40px;width:160px;height:220px;padding:24px}
 .art-caption{right:35px;top:40px;font-size:45px}

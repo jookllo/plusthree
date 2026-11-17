@@ -52,47 +52,86 @@
             @endif
         </section>
 
-        <aside id="career" class="career-column" aria-labelledby="career-heading">
-            <div class="section-heading">
-                <h2 id="career-heading">The Career Edit</h2>
-                <span>Read &amp; grow</span>
-            </div>
+        <div class="side-column">
+            @if ($events->isNotEmpty())
+                <section class="events-block" aria-labelledby="events-heading">
+                    <div class="section-heading">
+                        <h2 id="events-heading">Events</h2>
+                        <span>Meet &amp; learn</span>
+                    </div>
 
-            @if ($leadArticle)
-                <article class="lead-story">
-                    @if ($leadArticle->featured_image_path)
-                        @include('partials.article-art', ['article' => $leadArticle])
-                    @else
-                        <div class="story-art" aria-hidden="true">
-                            <div class="cover-title">More than<br>a job title.<span>Your story.</span></div>
-                        </div>
-                    @endif
-                    <p class="story-category">{{ $leadArticle->categories->first()?->name ?? 'Career advice' }}</p>
-                    <h3><a href="{{ route('blog.show', $leadArticle->slug) }}">{{ $leadArticle->title }}</a></h3>
-                    @if ($leadArticle->excerpt)
-                        <p>{{ $leadArticle->excerpt }}</p>
-                    @endif
-                    <p class="story-link"><a href="{{ route('blog.show', $leadArticle->slug) }}">Read the guide</a></p>
-                </article>
-
-                @foreach ($moreArticles as $article)
-                    <article class="small-story">
-                        <p class="story-category">{{ $article->categories->first()?->name ?? 'Career advice' }}</p>
-                        <h3><a href="{{ route('blog.show', $article->slug) }}">{{ $article->title }}</a></h3>
-                        @if ($article->excerpt)
-                            <p>{{ $article->excerpt }}</p>
-                        @endif
-                    </article>
-                @endforeach
-
-                <p class="listing-footnote"><a href="{{ route('blog.index') }}">All career advice</a></p>
-            @else
-                <div class="empty-state">
-                    <h3>No guides published yet.</h3>
-                    <p>Practical career advice appears here once an article is published.</p>
-                </div>
+                    <ul class="event-list">
+                        @foreach ($events as $event)
+                            @php($when = $event->startsAtNairobi())
+                            <li class="event-row">
+                                <p class="event-when">
+                                    <time datetime="{{ $event->starts_at->toIso8601String() }}">
+                                        {{ $when->format('D j M') }}@if ($when->format('H:i') !== '00:00')
+                                            · {{ $when->format('g:i a') }}
+                                        @endif
+                                    </time>
+                                </p>
+                                <h3>
+                                    @if ($event->safeUrl())
+                                        <a href="{{ $event->safeUrl() }}" rel="noopener">{{ $event->title }}</a>
+                                    @else
+                                        {{ $event->title }}
+                                    @endif
+                                </h3>
+                                @if (filled($event->location))
+                                    <p class="event-where">{{ $event->location }}</p>
+                                @endif
+                                @if (filled($event->description))
+                                    <p class="event-about">{{ $event->description }}</p>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </section>
             @endif
-        </aside>
+
+            <aside id="career" class="career-column" aria-labelledby="career-heading">
+                <div class="section-heading">
+                    <h2 id="career-heading">The Career Edit</h2>
+                    <span>Read &amp; grow</span>
+                </div>
+
+                @if ($leadArticle)
+                    <article class="lead-story">
+                        @if ($leadArticle->featured_image_path)
+                            @include('partials.article-art', ['article' => $leadArticle])
+                        @else
+                            <div class="story-art" aria-hidden="true">
+                                <div class="cover-title">More than<br>a job title.<span>Your story.</span></div>
+                            </div>
+                        @endif
+                        <p class="story-category">{{ $leadArticle->categories->first()?->name ?? 'Career advice' }}</p>
+                        <h3><a href="{{ route('blog.show', $leadArticle->slug) }}">{{ $leadArticle->title }}</a></h3>
+                        @if ($leadArticle->excerpt)
+                            <p>{{ $leadArticle->excerpt }}</p>
+                        @endif
+                        <p class="story-link"><a href="{{ route('blog.show', $leadArticle->slug) }}">Read the guide</a></p>
+                    </article>
+
+                    @foreach ($moreArticles as $article)
+                        <article class="small-story">
+                            <p class="story-category">{{ $article->categories->first()?->name ?? 'Career advice' }}</p>
+                            <h3><a href="{{ route('blog.show', $article->slug) }}">{{ $article->title }}</a></h3>
+                            @if ($article->excerpt)
+                                <p>{{ $article->excerpt }}</p>
+                            @endif
+                        </article>
+                    @endforeach
+
+                    <p class="listing-footnote"><a href="{{ route('blog.index') }}">All career advice</a></p>
+                @else
+                    <div class="empty-state">
+                        <h3>No guides published yet.</h3>
+                        <p>Practical career advice appears here once an article is published.</p>
+                    </div>
+                @endif
+            </aside>
+        </div>
     </div>
 
     <section class="about-band" id="about">
