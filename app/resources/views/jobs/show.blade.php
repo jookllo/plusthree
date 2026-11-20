@@ -98,77 +98,101 @@
                 @endif
             </div>
 
-            <aside class="detail-aside" aria-labelledby="apply-heading">
-                <h2 id="apply-heading">Apply</h2>
+            <div class="detail-side">
+                <aside class="detail-aside" aria-labelledby="apply-heading">
+                    <h2 id="apply-heading">Apply</h2>
 
-                @if ($job->canApply())
-                    @if ($applyUrl)
-                        <p>The employer collects applications on their own site.</p>
-                        <a class="button detail-apply" href="{{ $applyUrl }}" rel="nofollow noopener" target="_blank">
-                            Apply on employer site
-                        </a>
-                    @elseif (filled($job->application_email))
-                        <p>Send your application directly to the employer.</p>
-                        <a class="button detail-apply" href="mailto:{{ $job->application_email }}">
-                            Email your application
-                        </a>
+                    @if ($job->canApply())
+                        @if ($applyUrl)
+                            <p>The employer collects applications on their own site.</p>
+                            <a class="button detail-apply" href="{{ $applyUrl }}" rel="nofollow noopener" target="_blank">
+                                Apply on employer site
+                            </a>
+                        @elseif (filled($job->application_email))
+                            <p>Send your application directly to the employer.</p>
+                            <a class="button detail-apply" href="mailto:{{ $job->application_email }}">
+                                Email your application
+                            </a>
+                        @endif
+                    @elseif (! $job->isOpen())
+                        <p>Applications are closed for this role.</p>
+                    @else
+                        <p>Application details were not provided for this role.</p>
                     @endif
-                @elseif (! $job->isOpen())
-                    <p>Applications are closed for this role.</p>
-                @else
-                    <p>Application details were not provided for this role.</p>
-                @endif
 
-                <dl class="detail-facts">
-                    <div>
-                        <dt>Contract</dt>
-                        <dd>{{ $job->employment_type->label() }}</dd>
-                    </div>
-                    <div>
-                        <dt>Work mode</dt>
-                        <dd>{{ $job->work_mode->label() }}</dd>
-                    </div>
-                    @if ($location !== '')
+                    <dl class="detail-facts">
                         <div>
-                            <dt>Location</dt>
-                            <dd>{{ $location }}</dd>
+                            <dt>Contract</dt>
+                            <dd>{{ $job->employment_type->label() }}</dd>
                         </div>
-                    @endif
-                    @if ($job->closing_at)
                         <div>
-                            <dt>Closing date</dt>
-                            <dd>{{ $job->closing_at->timezone('Africa/Nairobi')->format('j M Y') }}</dd>
+                            <dt>Work mode</dt>
+                            <dd>{{ $job->work_mode->label() }}</dd>
                         </div>
+                        @if ($location !== '')
+                            <div>
+                                <dt>Location</dt>
+                                <dd>{{ $location }}</dd>
+                            </div>
+                        @endif
+                        @if ($job->closing_at)
+                            <div>
+                                <dt>Closing date</dt>
+                                <dd>{{ $job->closing_at->timezone('Africa/Nairobi')->format('j M Y') }}</dd>
+                            </div>
+                        @endif
+                    </dl>
+
+                    @if ($job->categories->isNotEmpty() || $job->tags->isNotEmpty())
+                        <ul class="tag-list" aria-label="Sectors and tags">
+                            @foreach ($job->categories as $category)
+                                <li>
+                                    {{-- Sector pages only exist while the sector has open
+                                         roles, so a closed listing shows plain text. --}}
+                                    @if ($job->isOpen())
+                                        <a href="{{ route('jobs.sector', $category->slug) }}">{{ $category->name }}</a>
+                                    @else
+                                        {{ $category->name }}
+                                    @endif
+                                </li>
+                            @endforeach
+                            @foreach ($job->tags as $tag)
+                                <li>{{ $tag->name }}</li>
+                            @endforeach
+                        </ul>
                     @endif
-                </dl>
 
-                @if ($job->categories->isNotEmpty() || $job->tags->isNotEmpty())
-                    <ul class="tag-list" aria-label="Sectors and tags">
-                        @foreach ($job->categories as $category)
-                            <li>
-                                {{-- Sector pages only exist while the sector has open
-                                     roles, so a closed listing shows plain text. --}}
-                                @if ($job->isOpen())
-                                    <a href="{{ route('jobs.sector', $category->slug) }}">{{ $category->name }}</a>
-                                @else
-                                    {{ $category->name }}
-                                @endif
-                            </li>
-                        @endforeach
-                        @foreach ($job->tags as $tag)
-                            <li>{{ $tag->name }}</li>
-                        @endforeach
-                    </ul>
-                @endif
+                    @if ($job->isOpen() && filled($job->location_country))
+                        <p class="aside-more">
+                            <a href="{{ route('jobs.country', \Illuminate\Support\Str::slug($job->location_country)) }}">
+                                More roles in {{ $job->location_country }}
+                            </a>
+                        </p>
+                    @endif
+                </aside>
 
-                @if ($job->isOpen() && filled($job->location_country))
-                    <p class="aside-more">
-                        <a href="{{ route('jobs.country', \Illuminate\Support\Str::slug($job->location_country)) }}">
-                            More roles in {{ $job->location_country }}
-                        </a>
-                    </p>
+                @if ($similar->isNotEmpty())
+                    <aside class="detail-aside similar-aside" aria-labelledby="similar-heading">
+                        <h2 id="similar-heading">{{ $similarAreRelated ? 'Similar roles' : 'More open roles' }}</h2>
+
+                        <ul class="similar-list">
+                            @foreach ($similar as $role)
+                                @php
+                                    $where = collect([$role->location_city, $role->location_country])->filter()->implode(', ');
+                                @endphp
+                                <li>
+                                    <a class="similar-link" href="{{ route('jobs.show', $role->slug) }}">
+                                        <span class="similar-title">{{ $role->title }}</span>
+                                        <span class="similar-meta">{{ $role->company?->name }}@if ($where !== '') · {{ $where }} @endif</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <p class="aside-more"><a href="{{ route('jobs.index') }}">All open roles</a></p>
+                    </aside>
                 @endif
-            </aside>
+            </div>
         </div>
     </div>
 @endsection

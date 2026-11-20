@@ -47,7 +47,7 @@
         <a href="{{ route('jobs.index') }}" @class(['active' => $onJobs]) @if ($onJobs) aria-current="page" @endif>Jobs</a>
         <a href="{{ route('jobs.fellowships') }}" @class(['active' => $onFellowships]) @if ($onFellowships) aria-current="page" @endif>Fellowships</a>
         <a href="{{ route('jobs.other') }}" @class(['active' => $onOther]) @if ($onOther) aria-current="page" @endif>Other opportunities</a>
-        <a href="{{ route('blog.index') }}" @class(['active' => $onBlog]) @if ($onBlog) aria-current="page" @endif>Career advice</a>
+        <a href="{{ route('blog.index') }}" @class(['active' => $onBlog]) @if ($onBlog) aria-current="page" @endif>Blog</a>
         <a href="{{ route('home') }}#about">About plusthree</a>
     </nav>
     <a class="nav-note" href="{{ route('employers.show') }}">For employers</a>

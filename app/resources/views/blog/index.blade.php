@@ -1,18 +1,18 @@
 @extends('layouts.site')
 
-@section('title', 'Career advice — Plusthree')
+@section('title', 'Blog — Plusthree')
 @section('meta-description', 'Practical guides on CVs, interviews, applications and building a career across Africa and beyond.')
 
 @section('content')
     <section class="page-band">
-        <div class="wrap">
+        <div class="wrap blog-band">
             <p class="band-kicker">The Career Edit</p>
             <h1>Advice that moves you forward.</h1>
             <p class="band-lede">Clear, practical guidance on applications, interviews and the working life that follows.</p>
         </div>
     </section>
 
-    <div class="wrap listing-page">
+    <div class="wrap listing-page blog-listing">
         @if ($categories->isNotEmpty())
             <nav class="topic-nav" aria-label="Article categories">
                 <span>Browse</span>

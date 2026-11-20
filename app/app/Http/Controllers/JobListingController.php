@@ -158,7 +158,13 @@ class JobListingController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        return view('jobs.show', ['job' => $job]);
+        $similar = $job->similarRoles();
+
+        return view('jobs.show', [
+            'job' => $job,
+            'similar' => $similar,
+            'similarAreRelated' => $job->similarRolesAreRelated($similar),
+        ]);
     }
 
     /**
@@ -172,6 +178,13 @@ class JobListingController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        return view('jobs.show', ['job' => $job, 'preview' => true]);
+        $similar = $job->similarRoles();
+
+        return view('jobs.show', [
+            'job' => $job,
+            'preview' => true,
+            'similar' => $similar,
+            'similarAreRelated' => $job->similarRolesAreRelated($similar),
+        ]);
     }
 }

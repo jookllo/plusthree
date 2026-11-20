@@ -15,7 +15,7 @@
 @section('content')
     <div class="wrap article-page">
         <p class="breadcrumb">
-            <a href="{{ route('blog.index') }}">Career advice</a>
+            <a href="{{ route('blog.index') }}">Blog</a>
             @if ($article->categories->isNotEmpty())
                 <span aria-hidden="true">/</span>
                 <a href="{{ route('blog.category', $article->categories->first()->slug) }}">

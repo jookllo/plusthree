@@ -177,7 +177,14 @@ details[open] summary{margin-bottom:12px}
 .detail-body h2,.detail-aside h2{font-size:20px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
 .prose{font-size:16px;line-height:1.75;max-width:66ch}
 .prose a{color:var(--red)}
-.detail-aside{background:var(--white);border:1px solid var(--rule);padding:24px;align-self:start}
+.detail-side{display:flex;flex-direction:column;gap:20px;align-self:start}
+.detail-aside{background:var(--white);border:1px solid var(--rule);padding:24px}
+.similar-list{list-style:none;margin:0;padding:0}
+.similar-list li+li{border-top:1px solid var(--rule)}
+.similar-link{display:block;padding:12px 0;text-decoration:none}
+.similar-title{display:block;font-size:14px;font-weight:bold;line-height:1.35}
+.similar-link:hover .similar-title{text-decoration:underline}
+.similar-meta{display:block;font-size:12px;color:var(--muted);margin-top:3px}
 .detail-aside>p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:16px}
 .detail-apply{width:100%;text-decoration:none}
 .detail-facts{margin-top:24px;border-top:1px solid var(--rule);padding-top:16px;font-size:13px}
@@ -208,11 +215,16 @@ details[open] summary{margin-bottom:12px}
 .topic-nav a:hover,.topic-nav a.selected{border-color:var(--red);font-weight:bold}
 .topic-nav small{color:var(--muted);margin-left:4px}
 .lead-article{padding:40px 0;border-bottom:2px solid var(--ink);max-width:820px}
+/* The blog reads as one centred measure instead of hugging the left edge
+   of the 1180px wrap; the band, the topic nav, the lead story and the card
+   grid all share it. Job pages keep the full width. */
+.blog-band{max-width:960px}
+.blog-listing>.topic-nav,.blog-listing>.lead-article,.blog-listing>.article-grid{max-width:960px;margin-inline:auto}
 .lead-article h2{font-family:var(--editorial);font-weight:normal;font-size:clamp(30px,4vw,44px);line-height:1.12;margin-bottom:14px}
 .lead-summary{font-size:17px;color:var(--muted);line-height:1.65;max-width:64ch}
 .article-meta{display:flex;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:16px}
 .article-meta span+span:before{content:'/';margin:0 10px}
-.article-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:32px;padding-top:36px}
+.article-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:32px;padding-top:36px}
 .article-card{border-top:2px solid var(--ink);padding-top:18px;display:flex;flex-direction:column}
 .article-card h3{font-family:var(--editorial);font-weight:normal;font-size:24px;line-height:1.2;margin:6px 0 10px}
 .article-card p{font-size:14px;color:var(--muted);line-height:1.6}

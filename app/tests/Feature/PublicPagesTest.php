@@ -606,4 +606,14 @@ class PublicPagesTest extends TestCase
         $this->get('/blog')->assertOk()
             ->assertSee('articles/featured.jpg', false);
     }
+
+    public function test_the_header_names_the_blog_blog(): void
+    {
+        $this->get('/')->assertOk()
+            ->assertSee('>Blog</a>', false)
+            ->assertDontSee('Career advice');
+
+        $this->get('/blog')->assertOk()
+            ->assertSee('<title>Blog — Plusthree</title>', false);
+    }
 }

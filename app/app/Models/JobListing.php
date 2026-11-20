@@ -10,6 +10,7 @@ use App\Support\HasUniqueSlug;
 use App\Support\Publishable;
 use Database\Factories\JobListingFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -155,6 +156,86 @@ class JobListing extends Model
     public function scopeEmploymentType(Builder $query, EmploymentType $type): void
     {
         $query->where('employment_type', $type);
+    }
+
+    /**
+     * Roles to offer someone who has just finished reading this one.
+     *
+     * The pools are tried in order — same sector, then same country, then the
+     * same kind of arrangement — because most listings are not filed under a
+     * sector yet. A single "same sector only" query would leave the block
+     * empty on those pages, which is exactly where the reader is most likely
+     * to leave. Within a pool the newest role comes first.
+     *
+     * Only open roles qualify: sending someone from one dead role to another
+     * is worse than showing nothing.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, self>
+     */
+    public function similarRoles(int $limit = 4): Collection
+    {
+        $picked = new Collection;
+        $seen = [$this->getKey() => true];
+
+        $collect = function (Builder $query) use ($picked, &$seen, $limit): void {
+            foreach ($query->latest('published_at')->limit($limit * 3)->get() as $role) {
+                if ($picked->count() >= $limit) {
+                    return;
+                }
+
+                if (isset($seen[$role->getKey()])) {
+                    continue;
+                }
+
+                $seen[$role->getKey()] = true;
+                $picked->push($role);
+            }
+        };
+
+        $open = static::query()
+            ->open()
+            ->with(['company', 'categories'])
+            ->whereKeyNot($this->getKey());
+
+        if ($this->categories->isNotEmpty()) {
+            $collect((clone $open)->whereHas(
+                'categories',
+                fn (Builder $query) => $query->whereIn('categories.id', $this->categories->modelKeys()),
+            ));
+        }
+
+        if ($picked->count() < $limit && filled($this->location_country)) {
+            $collect((clone $open)->where('location_country', $this->location_country));
+        }
+
+        if ($picked->count() < $limit) {
+            $collect((clone $open)->where('employment_type', $this->employment_type->value));
+        }
+
+        if ($picked->count() < $limit) {
+            $collect(clone $open);
+        }
+
+        return $picked;
+    }
+
+    /**
+     * Whether every role offered is genuinely like this one — same sector or
+     * same country. When the list had to be topped up with whatever else is
+     * open, the sidebar says "More open roles" instead of claiming a likeness
+     * that is not there.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection<int, self>  $roles
+     */
+    public function similarRolesAreRelated(Collection $roles): bool
+    {
+        $sectors = $this->categories->modelKeys();
+        $country = $this->location_country;
+
+        return $roles->isNotEmpty() && $roles->every(
+            fn (self $role): bool => (filled($country) && $role->location_country === $country)
+                || ($sectors !== [] && $role->categories->pluck('id')->intersect($sectors)->isNotEmpty()),
+        );
     }
 
     /**

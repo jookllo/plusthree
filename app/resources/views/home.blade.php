@@ -114,7 +114,7 @@
                                 <div class="cover-title">More than<br>a job title.<span>Your story.</span></div>
                             </div>
                         @endif
-                        <p class="story-category">{{ $leadArticle->categories->first()?->name ?? 'Career advice' }}</p>
+                        <p class="story-category">{{ $leadArticle->categories->first()?->name ?? 'The Career Edit' }}</p>
                         <h3><a href="{{ route('blog.show', $leadArticle->slug) }}">{{ $leadArticle->title }}</a></h3>
                         @if ($leadArticle->excerpt)
                             <p>{{ $leadArticle->excerpt }}</p>
@@ -124,7 +124,7 @@
 
                     @foreach ($moreArticles as $article)
                         <article class="small-story">
-                            <p class="story-category">{{ $article->categories->first()?->name ?? 'Career advice' }}</p>
+                            <p class="story-category">{{ $article->categories->first()?->name ?? 'The Career Edit' }}</p>
                             <h3><a href="{{ route('blog.show', $article->slug) }}">{{ $article->title }}</a></h3>
                             @if ($article->excerpt)
                                 <p>{{ $article->excerpt }}</p>

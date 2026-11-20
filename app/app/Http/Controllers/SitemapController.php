@@ -86,7 +86,7 @@ class SitemapController extends Controller
             'Job listings: '.route('jobs.index'),
             'Fellowships: '.route('jobs.fellowships'),
             'Other opportunities: '.route('jobs.other'),
-            'Career advice: '.route('blog.index'),
+            'Blog: '.route('blog.index'),
             'Sitemap: '.route('sitemap'),
             '',
             '## Attribution',
@@ -112,7 +112,7 @@ class SitemapController extends Controller
             });
 
         $lines[] = '';
-        $lines[] = '## Career advice';
+        $lines[] = '## Blog';
         $lines[] = '';
 
         Article::query()

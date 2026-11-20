@@ -1,13 +1,13 @@
 @extends('layouts.site')
 
-@section('title', $category->name.' — Plusthree career advice')
+@section('title', $category->name.' — Plusthree blog')
 @section('meta-description', 'Articles filed under '.$category->name.' on Plusthree.')
 
 @section('content')
     <section class="page-band">
-        <div class="wrap">
+        <div class="wrap blog-band">
             <p class="breadcrumb">
-                <a href="{{ route('blog.index') }}">Career advice</a>
+                <a href="{{ route('blog.index') }}">Blog</a>
                 <span aria-hidden="true">/</span>
                 <span>{{ $category->name }}</span>
             </p>
@@ -16,12 +16,12 @@
         </div>
     </section>
 
-    <div class="wrap listing-page">
+    <div class="wrap listing-page blog-listing">
         @if ($articles->isEmpty())
             <div class="empty-state">
                 <h2>Nothing filed here yet.</h2>
                 <p>No published articles use this category at the moment.</p>
-                <p><a href="{{ route('blog.index') }}">Read all career advice</a></p>
+                <p><a href="{{ route('blog.index') }}">Read the blog</a></p>
             </div>
         @else
             <div class="article-grid">
