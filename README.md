@@ -22,7 +22,7 @@ Read [AGENTS.md](AGENTS.md) for contributor/agent instructions, [ROADMAP.md](ROA
 | Homepage | Responsive masthead, provisional logo, gold search area, ruled job list paginated six at a time, editorial sidebar, about/employer sections | Real content is still sample content |
 | Search | Database keyword (`LIKE`) search plus an exact employment-type filter, shareable GET URLs, numbered pagination on `/jobs` | Not full-text; no stemming, typo tolerance, relevance ranking or sector filter |
 | Job pages | `/jobs`, `/jobs/{slug}` with application links, closing-soon urgency, expiry/archived states and structured data; `/jobs/sector/{slug}` and `/jobs/in/{country}` landing pages | Applications happen on the employer's site |
-| Blog | Database-backed `/blog`, `/blog/{slug}` and `/blog/category/{slug}` on one centred 960px measure | Article search and tag pages are not built |
+| Blog | Database-backed `/blog`, `/blog/{slug}` and `/blog/category/{slug}`; the listing shares a centred 960px measure and a post reads in a centred 720px column | Article search and tag pages are not built |
 | Events | Owner-managed events (meetups, fairs, webinars) from `/mdosi` → **Events** with an optional 16:9 banner and required alt text, shown in the homepage sidebar above The Career Edit and removed automatically once they start | No detail page or calendar; the row links straight to the organiser, and only the soonest event shows its banner |
 | Branding | Supplied colours, Africa logo with red uppercase tagline, saved logo concepts | Logo remains provisional; raster PNG, not a finished vector identity |
 | Accessibility basics | Labels, semantic headings, skip link, visible keyboard focus, native details controls | Not a complete accessibility audit |

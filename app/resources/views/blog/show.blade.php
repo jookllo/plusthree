@@ -68,7 +68,7 @@
             <section class="related" aria-labelledby="related-heading">
                 <div class="section-heading">
                     <h2 id="related-heading">Keep reading</h2>
-                    <a href="{{ route('blog.index') }}">All career advice</a>
+                    <a href="{{ route('blog.index') }}">All posts</a>
                 </div>
                 <div class="article-grid">
                     @foreach ($related as $item)
