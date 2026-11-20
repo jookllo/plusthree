@@ -237,7 +237,9 @@ details[open] summary{margin-bottom:12px}
 /* The post reads as one centred column. The hero still spans the page, but
    the body, the tags and "Keep reading" share a single 720px measure
    instead of hugging the left edge with empty space beside them. */
-.article-page .article-body,.article-page>.tag-list,.article-page .related{max-width:720px;margin-inline:auto}
+.article-page .article-body,.article-page>.tag-list{max-width:720px;margin-inline:auto}
+/* Three cards need the width the text column deliberately does not have. */
+.article-page .related{max-width:960px;margin-inline:auto}
 .article-figure{margin:32px 0 0}
 .article-figure img{display:block;width:100%;height:auto;border:1px solid var(--rule)}
 .related{padding-top:48px}
