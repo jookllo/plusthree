@@ -7,6 +7,8 @@ use App\Support\ArticleBody;
 use App\Support\HasUniqueSlug;
 use App\Support\Publishable;
 use Database\Factories\ArticleFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -99,6 +101,48 @@ class Article extends Model
         $words = $text === '' ? 0 : count(preg_split('/\s+/u', $text));
 
         return max(1, (int) ceil($words / 200));
+    }
+
+    /**
+     * Articles to offer at the foot of this one, newest first: those sharing
+     * a category, topped up with the most recent posts.
+     *
+     * Without the top-up the block is empty whenever an article has not been
+     * filed under a topic — which is most of the production archive — and an
+     * empty "Keep reading" is worse than none. The footer of a post is where a
+     * reader either leaves or reads a second piece, so it always offers one.
+     *
+     * @return Collection<int, self>
+     */
+    public function relatedArticles(int $limit = 3): Collection
+    {
+        $picked = static::query()
+            ->published()
+            ->whereKeyNot($this->getKey())
+            ->when(
+                $this->categories->isNotEmpty(),
+                fn (Builder $query) => $query->whereHas(
+                    'categories',
+                    fn (Builder $query) => $query->whereIn('categories.id', $this->categories->modelKeys()),
+                ),
+            )
+            ->latest('published_at')
+            ->limit($limit)
+            ->get();
+
+        if ($picked->count() < $limit) {
+            $picked = $picked->concat(
+                static::query()
+                    ->published()
+                    ->whereKeyNot($this->getKey())
+                    ->whereNotIn($this->getKeyName(), $picked->modelKeys())
+                    ->latest('published_at')
+                    ->limit($limit - $picked->count())
+                    ->get(),
+            );
+        }
+
+        return $picked;
     }
 
     /**

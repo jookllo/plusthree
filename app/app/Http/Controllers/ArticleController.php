@@ -36,17 +36,9 @@ class ArticleController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
-        $related = Article::query()
-            ->published()
-            ->whereKeyNot($article->getKey())
-            ->whereHas('categories', fn ($query) => $query->whereIn('categories.id', $article->categories->modelKeys()))
-            ->latest('published_at')
-            ->take(3)
-            ->get();
-
         return view('blog.show', [
             'article' => $article,
-            'related' => $related,
+            'related' => $article->relatedArticles(),
         ]);
     }
 
