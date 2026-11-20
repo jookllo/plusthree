@@ -188,11 +188,14 @@ final class StructuredData
         return match ($type) {
             EmploymentType::FullTime => 'FULL_TIME',
             EmploymentType::PartTime => 'PART_TIME',
-            EmploymentType::Contract => 'CONTRACTOR',
+            EmploymentType::Contract, EmploymentType::Consultancy => 'CONTRACTOR',
             EmploymentType::Internship => 'INTERN',
             // schema.org has no dedicated value for these; the listing's own
             // copy explains what kind of opportunity it is.
-            EmploymentType::Fellowship, EmploymentType::Other => 'OTHER',
+            EmploymentType::Fellowship,
+            EmploymentType::Funding,
+            EmploymentType::Board,
+            EmploymentType::Other => 'OTHER',
         };
     }
 }

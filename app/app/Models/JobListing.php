@@ -141,15 +141,22 @@ class JobListing extends Model
      *
      * Drives the listing pages' urgency notice, which links to the
      * `closing=soon` view instead of lifting every near-deadline role above
-     * the new ones. Counted within the page's own type so the Fellowships and
-     * Other opportunities pages do not advertise standard jobs.
+     * the new ones. Counted within the page's own type — or types, on the
+     * Other opportunities page — so it never advertises standard jobs.
+     *
+     * @param  EmploymentType|list<EmploymentType>|null  $types
      */
-    public static function closingSoonTotal(?EmploymentType $type = null): int
+    public static function closingSoonTotal(EmploymentType|array|null $types = null): int
     {
+        $types = is_array($types) ? $types : ($types ? [$types] : []);
+
         return static::query()
             ->open()
             ->closingSoon()
-            ->when($type, fn (Builder $query) => $query->where('employment_type', $type))
+            ->when($types !== [], fn (Builder $query) => $query->whereIn(
+                'employment_type',
+                array_map(fn (EmploymentType $case): string => $case->value, $types),
+            ))
             ->count();
     }
 

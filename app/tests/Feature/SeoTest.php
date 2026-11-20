@@ -299,15 +299,29 @@ class SeoTest extends TestCase
 
     public function test_fellowship_and_other_listings_emit_structured_data(): void
     {
-        foreach ([EmploymentType::Fellowship, EmploymentType::Other] as $type) {
+        foreach ([
+            EmploymentType::Fellowship,
+            EmploymentType::Funding,
+            EmploymentType::Board,
+            EmploymentType::Other,
+        ] as $type) {
             $job = JobListing::factory()->open()->create(['employment_type' => $type]);
 
             $json = $this->structuredData($this->get('/jobs/'.$job->slug)->getContent());
 
-            // schema.org has no fellowship or grant value; the copy carries
-            // the detail, but the markup must not blow up on the type.
+            // schema.org has no fellowship, funding or board value; the copy
+            // carries the detail, but the markup must not blow up on the type.
             $this->assertSame('OTHER', $json['employmentType']);
         }
+    }
+
+    public function test_consultancy_listings_emit_the_contractor_structured_data_value(): void
+    {
+        $job = JobListing::factory()->open()->create(['employment_type' => EmploymentType::Consultancy]);
+
+        $json = $this->structuredData($this->get('/jobs/'.$job->slug)->getContent());
+
+        $this->assertSame('CONTRACTOR', $json['employmentType']);
     }
 
     public function test_structured_data_does_not_break_out_of_the_script_tag(): void

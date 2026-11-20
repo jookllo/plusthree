@@ -84,13 +84,36 @@ class ContentSchemaTest extends TestCase
 
     public function test_enum_values_stay_in_step_with_the_public_filters(): void
     {
-        $this->assertSame(['full_time', 'part_time', 'contract', 'internship', 'fellowship', 'other'], EmploymentType::values());
+        $this->assertSame([
+            'full_time',
+            'part_time',
+            'contract',
+            'internship',
+            'fellowship',
+            'consultancy',
+            'funding',
+            'board',
+            'other',
+        ], EmploymentType::values());
         $this->assertSame('Full-time', EmploymentType::FullTime->label());
         $this->assertSame('Part-time', EmploymentType::PartTime->label());
         $this->assertSame('Contract', EmploymentType::Contract->label());
         $this->assertSame('Internship', EmploymentType::Internship->label());
         $this->assertSame('Fellowship', EmploymentType::Fellowship->label());
+        $this->assertSame('Consultancy', EmploymentType::Consultancy->label());
+        $this->assertSame('Funding', EmploymentType::Funding->label());
+        $this->assertSame('Board', EmploymentType::Board->label());
         $this->assertSame('Other opportunity', EmploymentType::Other->label());
+
+        // Consultancy, funding, board seats and catch-all opportunities share
+        // the Other opportunities page rather than becoming job sectors.
+        $this->assertSame([
+            'consultancy',
+            'funding',
+            'board',
+            'other',
+        ], EmploymentType::otherOpportunityValues());
+        $this->assertSame('Other', EmploymentType::Other->navLabel());
 
         $this->assertSame(['on_site', 'hybrid', 'remote'], WorkMode::values());
         $this->assertSame('On-site', WorkMode::OnSite->label());

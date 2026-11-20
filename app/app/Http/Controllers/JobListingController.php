@@ -40,8 +40,25 @@ class JobListingController extends Controller
         ]);
 
         $query = trim($filters['q'] ?? '');
-        $type = $landing?->value ?? ($filters['type'] ?? null);
+        $requested = isset($filters['type']) ? EmploymentType::from($filters['type']) : null;
         $closing = $filters['closing'] ?? null;
+
+        // A landing page covers one or more types. ?type= may narrow the
+        // Other opportunities page to one of its kinds, but it can never
+        // pull a role from outside that page into it.
+        $landingTypes = $landing?->landingTypes() ?? [];
+        $narrowed = $requested && in_array($requested, $landingTypes, true) ? $requested : null;
+        $types = $landing
+            ? ($narrowed ? [$narrowed] : $landingTypes)
+            : ($requested ? [$requested] : []);
+
+        // The type the view marks as selected in its filter and chips. A
+        // single-type landing page (Fellowships) keeps its own type so the
+        // urgency link stays inside it; the Other page only selects a chip
+        // when one was asked for.
+        $type = $landing
+            ? ($narrowed ?? (count($landingTypes) === 1 ? $landingTypes[0] : null))
+            : $requested;
 
         $jobs = JobListing::query()
             ->open()
@@ -55,7 +72,10 @@ class JobListingController extends Controller
                         ->orWhereHas('company', fn ($company) => $company->where('name', 'like', $like));
                 });
             })
-            ->when($type, fn ($builder) => $builder->where('employment_type', $type))
+            ->when($types !== [], fn ($builder) => $builder->whereIn(
+                'employment_type',
+                array_map(fn (EmploymentType $case): string => $case->value, $types),
+            ))
             // Newest first, so a role published this morning is visible without
             // scrolling past everything with a nearer deadline. The deadline
             // view is one click away and orders by what closes soonest.
@@ -70,9 +90,10 @@ class JobListingController extends Controller
         return view('jobs.index', [
             'jobs' => $jobs,
             'query' => $query,
-            'type' => $type,
+            'type' => $type?->value,
             'closing' => $closing,
             'landing' => $landing,
+            'typeNav' => count($landingTypes) > 1 ? $landingTypes : [],
             'heading' => match ($landing) {
                 EmploymentType::Fellowship => 'Fellowships',
                 EmploymentType::Other => 'Other opportunities',
@@ -80,10 +101,10 @@ class JobListingController extends Controller
             },
             'intro' => match ($landing) {
                 EmploymentType::Fellowship => 'Fellowships, graduate programmes and leadership schemes open to African talent.',
-                EmploymentType::Other => 'Scholarships, grants, volunteer roles and other opportunities that are not a standard job.',
+                EmploymentType::Other => 'Consultancy calls, funding rounds, board seats, scholarships and volunteer roles — opportunities that are not a standard job.',
                 default => null,
             },
-            'closingSoonCount' => JobListing::closingSoonTotal($type ? EmploymentType::from($type) : null),
+            'closingSoonCount' => JobListing::closingSoonTotal($types),
             'sectorPages' => JobListing::sectorPages(),
             'countryPages' => JobListing::countryPages(),
         ]);

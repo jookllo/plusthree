@@ -13,6 +13,17 @@
                 <p>{{ $intro ?? $jobs->total().' '.($jobs->total() === 1 ? 'opportunity' : 'opportunities').' published' }}</p>
             </div>
 
+            @if ($typeNav)
+                <nav class="job-tabs" aria-label="Filter other opportunities by type">
+                    <a href="{{ route('jobs.other') }}"
+                       @class(['selected' => $type === null])@if ($type === null) aria-current="page"@endif>All</a>
+                    @foreach ($typeNav as $option)
+                        <a href="{{ route('jobs.other', ['type' => $option->value]) }}"
+                           @class(['selected' => $type === $option->value])@if ($type === $option->value) aria-current="page"@endif>{{ $option->navLabel() }}</a>
+                    @endforeach
+                </nav>
+            @endif
+
             <form @class(['search-form', 'search-form-wide' => ! $landing, 'search-form-landing' => $landing]) action="{{ request()->url() }}" method="get" role="search">
                 <div class="search-field">
                     <label for="q" class="visually-hidden">Search jobs</label>
@@ -29,6 +40,9 @@
                         </select>
                     </div>
                 @endunless
+                @if ($typeNav && $type)
+                    <input type="hidden" name="type" value="{{ $type }}">
+                @endif
                 @if ($closing)
                     <input type="hidden" name="closing" value="{{ $closing }}">
                 @endif

@@ -37,11 +37,15 @@
         @php
             $filters = request()->query();
             $onJobs = request()->routeIs('jobs.index')
-                && ! in_array($filters['type'] ?? null, [\App\Enums\EmploymentType::Fellowship->value, \App\Enums\EmploymentType::Other->value], true);
+                && ! in_array(
+                    $filters['type'] ?? null,
+                    array_merge(\App\Enums\EmploymentType::otherOpportunityValues(), [\App\Enums\EmploymentType::Fellowship->value]),
+                    true,
+                );
             $onFellowships = request()->routeIs('jobs.fellowships')
                 || ($filters['type'] ?? null) === \App\Enums\EmploymentType::Fellowship->value;
             $onOther = request()->routeIs('jobs.other')
-                || ($filters['type'] ?? null) === \App\Enums\EmploymentType::Other->value;
+                || in_array($filters['type'] ?? null, \App\Enums\EmploymentType::otherOpportunityValues(), true);
             $onBlog = request()->routeIs('blog.*');
         @endphp
         <a href="{{ route('jobs.index') }}" @class(['active' => $onJobs]) @if ($onJobs) aria-current="page" @endif>Jobs</a>
