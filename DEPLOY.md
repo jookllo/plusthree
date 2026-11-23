@@ -169,7 +169,19 @@ docker run --rm -p 8081:80 \
 
 Then open `http://127.0.0.1:8081/`. On Linux, `host.docker.internal` requires `--add-host=host.docker.internal:host-gateway`.
 
-## 9. Known limits of this deployment
+## 9. Preview copy (Jaribu)
+
+The preview runs as a second Dokploy application rather than a second copy of production.
+
+- **Application:** `PlusThree Jaribu`, repository `jookllo/plusthree`, branch `jaribu`, build type Dockerfile, domain `https://jaribu.plusthree.io` (container port 80, Let's Encrypt).
+- **Database:** its own schema, `plusthree_jaribu`, on the MySQL instance at `45.155.102.200:3308`. Never point it at `plusthree` or `mindmap_db`; a mistake would publish test content or migrate another application's schema.
+- **Environment:** `APP_ENV=staging`, `APP_DEBUG=false`, its own `APP_KEY`, `SEO_INDEXABLE=false`, `ANALYTICS_ENABLED=false`, `MAIL_MAILER=log`, `GOOGLE_LOGIN_ENABLED=false`, file-backed sessions and cache, and `STAGING_BASIC_AUTH_USER` / `STAGING_BASIC_AUTH_PASSWORD` for the shared password.
+- **Indexing:** `SEO_INDEXABLE=false` makes the meta tag, `robots.txt` and the `X-Robots-Tag` header all say no. Do not test with those switched on.
+- **Password:** `App\Http\Middleware\ProtectStaging` only challenges requests when `APP_ENV=staging`; production ignores the credentials.
+- **Workflow:** push to `jaribu` for a preview deploy, test, then merge to `main` for production. Dokploy does not run migrations, so after a schema change run `php artisan migrate --force` in the Jaribu container.
+- **Never copy** the production `messages` or `users` tables into the preview. Copy public content only, and keep mail on the log driver so testers cannot email real employers.
+
+## 10. Known limits of this deployment
 
 - Single container, no queue worker, no scheduler — none are needed yet.
 - Sessions and cache use the MySQL database.

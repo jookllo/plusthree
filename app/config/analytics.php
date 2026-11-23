@@ -11,15 +11,15 @@ return [
     | dashboard. Both tags are emitted from the public layout only; the /mdosi
     | panel uses Filament's own layout, so editorial activity is not recorded.
     |
-    | On by default anywhere real visitors can land (production, staging) and
-    | off in local and testing, so development browsing and the test suite do
-    | not land in the report. Set ANALYTICS_ENABLED=false to silence a copy of
-    | the site that shares the same website id.
+    | On by default for real visitors (production) and off in local, testing and
+    | staging, so development browsing, the test suite and preview copies do not
+    | land in the owner's report. Set ANALYTICS_ENABLED=false to silence any
+    | other copy that shares the same website id.
     |
     */
 
     'enabled' => filter_var(
-        env('ANALYTICS_ENABLED', ! in_array(env('APP_ENV', 'production'), ['local', 'testing'], true)),
+        env('ANALYTICS_ENABLED', ! in_array(env('APP_ENV', 'production'), ['local', 'testing', 'staging'], true)),
         FILTER_VALIDATE_BOOLEAN,
     ),
 
